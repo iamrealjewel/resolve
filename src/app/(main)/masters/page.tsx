@@ -2,11 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { MastersClient } from "./masters-client";
 
 async function getMasterData() {
-  const [categories, departments, locations, companies, rules, users, designations] = await Promise.all([
+  const [categories, departments, locations, companies, rules, users, designations, templates] = await Promise.all([
     prisma.incidentCategory.findMany({ 
       include: { 
         children: true, 
         parent: true, 
+        template: true,
         approvers: {
           include: {
             user: {
@@ -47,8 +48,9 @@ async function getMasterData() {
       } 
     }),
     prisma.designation.findMany(),
+    prisma.dataTemplate.findMany(),
   ]);
-  return { categories, departments, locations, companies, rules, users, designations };
+  return { categories, departments, locations, companies, rules, users, designations, templates };
 }
 
 import { checkAuth } from "@/lib/auth-utils";

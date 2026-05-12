@@ -78,6 +78,38 @@ export async function deleteLocation(id: string) {
   revalidatePath("/masters");
 }
 
+// --- DATA TEMPLATE ---
+export async function createDataTemplate(data: { 
+  name: string; 
+  description?: string; 
+  fields: any 
+}) {
+  await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD"]);
+  const template = await prisma.dataTemplate.create({ data });
+  revalidatePath("/masters");
+  return template;
+}
+
+export async function updateDataTemplate(id: string, data: { 
+  name: string; 
+  description?: string; 
+  fields: any 
+}) {
+  await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD"]);
+  const template = await prisma.dataTemplate.update({ 
+    where: { id }, 
+    data 
+  });
+  revalidatePath("/masters");
+  return template;
+}
+
+export async function deleteDataTemplate(id: string) {
+  await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD"]);
+  await prisma.dataTemplate.delete({ where: { id } });
+  revalidatePath("/masters");
+}
+
 // --- DESIGNATION ---
 export async function createDesignation(data: { title: string }) {
   await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD"]);
@@ -110,6 +142,7 @@ export async function createCategory(data: {
   requiresResolverApproval?: boolean;
   raiserApprovers?: string[];
   resolverApprovers?: string[];
+  templateId?: string | null;
 }) {
   await checkAuth("SUPER_ADMIN");
   const { raiserApprovers, resolverApprovers, ...categoryData } = data;
@@ -139,6 +172,7 @@ export async function updateCategory(id: string, data: {
   requiresResolverApproval?: boolean;
   raiserApprovers?: string[];
   resolverApprovers?: string[];
+  templateId?: string | null;
 }) {
   await checkAuth("SUPER_ADMIN");
   const { raiserApprovers, resolverApprovers, ...categoryData } = data;

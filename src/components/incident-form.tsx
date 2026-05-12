@@ -16,8 +16,10 @@ import {
   Loader2, Send, Search, MessageSquare, History, User, Building2, MapPin,
   Tag, Clock, UserPlus, ShieldCheck, Paperclip, FileText, FileIcon,
   ImageIcon, X, Download, ChevronRight, ChevronDown, ChevronLeft, Edit, Users, AlertCircle,
-  FilePenLine, MessageSquarePlus, Plus, Check, ShieldAlert
+  FilePenLine, MessageSquarePlus, Plus, Check, ShieldAlert, FileSpreadsheet
 } from "lucide-react";
+
+import { TemplateGridDialog } from "./template-grid-dialog";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +115,8 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [logStartDate, setLogStartDate] = useState<string>("");
   const [logEndDate, setLogEndDate] = useState<string>("");
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templateData, setTemplateData] = useState<any[]>(incident?.templateData || []);
 
   const router = useRouter();
   const { data: session } = useSession();
@@ -248,6 +252,17 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
   const getSelectedPath = (id: string) => {
     const path: string[] = [];
+    let current = initialData.categories.find(c => c.id === id);
+    while (current) {
+      path.unshift(current.name);
+      current = initialData.categories.find(c => c.id === current?.parentId);
+    }
+    return path.join(" > ");
+  };
+
+  const selectedCategoryId = form.watch("category");
+  const selectedCategory = initialData.categories.find(c => c.id === selectedCategoryId);
+  const template = selectedCategory?.template;
     const find = (list: any[], targetId: string, currentPath: string[] = []): boolean => {
       for (const item of list) {
         if (item.id === targetId) {
@@ -324,7 +339,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const payload = { ...values, attachments };
+      const payload = { ...values, attachments, templateData };
       if (isCreate) {
         await createIncident(payload);
         toast.success("Incident reported successfully");
@@ -497,6 +512,25 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                 </Link>
               </div>
             </div>
+
+            {template && (
+              <div className="flex items-center gap-2 pl-6 border-l shrink-0">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => setTemplateDialogOpen(true)}
+                  className={cn(
+                    "h-10 gap-2 px-4 rounded-sm border-2 font-bold text-[10px] uppercase tracking-wider transition-all",
+                    templateData.length > 0 
+                      ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100" 
+                      : "bg-[#0176D3]/5 border-[#0176D3]/20 text-[#0176D3] hover:bg-[#0176D3]/10"
+                  )}
+                >
+                  <FileSpreadsheet className="size-4" />
+                  {templateData.length > 0 ? `${templateData.length} Records Captured` : "Fill Data Worksheet"}
+                </Button>
+              </div>
+            )}
 
             <div className="flex items-center gap-8">
               <div className="flex flex-col min-w-max">
@@ -708,7 +742,24 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       name="category"
                       render={({ field }) => (
                         <FormItem className="space-y-1 col-span-2">
-                          <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">CATEGORY</FormLabel>
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">CATEGORY</FormLabel>
+                            {template && (
+                              <Button 
+                                type="button"
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setTemplateDialogOpen(true)}
+                                className={cn(
+                                  "h-6 text-[10px] font-bold gap-1 px-2 rounded-sm",
+                                  templateData.length > 0 ? "text-green-600 bg-green-50" : "text-[#0176D3] bg-[#0176D3]/5"
+                                )}
+                              >
+                                <FileSpreadsheet className="size-3" />
+                                {templateData.length > 0 ? `${templateData.length} Records` : "Fill Worksheet"}
+                              </Button>
+                            )}
+                          </div>
                           <Popover open={catOpen} onOpenChange={setCatOpen}>
                             <FormControl>
                               <PopoverTrigger disabled={effectiveIsView} className={cn("flex items-center h-8 border-b w-full text-sm font-medium bg-transparent px-0 transition-all text-left", !field.value && "text-muted-foreground", isView && "border-transparent cursor-default")}>
@@ -999,6 +1050,16 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
           </Form>
         </div>
       </div>
+
+      {template && (
+        <TemplateGridDialog 
+          isOpen={templateDialogOpen}
+          setIsOpen={setTemplateDialogOpen}
+          template={template}
+          data={templateData}
+          onSave={setTemplateData}
+        />
+      )}
     </div>
   );
 }

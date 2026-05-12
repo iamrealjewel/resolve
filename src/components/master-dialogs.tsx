@@ -41,10 +41,11 @@ import {
   createLocation,
   createDesignation,
   createRoutingRule,
-  updateCategory,
   updateDepartment,
   updateLocation,
-  updateDesignation 
+  updateDesignation,
+  createDataTemplate,
+  updateDataTemplate
 } from "@/app/actions/master";
 
 export function CategoryDialog({ 
@@ -55,6 +56,7 @@ export function CategoryDialog({
 }: { 
   categories: any[], 
   users: any[],
+  templates: any[],
   item?: any, 
   defaultParentId?: string 
 }) {
@@ -66,6 +68,7 @@ export function CategoryDialog({
   const [requiresResolverApproval, setRequiresResolverApproval] = useState(item?.requiresResolverApproval || false);
   const [raiserApprovers, setRaiserApprovers] = useState<string[]>(item?.approvers?.filter((a: any) => a.type === "RAISER").map((a: any) => a.userId) || []);
   const [resolverApprovers, setResolverApprovers] = useState<string[]>(item?.approvers?.filter((a: any) => a.type === "RESOLVER").map((a: any) => a.userId) || []);
+  const [templateId, setTemplateId] = useState<string | null>(item?.templateId || "none");
 
   useEffect(() => {
     if (isOpen) {
@@ -76,6 +79,7 @@ export function CategoryDialog({
         setRequiresResolverApproval(item.requiresResolverApproval);
         setRaiserApprovers(item.approvers?.filter((a: any) => a.type === "RAISER").map((a: any) => a.userId) || []);
         setResolverApprovers(item.approvers?.filter((a: any) => a.type === "RESOLVER").map((a: any) => a.userId) || []);
+        setTemplateId(item.templateId || "none");
       } else {
         setName("");
         setParentId(defaultParentId || "none");
@@ -83,6 +87,7 @@ export function CategoryDialog({
         setRequiresResolverApproval(false);
         setRaiserApprovers([]);
         setResolverApprovers([]);
+        setTemplateId("none");
       }
     }
   }, [isOpen, item, defaultParentId]);
@@ -97,7 +102,8 @@ export function CategoryDialog({
         requiresRaiserApproval,
         requiresResolverApproval,
         raiserApprovers,
-        resolverApprovers
+        resolverApprovers,
+        templateId: templateId === "none" ? null : templateId
       };
 
       if (item) {
@@ -275,6 +281,24 @@ export function CategoryDialog({
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 mt-2 space-y-2">
+            <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Data Template Assignment</Label>
+            <div className="p-4 border rounded-sm bg-[#0176D3]/5 border-[#0176D3]/10">
+              <p className="text-[10px] text-muted-foreground leading-tight mb-3">Require users to fill out a structured data sheet when creating incidents in this category.</p>
+              <Select value={templateId || "none"} onValueChange={setTemplateId}>
+                <SelectTrigger className="h-9 text-xs bg-background">
+                  <SelectValue placeholder="No template required" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" className="text-xs font-bold uppercase tracking-wider italic text-muted-foreground">None / Not Required</SelectItem>
+                  {templates.map(t => (
+                    <SelectItem key={t.id} value={t.id} className="text-xs">{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -569,6 +593,183 @@ export function RoutingRuleDialog({
             )}
           </Button>
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function DataTemplateDialog({ 
+  item 
+}: { 
+  item?: any 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState(item?.name || "");
+  const [description, setDescription] = useState(item?.description || "");
+  const [fields, setFields] = useState<any[]>(item?.fields || [{ name: "", type: "string", required: true }]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (item) {
+        setName(item.name);
+        setDescription(item.description || "");
+        setFields(item.fields || []);
+      } else {
+        setName("");
+        setDescription("");
+        setFields([{ name: "", type: "string", required: true }]);
+      }
+    }
+  }, [isOpen, item]);
+
+  const addField = () => setFields([...fields, { name: "", type: "string", required: true }]);
+  const removeField = (index: number) => setFields(fields.filter((_, i) => i !== index));
+  const updateField = (index: number, updates: any) => {
+    const newFields = [...fields];
+    newFields[index] = { ...newFields[index], ...updates };
+    setFields(newFields);
+  };
+
+  async function handleAction() {
+    if (!name) return toast.error("Template name is required");
+    if (fields.length === 0) return toast.error("At least one field is required");
+    if (fields.some(f => !f.name)) return toast.error("All fields must have a name");
+
+    setIsSubmitting(true);
+    try {
+      const payload = { name, description, fields };
+      if (item) {
+        await updateDataTemplate(item.id, payload);
+        toast.success("Template updated successfully");
+      } else {
+        await createDataTemplate(payload);
+        toast.success("Template created successfully");
+      }
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("Failed to save template");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        {item ? (
+          <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
+            <Edit2 className="size-4" />
+          </Button>
+        ) : (
+          <Button className="h-9 bg-[#0176D3] hover:bg-[#0176D3]/90 text-white gap-2 px-4 font-bold text-xs rounded-sm">
+            <Plus className="size-4" />
+            CREATE TEMPLATE
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden border-none rounded-none shadow-2xl">
+        <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
+          <div className="flex flex-col">
+            <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground leading-none">Define the worksheet columns and data types</DialogDescription>
+          </div>
+        </DialogHeader>
+        <div className="grid gap-6 p-8">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Template Name</Label>
+              <Input 
+                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Supplier Onboarding"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Description (Optional)</Label>
+              <Input 
+                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Briefly describe the purpose"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Template Fields (Columns)</Label>
+              <Button onClick={addField} type="button" variant="outline" size="sm" className="h-7 text-[10px] font-bold gap-1 px-3">
+                <Plus className="size-3" /> ADD FIELD
+              </Button>
+            </div>
+
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+              {fields.map((field, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 border rounded-sm bg-muted/5 relative group">
+                  <div className="flex-1 space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
+                        <Input 
+                          className="h-8 text-xs bg-background"
+                          value={field.name}
+                          onChange={(e) => updateField(index, { name: e.target.value })}
+                          placeholder="Column Header"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
+                        <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
+                          <SelectTrigger className="h-8 text-xs bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
+                            <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
+                            <SelectItem value="email" className="text-xs">Email</SelectItem>
+                            <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon" 
+                    className="size-8 text-muted-foreground hover:text-destructive shrink-0 mt-4"
+                    onClick={() => removeField(index)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              ))}
+              {fields.length === 0 && (
+                <div className="text-center py-8 border-2 border-dashed rounded-sm">
+                  <p className="text-xs text-muted-foreground">No fields defined yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="p-8 bg-muted/30 border-t gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsOpen(false)} 
+            className="h-10 text-[10px] font-bold tracking-widest px-8 rounded-none border-2"
+          >
+            CANCEL
+          </Button>
+          <Button 
+            onClick={handleAction} 
+            disabled={isSubmitting}
+            className="h-10 bg-foreground text-background hover:bg-foreground/90 text-[10px] font-bold tracking-widest px-8 rounded-none min-w-[140px]"
+          >
+            {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : (item ? "SAVE CHANGES" : "CREATE TEMPLATE")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

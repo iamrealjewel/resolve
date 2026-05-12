@@ -97,6 +97,9 @@ model IncidentCategory {
   requiresResolverApproval Boolean @default(false)
   approvers                CategoryApprover[]
 
+  templateId String?
+  template   DataTemplate? @relation(fields: [templateId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -128,6 +131,8 @@ model Incident {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  templateData Json? // Multi-record payload (Array of Objects)
 
   company    Company          @relation(fields: [companyId], references: [id])
   department Department       @relation(fields: [departmentId], references: [id])
@@ -241,4 +246,14 @@ enum Status {
   RESOLVED
   CLOSED
   REJECTED
+}
+
+model DataTemplate {
+  id          String             @id @default(cuid())
+  name        String             @unique
+  description String?            @db.Text
+  fields      Json               // Array of { name: string, type: string, required: boolean, options?: string[] }
+  categories  IncidentCategory[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 }
