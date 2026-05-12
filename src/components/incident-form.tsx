@@ -116,12 +116,12 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   const [logStartDate, setLogStartDate] = useState<string>("");
   const [logEndDate, setLogEndDate] = useState<string>("");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const incident = initialData.incident;
   const [templateData, setTemplateData] = useState<any[]>(incident?.templateData || []);
 
   const router = useRouter();
   const { data: session } = useSession();
   const user = session?.user as any;
-  const incident = initialData.incident;
 
   const isPendingBusiness = incident?.status === "PENDING_BUSINESS_APPROVAL";
   const isPendingOperational = incident?.status === "PENDING_OPERATIONAL_APPROVAL";
@@ -263,21 +263,6 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   const selectedCategoryId = form.watch("category");
   const selectedCategory = initialData.categories.find(c => c.id === selectedCategoryId);
   const template = selectedCategory?.template;
-    const find = (list: any[], targetId: string, currentPath: string[] = []): boolean => {
-      for (const item of list) {
-        if (item.id === targetId) {
-          path.push(...currentPath, item.name);
-          return true;
-        }
-        if (item.children && find(item.children, targetId, [...currentPath, item.name])) {
-          return true;
-        }
-      }
-      return false;
-    };
-    find(categoryTree, id);
-    return path.join(" / ");
-  };
 
   const CategoryTreeItem = ({ category, depth = 0, onSelect }: { category: any, depth?: number, onSelect: (id: string) => void }) => {
     const hasChildren = category.children && category.children.length > 0;

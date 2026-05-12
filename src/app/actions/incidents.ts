@@ -354,8 +354,10 @@ export async function createIncident(formData: any) {
       raiserApprover: raiserApproverId ? { connect: { id: raiserApproverId } } : undefined,
       resolverApprover: resolverApproverId ? { connect: { id: resolverApproverId } } : undefined,
       accessList: {
+        set: [], // Clear first
         connect: formData.accessList?.map((id: string) => ({ id })) || []
       },
+      templateData: formData.templateData || [],
       attachments: {
         create: formData.attachments?.map((a: any) => ({
           name: a.name,
@@ -490,6 +492,7 @@ export async function updateIncident(id: string, data: any) {
     categoryId: data.categoryId || incident.categoryId,
     locationId: data.locationId || incident.locationId,
     companyId: data.companyId || incident.companyId,
+    templateData: data.templateData || incident.templateData || [],
     accessList: data.accessList ? {
       set: data.accessList.map((uid: string) => ({ id: uid }))
     } : undefined,
