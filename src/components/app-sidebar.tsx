@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Layout as LayoutIcon,
   Database,
+  Menu
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -33,6 +34,8 @@ import { UserNav } from "@/components/user-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/components/layout-provider";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Logo } from "@/components/layout-elements/logo";
 
 const data = {
   navMain: [
@@ -62,8 +65,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" {...props} className="border-r border-border">
-      <SidebarHeader className="h-14 border-b border-border px-4 flex items-center">
-        <span className="text-[10px] font-semibold text-muted-foreground/60 group-data-[collapsible=icon]:hidden">NAVIGATION</span>
+      <SidebarHeader className="py-4 px-0 flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 w-full">
+          <Logo showText={state === "expanded"} />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            onClick={toggleSidebar}
+          >
+            <Menu className="size-5" />
+          </Button>
+        </div>
       </SidebarHeader>
 
       <SidebarContent className="py-2">
@@ -130,21 +143,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1">
-             <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleLayout}
-                title="Switch Navigation Mode"
-                className="size-8 text-muted-foreground hover:text-foreground"
-              >
-                <LayoutIcon className="size-4" />
-              </Button>
-              <ThemeToggle />
+      <SidebarFooter className="border-t p-2 flex flex-col items-center gap-3 py-4">
+        <div className="flex flex-col items-center gap-3 w-full">
+           <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleLayout}
+            title="Switch to Top Navigation"
+            className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <LayoutIcon className="size-5" />
+          </Button>
+          <ThemeToggle />
+          <div className="pt-2 border-t w-full flex justify-center">
+            <UserNav />
           </div>
-          <UserNav />
         </div>
       </SidebarFooter>
     </Sidebar>

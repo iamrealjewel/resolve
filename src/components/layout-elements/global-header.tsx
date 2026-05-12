@@ -53,11 +53,10 @@ export function GlobalHeader() {
   
   const { toggleSidebar, state } = useSidebar();
 
+  if (layoutType === "sidebar") return null;
+
   return (
-    <header className={cn(
-      "h-14 border-b bg-background sticky top-0 z-50 flex items-center transition-all duration-300",
-      layoutType === "sidebar" ? "w-fit" : "w-full px-6 justify-between"
-    )}>
+    <header className="h-14 border-b bg-background sticky top-0 z-50 flex items-center w-full px-6 justify-between">
       <div className={cn(
         "flex items-center h-full px-4 transition-all duration-300",
         layoutType === "sidebar" 

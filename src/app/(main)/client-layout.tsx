@@ -45,7 +45,7 @@ export function ClientLayout({
       <div className="min-h-screen flex flex-col bg-background w-full">
         <GlobalHeader />
         <div className="flex-1 flex overflow-hidden">
-          {layoutType === "sidebar" && <AppSidebar className="mt-14" />}
+          {layoutType === "sidebar" && <AppSidebar />}
           <SidebarInset className="bg-background flex flex-col">
             <main className={cn(
               "flex-1",
