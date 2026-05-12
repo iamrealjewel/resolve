@@ -734,6 +734,17 @@ export function DataTemplateDialog({
                         </Select>
                       </div>
                     </div>
+                    {field.type === "list" && (
+                      <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
+                        <Input 
+                          className="h-8 text-xs bg-background"
+                          value={field.options?.join(", ") || ""}
+                          onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
+                          placeholder="Option 1, Option 2, Option 3"
+                        />
+                      </div>
+                    )}
                   </div>
                   <Button 
                     type="button" 
