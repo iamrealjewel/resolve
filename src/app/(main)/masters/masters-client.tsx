@@ -272,13 +272,6 @@ export function MastersClient({ data }: { data: any }) {
               <Tag className="size-3.5" /> Designations
             </TabsTrigger>
             <TabsTrigger 
-              value="templates" 
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            >
-              <Layers className="size-3" />
-              Templates
-            </TabsTrigger>
-            <TabsTrigger 
               value="classifications" 
               className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
@@ -289,6 +282,13 @@ export function MastersClient({ data }: { data: any }) {
               className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               <ArrowRight className="size-3.5" /> Routing
+            </TabsTrigger>
+            <TabsTrigger 
+              value="templates" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <Layers className="size-3" />
+              Templates
             </TabsTrigger>
           </TabsList>
         </div>
@@ -461,75 +461,6 @@ export function MastersClient({ data }: { data: any }) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="templates" className="mt-0 border-none flex-1 overflow-hidden">
-            <Card className="h-full border-none shadow-none rounded-none">
-              <CardHeader className="py-6 px-0 flex flex-row items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg font-bold">Data Templates</CardTitle>
-                  <CardDescription className="text-xs">Define worksheet schemas for specialized request types</CardDescription>
-                </div>
-                <DataTemplateDialog />
-              </CardHeader>
-              <CardContent className="px-0 py-0">
-                <div className="border border-border/50">
-                  <Table>
-                    <TableHeader className="bg-muted/30">
-                      <TableRow>
-                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Template Name</TableHead>
-                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Fields (Columns)</TableHead>
-                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Description</TableHead>
-                        <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider h-10 w-[100px]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {templates?.map((template: any) => (
-                        <TableRow key={template.id} className="hover:bg-muted/10">
-                          <TableCell className="py-3 font-bold text-[13px]">{template.name}</TableCell>
-                          <TableCell className="py-3">
-                            <div className="flex flex-wrap gap-1">
-                              {template.fields?.map((f: any, i: number) => (
-                                <Badge key={i} variant="secondary" className="text-[9px] font-bold py-0 h-5 px-1.5 uppercase tracking-tight bg-indigo-50 text-indigo-700 border-indigo-200">
-                                  {f.name} ({f.type})
-                                </Badge>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-3 text-xs text-muted-foreground italic">
-                            {template.description || "No description provided"}
-                          </TableCell>
-                          <TableCell className="py-3 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <DataTemplateDialog item={template} />
-                              <ConfirmDialog
-                                title="Delete Template"
-                                description="Are you sure you want to delete this template? Any categories using it will lose their template requirement."
-                                onConfirm={async () => {
-                                  await deleteDataTemplate(template.id);
-                                  toast.success("Template deleted successfully");
-                                }}
-                              >
-                                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive">
-                                  <Trash2 className="size-4" />
-                                </Button>
-                              </ConfirmDialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {(!templates || templates.length === 0) && (
-                        <TableRow>
-                          <TableCell colSpan={4} className="h-32 text-center text-muted-foreground text-xs italic">
-                            No data templates defined yet.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="classifications" className="m-0 space-y-4 focus-visible:outline-none">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
@@ -597,6 +528,75 @@ export function MastersClient({ data }: { data: any }) {
                   ))}
                 </TableBody>
               </Table>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="templates" className="mt-0 border-none flex-1 overflow-hidden">
+            <Card className="h-full border-none shadow-none rounded-none">
+              <CardHeader className="py-6 px-0 flex flex-row items-center justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg font-bold">Data Templates</CardTitle>
+                  <CardDescription className="text-xs">Define worksheet schemas for specialized request types</CardDescription>
+                </div>
+                <DataTemplateDialog />
+              </CardHeader>
+              <CardContent className="px-0 py-0">
+                <div className="border border-border/50">
+                  <Table>
+                    <TableHeader className="bg-muted/30">
+                      <TableRow>
+                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Template Name</TableHead>
+                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Fields (Columns)</TableHead>
+                        <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Description</TableHead>
+                        <TableHead className="text-right text-[10px] font-bold uppercase tracking-wider h-10 w-[100px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {templates?.map((template: any) => (
+                        <TableRow key={template.id} className="hover:bg-muted/10">
+                          <TableCell className="py-3 font-bold text-[13px]">{template.name}</TableCell>
+                          <TableCell className="py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {template.fields?.map((f: any, i: number) => (
+                                <Badge key={i} variant="secondary" className="text-[9px] font-bold py-0 h-5 px-1.5 uppercase tracking-tight bg-indigo-50 text-indigo-700 border-indigo-200">
+                                  {f.name} ({f.type})
+                                </Badge>
+                              ))}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3 text-xs text-muted-foreground italic">
+                            {template.description || "No description provided"}
+                          </TableCell>
+                          <TableCell className="py-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <DataTemplateDialog item={template} />
+                              <ConfirmDialog
+                                title="Delete Template"
+                                description="Are you sure you want to delete this template? Any categories using it will lose their template requirement."
+                                onConfirm={async () => {
+                                  await deleteDataTemplate(template.id);
+                                  toast.success("Template deleted successfully");
+                                }}
+                              >
+                                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive">
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              </ConfirmDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {(!templates || templates.length === 0) && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="h-32 text-center text-muted-foreground text-xs italic">
+                            No data templates defined yet.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
             </Card>
           </TabsContent>
         </div>
