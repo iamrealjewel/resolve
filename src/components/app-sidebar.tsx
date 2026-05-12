@@ -38,7 +38,6 @@ const data = {
   navMain: [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
     { title: "Incidents", url: "/incidents", icon: AlertCircle },
-    { title: "Organization", url: "/org", icon: Building2 },
     { title: "Users", url: "/users", icon: Users },
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Master Data", url: "/masters", icon: Database },

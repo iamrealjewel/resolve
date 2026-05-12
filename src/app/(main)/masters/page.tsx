@@ -24,7 +24,16 @@ async function getMasterData() {
     }),
     prisma.department.findMany({ include: { children: true, parent: true } }),
     prisma.location.findMany(),
-    prisma.company.findMany(),
+    prisma.company.findMany({
+      include: {
+        _count: {
+          select: {
+            users: true,
+            incidents: true
+          }
+        }
+      }
+    }),
     prisma.routingRule.findMany({ include: { category: true, department: true } }),
     prisma.user.findMany({ 
       select: { 

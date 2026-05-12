@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { CategoryDialog, InfrastructureDialog, RoutingRuleDialog } from "@/components/master-dialogs";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { CompanyCRUD, DeleteCompanyButton } from "@/components/org-crud";
 import { 
   deleteCategory, 
   deleteDepartment, 
@@ -240,14 +241,20 @@ export function MastersClient({ data }: { data: any }) {
         </div>
       </div>
 
-      <Tabs defaultValue="organization" className="flex-1 flex flex-col">
+      <Tabs defaultValue="companies" className="flex-1 flex flex-col">
         <div className="border-b bg-background sticky top-0 z-10">
           <TabsList className="h-9 bg-muted/20 p-0 gap-0 border-none flex rounded-none" variant="line">
+            <TabsTrigger 
+              value="companies" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <Building2 className="size-3.5" /> Companies
+            </TabsTrigger>
             <TabsTrigger 
               value="organization" 
               className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
-              <Building2 className="size-3.5" /> Org Units
+              <Users className="size-3.5" /> Org Units
             </TabsTrigger>
             <TabsTrigger 
               value="designations" 
@@ -271,6 +278,68 @@ export function MastersClient({ data }: { data: any }) {
         </div>
 
         <div className="flex-1 overflow-auto py-4">
+          <TabsContent value="companies" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold">Legal Entities</h3>
+                <p className="text-sm text-muted-foreground">Manage registered companies and subsidiaries.</p>
+              </div>
+              <CompanyCRUD />
+            </div>
+            <Card className="border shadow-none rounded-sm overflow-hidden bg-white dark:bg-[#1A1A1A]">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-b">
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground pl-6 h-12">Entity Name</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground h-12">User Pool</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground h-12">Incidents</TableHead>
+                    <TableHead className="w-[100px] h-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {companies.map((company: any) => (
+                    <TableRow key={company.id} className="group hover:bg-muted/30 transition-none">
+                      <TableCell className="pl-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="size-8 bg-muted/50 flex items-center justify-center border rounded-sm">
+                            <Building2 className="size-4 text-[#0176D3]" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-foreground group-hover:text-[#0176D3] transition-colors">{company.name}</span>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">ID: {company.id.split('-').pop()?.toUpperCase()}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Users className="size-4 text-[#0176D3]/40" />
+                          <span className="text-sm font-bold">{company._count?.users || 0} Users</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Activity className="size-4 text-[#0176D3]/40" />
+                          <span className="text-sm font-bold">{company._count?.incidents || 0} Open Cases</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <DeleteCompanyButton id={company.id} />
+                          <Link 
+                            href={`/masters/companies/${company.id}`}
+                            className="text-muted-foreground hover:text-[#0176D3] h-8 w-8 flex items-center justify-center"
+                          >
+                            <ChevronRight className="size-4" />
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="organization" className="m-0 space-y-4 focus-visible:outline-none">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                {/* Departments Section */}
