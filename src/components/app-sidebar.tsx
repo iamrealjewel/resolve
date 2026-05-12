@@ -66,18 +66,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon" {...props} className="border-r border-border">
-      <SidebarHeader className="py-4 px-0 flex flex-col items-center gap-4">
-        <div className="flex flex-col items-center gap-4 w-full">
-          <Logo showText={state === "expanded"} />
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            onClick={toggleSidebar}
-          >
-            <Menu className="size-5" />
-          </Button>
-        </div>
+      <SidebarHeader className={cn(
+        "py-4 px-4 flex transition-all duration-300",
+        state === "expanded" ? "flex-row items-center justify-between" : "flex-col items-center gap-4 px-0"
+      )}>
+        <Logo showText={state === "expanded"} />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          onClick={toggleSidebar}
+        >
+          <Menu className="size-5" />
+        </Button>
       </SidebarHeader>
 
       <SidebarContent className="py-2">
@@ -144,22 +145,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-2 flex flex-col items-center gap-3 py-4">
-        <div className="flex flex-col items-center gap-3 w-full">
-           <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleLayout}
-            title="Switch to Top Navigation"
-            className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-          >
-            <LayoutIcon className="size-5" />
-          </Button>
-          <ThemeToggle />
-          <div className="pt-2 border-t w-full flex justify-center">
+      <SidebarFooter className={cn(
+        "border-t p-2 transition-all duration-300 py-4",
+        state === "expanded" ? "flex flex-row items-center justify-between px-4" : "flex flex-col items-center gap-3 px-0"
+      )}>
+        {state === "expanded" ? (
+          <>
             <UserNav />
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleLayout}
+                title="Switch to Top Navigation"
+                className="size-8 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                <LayoutIcon className="size-4" />
+              </Button>
+              <ThemeToggle />
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-3 w-full">
+             <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleLayout}
+              title="Switch to Top Navigation"
+              className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <LayoutIcon className="size-5" />
+            </Button>
+            <ThemeToggle />
+            <div className="pt-2 border-t w-full flex justify-center">
+              <UserNav />
+            </div>
           </div>
-        </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
