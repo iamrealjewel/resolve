@@ -51,18 +51,32 @@ export function GlobalHeader() {
 
   const filteredNavMain = navMain.filter((item) => canAccess(role, item.url));
   
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
 
   return (
     <header className={cn(
-      "h-14 border-b bg-background sticky top-0 z-50 flex items-center justify-between overflow-hidden transition-all duration-300",
-      layoutType === "sidebar" ? "w-[var(--sidebar-width)] border-r px-4" : "w-full px-6"
+      "h-14 border-b bg-background sticky top-0 z-50 flex items-center transition-all duration-300",
+      layoutType === "sidebar" ? "w-fit" : "w-full px-6 justify-between"
     )}>
-      <div className="flex items-center h-full flex-1">
-        <div className="flex items-center gap-2">
-          <Logo />
-        </div>
+      <div className={cn(
+        "flex items-center h-full px-4 transition-all duration-300",
+        layoutType === "sidebar" 
+          ? (state === "expanded" ? "w-[var(--sidebar-width)] border-r" : "w-[var(--sidebar-width-icon)] border-r")
+          : "flex-1"
+      )}>
+        <Logo showText={layoutType === "topnav" || state === "expanded"} />
         
+        {layoutType === "sidebar" && state === "expanded" && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="size-8 ml-auto"
+            onClick={toggleSidebar}
+          >
+            <Menu className="size-5" />
+          </Button>
+        )}
+
         {layoutType === "topnav" && (
           <div className="ml-6 flex items-center h-full">
             <nav className="hidden md:flex items-center h-full">
@@ -89,8 +103,8 @@ export function GlobalHeader() {
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {layoutType === "sidebar" ? (
+      {layoutType === "sidebar" && state === "collapsed" && (
+        <div className="px-3">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -99,24 +113,26 @@ export function GlobalHeader() {
           >
             <Menu className="size-5" />
           </Button>
-        ) : (
-          <>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleLayout}
-              title="Switch to Sidebar"
-              className="size-8 text-muted-foreground hover:text-foreground"
-            >
-              <LayoutIcon className="size-4" />
-            </Button>
-            <ThemeToggle />
-            <div className="ml-2">
-              <UserNav />
-            </div>
-          </>
-        )}
-      </div>
+        </div>
+      )}
+
+      {layoutType === "topnav" && (
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleLayout}
+            title="Switch to Sidebar"
+            className="size-8 text-muted-foreground hover:text-foreground"
+          >
+            <LayoutIcon className="size-4" />
+          </Button>
+          <ThemeToggle />
+          <div className="ml-2">
+            <UserNav />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
