@@ -12,7 +12,8 @@ import {
   Building2, 
   Database,
   Layout as LayoutIcon,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserNav } from "@/components/user-nav";
@@ -31,7 +32,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 const navMain = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -50,18 +51,20 @@ export function GlobalHeader() {
 
   const filteredNavMain = navMain.filter((item) => canAccess(role, item.url));
   
-  const segment = pathname.split("/").pop() || "Dashboard";
-  const title = segment.charAt(0).toUpperCase() + segment.slice(1);
+  const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="h-14 w-full border-b bg-background sticky top-0 z-50 px-6 flex items-center justify-between overflow-hidden">
-      <div className="flex items-center h-full">
+    <header className={cn(
+      "h-14 border-b bg-background sticky top-0 z-50 flex items-center justify-between overflow-hidden transition-all duration-300",
+      layoutType === "sidebar" ? "w-[var(--sidebar-width)] border-r px-4" : "w-full px-6"
+    )}>
+      <div className="flex items-center h-full flex-1">
         <div className="flex items-center gap-2">
           <Logo />
         </div>
         
-        <div className="ml-6 flex items-center h-full">
-          {layoutType === "topnav" ? (
+        {layoutType === "topnav" && (
+          <div className="ml-6 flex items-center h-full">
             <nav className="hidden md:flex items-center h-full">
               {filteredNavMain.map((item) => {
                 const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
@@ -82,28 +85,37 @@ export function GlobalHeader() {
                 );
               })}
             </nav>
-          ) : (
-            <div className="flex items-center gap-4">
-               <SidebarTrigger className="-ml-2 text-muted-foreground hover:text-foreground transition-colors" />
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleLayout}
-          title={layoutType === "sidebar" ? "Switch to Top Navigation" : "Switch to Sidebar"}
-          className="size-8 text-muted-foreground hover:text-foreground"
-        >
-          <LayoutIcon className="size-4" />
-        </Button>
-        <ThemeToggle />
-        <div className="ml-2">
-          <UserNav />
-        </div>
+        {layoutType === "sidebar" ? (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="size-8"
+            onClick={toggleSidebar}
+          >
+            <Menu className="size-5" />
+          </Button>
+        ) : (
+          <>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleLayout}
+              title="Switch to Sidebar"
+              className="size-8 text-muted-foreground hover:text-foreground"
+            >
+              <LayoutIcon className="size-4" />
+            </Button>
+            <ThemeToggle />
+            <div className="ml-2">
+              <UserNav />
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
