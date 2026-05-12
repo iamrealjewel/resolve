@@ -31,6 +31,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface Field {
@@ -189,13 +196,42 @@ export function TemplateGridDialog({
                   </TableCell>
                   {template.fields.map((field, fieldIdx) => (
                     <TableCell key={fieldIdx} className="p-0 h-10 border-r">
-                      <Input 
-                        className="h-full w-full rounded-none border-none bg-transparent px-4 text-sm focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#0176D3] transition-none placeholder:italic placeholder:text-[11px]"
-                        value={row[field.name] || ""}
-                        onChange={(e) => updateCell(rowIndex, field.name, e.target.value)}
-                        placeholder={`Enter ${field.name}...`}
-                        type={field.type === "numeric" ? "number" : field.type === "email" ? "email" : "text"}
-                      />
+                      {field.type === "list" ? (
+                        <Select 
+                          value={row[field.name] || ""} 
+                          onValueChange={(val) => updateCell(rowIndex, field.name, val)}
+                        >
+                          <SelectTrigger className="h-full w-full rounded-none border-none bg-transparent px-4 text-sm focus:ring-0 focus:border-none shadow-none">
+                            <SelectValue placeholder={`Select ${field.name}...`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(field as any).options?.map((opt: string) => (
+                              <SelectItem key={opt} value={opt} className="text-xs">{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : field.type === "boolean" ? (
+                        <Select 
+                          value={row[field.name]?.toString() || ""} 
+                          onValueChange={(val) => updateCell(rowIndex, field.name, val === "true")}
+                        >
+                          <SelectTrigger className="h-full w-full rounded-none border-none bg-transparent px-4 text-sm focus:ring-0 focus:border-none shadow-none text-left">
+                            <SelectValue placeholder="Select..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="true" className="text-xs">Yes</SelectItem>
+                            <SelectItem value="false" className="text-xs">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input 
+                          className="h-full w-full rounded-none border-none bg-transparent px-4 text-sm focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[#0176D3] transition-none placeholder:italic placeholder:text-[11px]"
+                          value={row[field.name] || ""}
+                          onChange={(e) => updateCell(rowIndex, field.name, e.target.value)}
+                          placeholder={`Enter ${field.name}...`}
+                          type={field.type === "numeric" ? "number" : field.type === "email" ? "email" : "text"}
+                        />
+                      )}
                     </TableCell>
                   ))}
                   <TableCell className="p-0 h-10 text-center">

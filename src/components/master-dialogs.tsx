@@ -668,7 +668,7 @@ export function DataTemplateDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[95vw] sm:max-w-[95vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-[55vw] sm:max-w-[55vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
         <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
@@ -710,14 +710,14 @@ export function DataTemplateDialog({
                 <div key={index} className="flex items-center gap-4 p-3 border rounded-sm bg-muted/5 relative group">
                   <div className="flex-[2] space-y-1">
                     <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
-                    <Input
+                    <Input 
                       className="h-8 text-xs bg-background"
                       value={field.name}
                       onChange={(e) => updateField(index, { name: e.target.value })}
                       placeholder="Column Header"
                     />
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div className="w-[180px] shrink-0 space-y-1">
                     <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
                     <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
                       <SelectTrigger className="h-8 text-xs bg-background">
@@ -727,6 +727,7 @@ export function DataTemplateDialog({
                         <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
                         <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
                         <SelectItem value="email" className="text-xs">Email</SelectItem>
+                        <SelectItem value="boolean" className="text-xs">Boolean (Yes/No)</SelectItem>
                         <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
                       </SelectContent>
                     </Select>
