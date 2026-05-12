@@ -1,0 +1,452 @@
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, Tag, GitBranch, Trash2, ArrowRight, ChevronRight, ChevronDown, FolderTree, Layers, ShieldCheck } from "lucide-react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { CategoryDialog, InfrastructureDialog, RoutingRuleDialog } from "@/components/master-dialogs";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { 
+  deleteCategory, 
+  deleteDepartment, 
+  deleteLocation, 
+  deleteRoutingRule,
+  deleteDesignation
+} from "@/app/actions/master";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface Category {
+  id: string;
+  name: string;
+  parentId: string | null;
+  requiresRaiserApproval?: boolean;
+  requiresResolverApproval?: boolean;
+  approvers?: any[];
+  children?: Category[];
+}
+
+function CategoryTreeNode({ category, categories, users, rules, depth = 0 }: { category: Category, categories: any[], users: any[], rules: any[], depth?: number }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const hasChildren = category.children && category.children.length > 0;
+  const categoryRules = rules.filter(r => r.categoryId === category.id);
+
+  return (
+    <div className="flex flex-col">
+      <div 
+        className={cn(
+          "flex flex-col border-b hover:bg-accent/30 transition-none group relative",
+          depth > 0 && "bg-muted/5"
+        )}
+      >
+        <div className="flex items-center gap-2 py-2 pr-6">
+          {Array.from({ length: depth }).map((_, i) => (
+            <div key={i} className="absolute h-full border-l border-muted-foreground/20 border-dashed" style={{ left: `${i * 24 + 12}px` }} />
+          ))}
+          <div className="flex items-center gap-2 flex-1 relative" style={{ paddingLeft: `${depth * 24 + 8}px` }}>
+            <div className="flex items-center gap-2 flex-1">
+              {hasChildren ? (
+                <button 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-muted-foreground hover:text-foreground transition-none"
+                >
+                  {isExpanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                </button>
+              ) : (
+                <div className="size-4" />
+              )}
+              <div className="size-2 shrink-0 bg-[#0176D3]/40 rounded-full" />
+              <div className="flex flex-col">
+                <span className={cn(
+                  "text-[13px] font-bold tracking-tight",
+                  depth === 0 ? "text-foreground" : "text-foreground/80"
+                )}>
+                  {category.name}
+                </span>
+                
+                {/* Workflow Summary in Tree */}
+                <div className="flex items-center gap-3 mt-1">
+                  {/* Routing Rule Info */}
+                  {categoryRules.length > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] font-bold text-[#0176D3] uppercase tracking-wider bg-[#0176D3]/5 px-1.5 py-0.5 rounded-sm border border-[#0176D3]/10">
+                      <GitBranch className="size-2.5" />
+                      Team: {categoryRules[0].department?.name || "N/A"}
+                    </div>
+                  )}
+
+                  {/* Approval Matrix Indicators */}
+                  <div className="flex items-center gap-1.5">
+                    {category.requiresRaiserApproval && (
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-[9px] font-bold text-amber-600 border border-amber-200 rounded-sm leading-none" title="Business Approval Required">
+                        <ShieldCheck className="size-2.5" />
+                        BA
+                        {category.approvers?.some(a => a.type === "RAISER") && <span className="ml-1 text-[8px] px-1 bg-amber-600 text-white rounded-[2px]">OVERRIDE</span>}
+                      </div>
+                    )}
+                    {category.requiresResolverApproval && (
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 text-[9px] font-bold text-orange-600 border border-orange-200 rounded-sm leading-none" title="Operational Approval Required">
+                        <ShieldCheck className="size-2.5" />
+                        OA
+                        {category.approvers?.some(a => a.type === "RESOLVER") && <span className="ml-1 text-[8px] px-1 bg-orange-600 text-white rounded-[2px]">OVERRIDE</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <CategoryDialog categories={categories} users={users} defaultParentId={category.id} />
+              <CategoryDialog categories={categories} users={users} item={category} />
+              <ConfirmDialog 
+                title="Delete Category?" 
+                description={`Are you sure you want to delete "${category.name}"? This action cannot be undone.`}
+                onConfirm={async () => await deleteCategory(category.id)}
+                trigger={
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8 p-0">
+                    <Trash2 className="size-4" />
+                  </Button>
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Approver Hover/Expand Info (Optional, but let's show it clearly if they exist) */}
+        {category.approvers && category.approvers.length > 0 && (
+          <div className="flex flex-wrap gap-4 px-4 pb-3 ml-[var(--depth-padding)]" style={{ paddingLeft: `${depth * 24 + 40}px` }}>
+            {category.approvers.map((ap: any) => ap.user && (
+              <div key={ap.id} className="flex flex-col text-[10px] text-muted-foreground bg-muted/30 p-2 rounded-sm border min-w-[200px]">
+                <span className="font-bold uppercase tracking-wider text-[8px] mb-1 text-foreground/60">
+                  {ap.type === "RAISER" ? "Business Approver" : "Operational Approver"}
+                </span>
+                <div className="font-bold text-foreground flex items-center gap-1">
+                  {ap.user.name}
+                </div>
+                <div className="italic text-[9px]">
+                  {ap.user.designation?.title || "N/A"}
+                </div>
+                <div className="flex items-center gap-1 mt-1 text-[8px] uppercase tracking-tighter">
+                  {ap.user.department?.name || "N/A"} • {ap.user.company?.name || "N/A"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {hasChildren && isExpanded && (
+        <div className="flex flex-col">
+          {category.children?.map(child => (
+            <CategoryTreeNode key={child.id} category={child} categories={categories} users={users} rules={rules} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DepartmentTreeNode({ department, allDepartments, companies, depth = 0 }: { department: any, allDepartments: any[], companies: any[], depth?: number }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const children = allDepartments.filter(d => d.parentId === department.id);
+  const hasChildren = children.length > 0;
+
+  return (
+    <div className="flex flex-col">
+      <div 
+        className={cn(
+          "flex items-center justify-between py-0.5 border-b hover:bg-accent/50 transition-none group relative",
+          depth > 0 && "bg-muted/5"
+        )}
+      >
+        {Array.from({ length: depth }).map((_, i) => (
+          <div key={i} className="absolute h-full border-l border-muted-foreground/20 border-dashed" style={{ left: `${i * 24 + 12}px` }} />
+        ))}
+        <div className="flex items-center justify-between gap-2 flex-1 relative" style={{ paddingLeft: `${depth * 24 + 8}px` }}>
+          <div className="flex items-center gap-2">
+            {hasChildren ? (
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-muted-foreground hover:text-foreground transition-none"
+              >
+                {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+              </button>
+            ) : (
+              <div className="size-3.5" />
+            )}
+            <div className="size-2 shrink-0 bg-[#0176D3]/40 rounded-full" />
+            <div className="flex flex-col">
+              <span className="font-medium text-[13px] leading-tight">{department.name}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 pr-4">
+            <InfrastructureDialog type="department" companies={companies} departments={allDepartments} defaultParentId={department.id} />
+            <InfrastructureDialog type="department" item={department} companies={companies} departments={allDepartments} />
+            <ConfirmDialog 
+              title="Delete Department?" 
+              description={`Are you sure you want to delete "${department.name}"? This action cannot be undone.`}
+              onConfirm={async () => await deleteDepartment(department.id)}
+              trigger={
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8">
+                  <Trash2 className="size-4" />
+                </Button>
+              }
+            />
+          </div>
+        </div>
+      </div>
+      {hasChildren && isExpanded && (
+        <div className="flex flex-col">
+          {children.map((child: any) => (
+            <DepartmentTreeNode key={child.id} department={child} allDepartments={allDepartments} companies={companies} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MastersClient({ data }: { data: any }) {
+  const { categories, departments, locations, companies, rules, users, designations } = data;
+
+  // Helper to build recursive tree
+  const buildTree = (items: any[], parentId: string | null = null): any[] => {
+    return items
+      .filter(item => item.parentId === parentId)
+      .map(item => ({
+        ...item,
+        children: buildTree(items, item.id)
+      }));
+  };
+
+  const rootCategories = buildTree(categories);
+  const rootDepartments = buildTree(departments);
+
+  return (
+    <div className="space-y-0 h-full flex flex-col px-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-2 border-b">
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Master Data Registry</h2>
+          <p className="text-[10px] font-bold text-[#0176D3] uppercase tracking-wider">
+            Infrastructure Configuration
+          </p>
+          <h1 className="text-lg font-bold text-foreground mt-1">Foundational Entities & Hierarchy</h1>
+        </div>
+      </div>
+
+      <Tabs defaultValue="organization" className="flex-1 flex flex-col">
+        <div className="border-b bg-background sticky top-0 z-10">
+          <TabsList className="h-9 bg-muted/20 p-0 gap-0 border-none flex rounded-none" variant="line">
+            <TabsTrigger 
+              value="organization" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <Building2 className="size-3.5" /> Org Units
+            </TabsTrigger>
+            <TabsTrigger 
+              value="designations" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <Tag className="size-3.5" /> Designations
+            </TabsTrigger>
+            <TabsTrigger 
+              value="classifications" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <GitBranch className="size-3.5" /> Service Tree
+            </TabsTrigger>
+            <TabsTrigger 
+              value="routing" 
+              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              <ArrowRight className="size-3.5" /> Routing
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="flex-1 overflow-auto py-4">
+          <TabsContent value="organization" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+               {/* Departments Section */}
+               <div className="space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h3 className="text-lg font-bold">Internal Hierarchy</h3>
+                      <p className="text-sm text-muted-foreground">Manage departmental structure.</p>
+                    </div>
+                    <InfrastructureDialog type="department" departments={departments} />
+                 </div>
+                 <Card className="border shadow-none overflow-hidden rounded-none">
+                   <div className="bg-muted/50 border-b px-6 py-2.5">
+                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Departmental Nodes</span>
+                   </div>
+                   <div className="divide-y">
+                     {departments.filter((d: any) => !d.parentId).map((dept: any) => (
+                       <DepartmentTreeNode key={dept.id} department={dept} allDepartments={departments} companies={companies} />
+                     ))}
+                   </div>
+                 </Card>
+               </div>
+
+               {/* Locations Section */}
+               <div className="space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h3 className="text-lg font-bold">Operational Sites</h3>
+                      <p className="text-sm text-muted-foreground">Register physical or logical service locations.</p>
+                    </div>
+                    <InfrastructureDialog type="location" />
+                 </div>
+                 <Card className="border shadow-none overflow-hidden rounded-none">
+                   <Table>
+                     <TableBody>
+                       {locations.map((loc: any) => (
+                         <TableRow key={loc.id}>
+                           <TableCell className="font-medium text-xs pl-6 py-1.5">{loc.name}</TableCell>
+                           <TableCell className="text-right pr-6 py-1.5">
+                             <div className="flex items-center justify-end gap-1">
+                               <InfrastructureDialog type="location" item={loc} />
+                               <ConfirmDialog 
+                                 title="Delete Location?" 
+                                 onConfirm={async () => await deleteLocation(loc.id)}
+                                 trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
+                               />
+                             </div>
+                           </TableCell>
+                         </TableRow>
+                       ))}
+                     </TableBody>
+                   </Table>
+                 </Card>
+               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="designations" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold">Official Designations</h3>
+                <p className="text-sm text-muted-foreground">Manage organizational titles and departmental roles.</p>
+              </div>
+              <InfrastructureDialog type="designation" departments={departments} />
+            </div>
+
+            <Card className="border shadow-none overflow-hidden rounded-none">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-b">
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground pl-6">Title</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {designations.length > 0 ? (
+                    designations.map((d: any) => (
+                      <TableRow key={d.id} className="group hover:bg-accent transition-none">
+                        <TableCell className="pl-6 py-0.5">
+                          <span className="text-xs font-medium">{d.title}</span>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                           <div className="flex items-center justify-end gap-1">
+                              <InfrastructureDialog type="designation" item={d} />
+                              <ConfirmDialog 
+                                title="Delete Designation?" 
+                                onConfirm={async () => await deleteDesignation(d.id)}
+                                trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
+                              />
+                           </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="h-24 text-center text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
+                        No designations registered
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="classifications" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold">Category Hierarchy</h3>
+                <p className="text-sm text-muted-foreground">Define hierarchical incident classifications for automated resolution.</p>
+              </div>
+              <CategoryDialog categories={categories} users={users} />
+            </div>
+            
+            <Card className="border shadow-none overflow-hidden rounded-none">
+              <div className="divide-y">
+                {rootCategories.map((cat: any) => (
+                  <CategoryTreeNode key={cat.id} category={cat} categories={categories} users={users} rules={rules} />
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="routing" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold">Workflow Automation</h3>
+                <p className="text-sm text-muted-foreground">Map classifications to specific functional resolver units.</p>
+              </div>
+              <RoutingRuleDialog categories={categories} departments={departments} users={users} />
+            </div>
+
+            <Card className="border shadow-none overflow-hidden rounded-none">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-b">
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground pl-6">Incident Domain</TableHead>
+                    <TableHead className="font-bold text-[10px] uppercase tracking-wider text-foreground">Assigned Unit</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rules.map((rule: any) => (
+                    <TableRow key={rule.id} className="group hover:bg-accent transition-none">
+                      <TableCell className="pl-6 py-1.5">
+                        <div className="flex items-center gap-3">
+                           <div className="size-7 bg-muted flex items-center justify-center border">
+                              <Tag className="size-3.5 text-primary" />
+                           </div>
+                           <span className="text-xs font-medium">{rule.category.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                           <GitBranch className="size-3.5 text-muted-foreground" />
+                           <span className="text-xs font-medium">{rule.department.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <div className="flex items-center justify-end gap-1">
+                          <RoutingRuleDialog categories={categories} departments={departments} users={users} item={rule} />
+                          <ConfirmDialog 
+                            title="Delete Routing Rule?" 
+                            onConfirm={async () => await deleteRoutingRule(rule.id)}
+                            trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+        </div>
+      </Tabs>
+    </div>
+  );
+}

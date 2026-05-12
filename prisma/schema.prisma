@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Company {
+  id        String     @id @default(cuid())
+  name      String
+  logo      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  incidents Incident[]
+  users     User[]
+}
+
+model Location {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  incidents Incident[]
+  users     User[]
+}
+
+model Department {
+  id           String        @id @default(cuid())
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  parentId     String?
+  parent       Department?   @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children     Department[]  @relation("DepartmentHierarchy")
+  routingRules RoutingRule[]
+  users        User[]
+  incidents    Incident[]
+
+  @@index([parentId])
+}
+
+model Designation {
+  id           String     @id @default(cuid())
+  title        String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  users        User[]
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String
+  password          String
+  role              Role          @default(USER)
+  companyId         String
+  departmentId      String?
+  designationId     String?
+  locationId        String?
+  phone             String?
+  superiorId        String?
+  superior          User?              @relation("ReportingLine", fields: [superiorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subordinates      User[]             @relation("ReportingLine")
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  assignedIncidents Incident[]         @relation("Assignee")
+  reportedIncidents Incident[]         @relation("Reporter")
+  raiserApprovals    Incident[]         @relation("RaiserApprover")
+  resolverApprovals  Incident[]         @relation("ResolverApprover")
+  incidentLogs      IncidentLog[]
+  company           Company            @relation(fields: [companyId], references: [id])
+  department        Department?        @relation(fields: [departmentId], references: [id])
+  designation       Designation?       @relation(fields: [designationId], references: [id])
+  location          Location?          @relation(fields: [locationId], references: [id])
+  accessibleIncidents Incident[]       @relation("IncidentAccessList")
+  categoryApprovals   CategoryApprover[]
+
+  @@index([companyId], map: "User_companyId_fkey")
+  @@index([departmentId], map: "User_departmentId_fkey")
+  @@index([designationId], map: "User_designationId_fkey")
+  @@index([locationId], map: "User_locationId_fkey")
+}
+
+model IncidentCategory {
+  id        String             @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    IncidentCategory?  @relation("Hierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  IncidentCategory[] @relation("Hierarchy")
+  rules     RoutingRule[]
+  incidents Incident[]
+  
+  // Dual-Gate Approval Matrix
+  requiresRaiserApproval   Boolean @default(false)
+  requiresResolverApproval Boolean @default(false)
+  approvers                CategoryApprover[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model Incident {
+  id          String   @id @default(cuid())
+  ticketId    String   @unique
+  title       String
+  description String   @db.Text
+  status      String   @default("NEW") // NEW, PENDING_RAISER_APPROVAL, PENDING_RESOLVER_APPROVAL, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED
+  priority    String?
+  
+  // Relations
+  companyId    String
+  departmentId String
+  locationId   String?
+  categoryId   String
+  reporterId   String
+  assigneeId   String?
+  
+  // Approval Matrix
+  raiserApproverId   String?
+  resolverApproverId String?
+
+  raiserApprover   User? @relation("RaiserApprover", fields: [raiserApproverId], references: [id])
+  resolverApprover User? @relation("ResolverApprover", fields: [resolverApproverId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company    Company          @relation(fields: [companyId], references: [id])
+  department Department       @relation(fields: [departmentId], references: [id])
+  category   IncidentCategory @relation(fields: [categoryId], references: [id])
+  reporter   User             @relation("Reporter", fields: [reporterId], references: [id])
+  assignee   User?            @relation("Assignee", fields: [assigneeId], references: [id])
+  location   Location?        @relation(fields: [locationId], references: [id])
+  logs       IncidentLog[]
+  accessList User[]           @relation("IncidentAccessList")
+  attachments Attachment[]
+
+  @@index([companyId])
+  @@index([departmentId])
+  @@index([categoryId])
+  @@index([reporterId])
+  @@index([assigneeId])
+}
+
+model IncidentLog {
+  id         String   @id @default(cuid())
+  incidentId String
+  userId     String
+  action     String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+  incident   Incident @relation(fields: [incidentId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  attachments Attachment[]
+
+  @@index([incidentId], map: "IncidentLog_incidentId_fkey")
+  @@index([userId], map: "IncidentLog_userId_fkey")
+}
+
+model Attachment {
+  id            String   @id @default(cuid())
+  name          String
+  url           String
+  fileType      String
+  fileSize      Int
+  incidentId    String?
+  incidentLogId String?
+  createdAt     DateTime @default(now())
+
+  incident      Incident?    @relation(fields: [incidentId], references: [id])
+  incidentLog   IncidentLog? @relation(fields: [incidentLogId], references: [id])
+
+  @@index([incidentId])
+  @@index([incidentLogId])
+}
+
+model RoutingRule {
+  id               String   @id @default(cuid())
+  categoryId       String
+  departmentId     String
+  locationId       String?
+  priority         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category   IncidentCategory @relation(fields: [categoryId], references: [id])
+  department Department       @relation(fields: [departmentId], references: [id])
+
+  @@index([categoryId], map: "RoutingRule_categoryId_fkey")
+  @@index([departmentId], map: "RoutingRule_departmentId_fkey")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email, token])
+}
+
+enum Role {
+  SUPER_ADMIN
+  DEPARTMENT_HEAD
+  LINE_MANAGER
+  RESOLVER
+  USER
+}
+
+model CategoryApprover {
+  id         String           @id @default(cuid())
+  categoryId String
+  userId     String
+  type       String           // "RAISER" or "RESOLVER"
+  
+  category   IncidentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([userId])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Status {
+  NEW
+  PENDING_BUSINESS_APPROVAL
+  PENDING_OPERATIONAL_APPROVAL
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+}
