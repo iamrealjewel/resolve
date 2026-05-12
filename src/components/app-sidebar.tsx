@@ -59,6 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleLayout } = useLayout();
   const { data: session } = useSession();
   const role = session?.user?.role;
+  const { toggleSidebar, state } = useSidebar();
 
   const filteredNavMain = data.navMain.filter((item) => canAccess(role, item.url));
   const filteredSecondary = data.secondary.filter((item) => canAccess(role, item.url));
