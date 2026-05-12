@@ -512,7 +512,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       value={field.value || "NEW"}
                     >
                       <SelectTrigger className={cn(
-                        "h-7 min-w-[140px] text-[10px] font-bold uppercase tracking-wider rounded-sm border-none shadow-sm transition-all",
+                        "h-7 min-w-[200px] text-[10px] font-bold uppercase tracking-wider rounded-sm border-none shadow-sm transition-all",
                         STATUS_COLOR_MAP[field.value || "NEW"],
                         isPendingOperational && "opacity-50 cursor-not-allowed"
                       )}>
