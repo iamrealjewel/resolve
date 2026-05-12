@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ClientLayout } from "./client-layout";
 import { AuthProvider } from "@/components/auth-provider";
+import { LayoutProvider } from "@/components/layout-provider";
 
 export default async function DashboardLayout({
   children,
@@ -17,7 +18,9 @@ export default async function DashboardLayout({
 
   return (
     <AuthProvider session={session}>
-      <ClientLayout>{children}</ClientLayout>
+      <LayoutProvider>
+        <ClientLayout>{children}</ClientLayout>
+      </LayoutProvider>
     </AuthProvider>
   );
 }
