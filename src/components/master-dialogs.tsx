@@ -668,7 +668,7 @@ export function DataTemplateDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-5xl p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-7xl p-0 overflow-hidden border-none rounded-none shadow-2xl">
         <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
@@ -676,7 +676,7 @@ export function DataTemplateDialog({
           </div>
         </DialogHeader>
         <div className="grid gap-6 p-8">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Template Name</Label>
               <Input 
@@ -705,56 +705,54 @@ export function DataTemplateDialog({
               </Button>
             </div>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
               {fields.map((field, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 border rounded-sm bg-muted/5 relative group">
-                  <div className="flex-1 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
-                        <Input 
-                          className="h-8 text-xs bg-background"
-                          value={field.name}
-                          onChange={(e) => updateField(index, { name: e.target.value })}
-                          placeholder="Column Header"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
-                        <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
-                          <SelectTrigger className="h-8 text-xs bg-background">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
-                            <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
-                            <SelectItem value="email" className="text-xs">Email</SelectItem>
-                            <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    {field.type === "list" && (
-                      <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
-                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
-                        <Input 
-                          className="h-8 text-xs bg-background"
-                          value={field.options?.join(", ") || ""}
-                          onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
-                          placeholder="Option 1, Option 2, Option 3"
-                        />
-                      </div>
-                    )}
+                <div key={index} className="flex items-center gap-4 p-3 border rounded-sm bg-muted/5 relative group">
+                  <div className="flex-[2] space-y-1">
+                    <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
+                    <Input 
+                      className="h-8 text-xs bg-background"
+                      value={field.name}
+                      onChange={(e) => updateField(index, { name: e.target.value })}
+                      placeholder="Column Header"
+                    />
                   </div>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    className="size-8 text-muted-foreground hover:text-destructive shrink-0 mt-4"
-                    onClick={() => removeField(index)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
+                    <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
+                      <SelectTrigger className="h-8 text-xs bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
+                        <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
+                        <SelectItem value="email" className="text-xs">Email</SelectItem>
+                        <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {field.type === "list" && (
+                    <div className="flex-[2] space-y-1 animate-in slide-in-from-left-2 duration-200">
+                      <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
+                      <Input 
+                        className="h-8 text-xs bg-background"
+                        value={field.options?.join(", ") || ""}
+                        onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
+                        placeholder="Option 1, Option 2, Option 3"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-none pt-4">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      className="size-8 text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={() => removeField(index)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
               {fields.length === 0 && (
