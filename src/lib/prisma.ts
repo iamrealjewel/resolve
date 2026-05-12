@@ -19,6 +19,13 @@ export const prisma =
     log: ["query"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-// Last regenerated: 2026-05-10T12:19:00
+if (process.env.NODE_ENV !== "production") {
+  const g = global as any;
+  if (g.prisma && !g.prisma.dataTemplate) {
+    console.log("♻️ Stale Prisma instance detected. Force-refreshing client...");
+    delete g.prisma;
+  }
+  globalForPrisma.prisma = prisma;
+}
+// Last regenerated: 2026-05-12T18:40:00
 

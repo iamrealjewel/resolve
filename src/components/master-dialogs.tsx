@@ -33,7 +33,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check } from "lucide-react";
+import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database } from "lucide-react";
 import { toast } from "sonner";
 import { 
   createCategory,

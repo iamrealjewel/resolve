@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { MastersClient } from "./masters-client";
 
 async function getMasterData() {
+  console.log("Prisma keys at runtime:", Object.keys(prisma).filter(k => !k.startsWith("_")));
   const [categories, departments, locations, companies, rules, users, designations, templates] = await Promise.all([
     prisma.incidentCategory.findMany({ 
       include: { 
