@@ -238,7 +238,6 @@ export function MastersClient({ data }: { data: any }) {
           <p className="text-[10px] font-bold text-[#0176D3] uppercase tracking-wider">
             Infrastructure Configuration
           </p>
-          <h1 className="text-lg font-bold text-foreground mt-1">Foundational Entities & Hierarchy</h1>
         </div>
       </div>
 
