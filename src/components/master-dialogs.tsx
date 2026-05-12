@@ -13,11 +13,11 @@ const getTreeList = (items: any[], parentId: string | null = null, depth = 0): a
     ]);
 };
 
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
   DialogDescription,
   DialogTrigger
@@ -25,17 +25,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
+import {
+  Select,
+  SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database } from "lucide-react";
 import { toast } from "sonner";
-import { 
+import {
   createCategory,
   createDepartment,
   createLocation,
@@ -48,17 +48,17 @@ import {
   updateDataTemplate
 } from "@/app/actions/master";
 
-export function CategoryDialog({ 
-  categories, 
+export function CategoryDialog({
+  categories,
   users,
-  item, 
-  defaultParentId 
-}: { 
-  categories: any[], 
+  item,
+  defaultParentId
+}: {
+  categories: any[],
   users: any[],
   templates: any[],
-  item?: any, 
-  defaultParentId?: string 
+  item?: any,
+  defaultParentId?: string
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,8 +96,8 @@ export function CategoryDialog({
     if (!name) return toast.error("Category name is required");
     setIsSubmitting(true);
     try {
-      const payload = { 
-        name, 
+      const payload = {
+        name,
         parentId: parentId === "none" ? null : parentId,
         requiresRaiserApproval,
         requiresResolverApproval,
@@ -129,7 +129,7 @@ export function CategoryDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger 
+      <DialogTrigger
         render={
           item || defaultParentId ? (
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-9 w-9 rounded-none transition-all">
@@ -145,7 +145,7 @@ export function CategoryDialog({
       <DialogContent className="sm:max-w-[700px] border shadow-none bg-background p-0 overflow-hidden rounded-sm">
         <DialogHeader className="p-6 bg-muted/10 border-b flex flex-row items-center gap-4">
           <div className="size-10 bg-[#0176D3] flex items-center justify-center rounded-sm">
-             <Tag className="size-5 text-white" />
+            <Tag className="size-5 text-white" />
           </div>
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Classification" : "New Classification"}</DialogTitle>
@@ -155,8 +155,8 @@ export function CategoryDialog({
         <div className="grid gap-6 p-8">
           <div className="space-y-2">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Classification Name</Label>
-            <Input 
-              className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+            <Input
+              className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Software Deployment"
@@ -173,12 +173,12 @@ export function CategoryDialog({
                 {getTreeList(categories.filter(c => c.id !== item?.id)).map(c => (
                   <SelectItem key={c.id} value={c.id} className="py-3">
                     <div className="flex items-center gap-2">
-                       {Array.from({ length: c.depth }).map((_, i) => (
-                         <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
-                       ))}
-                       <span className={cn(c.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
-                         {c.name}
-                       </span>
+                      {Array.from({ length: c.depth }).map((_, i) => (
+                        <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
+                      ))}
+                      <span className={cn(c.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
+                        {c.name}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -188,7 +188,7 @@ export function CategoryDialog({
 
           <div className="border-t pt-4 mt-2 space-y-4">
             <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Approval Matrix Configuration</Label>
-            
+
             <div className="grid grid-cols-1 gap-4">
               {/* Business Approval Section */}
               <div className="space-y-4 p-4 border rounded-sm bg-muted/5">
@@ -197,17 +197,17 @@ export function CategoryDialog({
                     <Label className="text-xs font-bold uppercase tracking-tight">Business Approval</Label>
                     <p className="text-[10px] text-muted-foreground leading-tight">Wait for reporter's superior or specific approvers.</p>
                   </div>
-                  <Button 
+                  <Button
                     type="button"
-                    variant={requiresRaiserApproval ? "default" : "outline"} 
-                    size="sm" 
+                    variant={requiresRaiserApproval ? "default" : "outline"}
+                    size="sm"
                     className={cn("h-7 text-[10px] px-3 font-bold", requiresRaiserApproval ? "bg-[#0176D3] text-white" : "")}
                     onClick={() => setRequiresRaiserApproval(!requiresRaiserApproval)}
                   >
                     {requiresRaiserApproval ? "ENABLED" : "DISABLED"}
                   </Button>
                 </div>
-                
+
                 {requiresRaiserApproval && (
                   <div className="space-y-2 pt-2 border-t">
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground">Custom Approver Override</Label>
@@ -243,10 +243,10 @@ export function CategoryDialog({
                     <Label className="text-xs font-bold uppercase tracking-tight">Operational Approval</Label>
                     <p className="text-[10px] text-muted-foreground leading-tight">Wait for resolver's admin or specific approvers.</p>
                   </div>
-                  <Button 
+                  <Button
                     type="button"
-                    variant={requiresResolverApproval ? "default" : "outline"} 
-                    size="sm" 
+                    variant={requiresResolverApproval ? "default" : "outline"}
+                    size="sm"
                     className={cn("h-7 text-[10px] px-3 font-bold", requiresResolverApproval ? "bg-[#0176D3] text-white" : "")}
                     onClick={() => setRequiresResolverApproval(!requiresResolverApproval)}
                   >
@@ -303,8 +303,8 @@ export function CategoryDialog({
           </div>
         </div>
         <div className="p-6 border-t bg-muted/10">
-          <Button 
-            onClick={handleAction} 
+          <Button
+            onClick={handleAction}
             disabled={isSubmitting}
             className="w-full h-10 font-semibold text-sm rounded-sm bg-[#0176D3] hover:bg-[#014486] text-white"
           >
@@ -317,15 +317,15 @@ export function CategoryDialog({
   );
 }
 
-export function InfrastructureDialog({ 
-  type, 
-  companies, 
+export function InfrastructureDialog({
+  type,
+  companies,
   departments,
   item,
   defaultParentId
-}: { 
-  type: "department" | "location" | "designation", 
-  companies?: any[], 
+}: {
+  type: "department" | "location" | "designation",
+  companies?: any[],
   departments?: any[],
   item?: any,
   defaultParentId?: string
@@ -355,21 +355,21 @@ export function InfrastructureDialog({
     setIsSubmitting(true);
     try {
       if (item) {
-        if (type === "department") await updateDepartment(item.id, { 
-          name, 
+        if (type === "department") await updateDepartment(item.id, {
+          name,
           parentId: departmentParentId === "none" ? null : departmentParentId
         });
         if (type === "location") await updateLocation(item.id, { name });
         if (type === "designation") await updateDesignation(item.id, { title: name });
         toast.success(`${type} updated successfully`);
       } else {
-        if (type === "department") await createDepartment({ 
-          name, 
+        if (type === "department") await createDepartment({
+          name,
           parentId: departmentParentId === "none" ? null : departmentParentId
         });
         if (type === "location") await createLocation({ name });
         if (type === "designation") await createDesignation({ title: name });
-        
+
         toast.success(`${type} created successfully`);
         setName("");
         setDepartmentParentId("none");
@@ -384,7 +384,7 @@ export function InfrastructureDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger 
+      <DialogTrigger
         render={
           item || defaultParentId ? (
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-9 w-9 rounded-none transition-all">
@@ -400,7 +400,7 @@ export function InfrastructureDialog({
       <DialogContent className="sm:max-w-[700px] border shadow-none bg-background p-0 overflow-hidden rounded-sm">
         <DialogHeader className="p-6 bg-muted/10 border-b flex flex-row items-center gap-4">
           <div className={cn("size-10 flex items-center justify-center rounded-sm", config.color)}>
-             <config.icon className="size-5 text-white" />
+            <config.icon className="size-5 text-white" />
           </div>
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{config.title}</DialogTitle>
@@ -410,14 +410,14 @@ export function InfrastructureDialog({
         <div className="grid gap-6 p-6">
           <div className="space-y-2">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">{config.label}</Label>
-            <Input 
-              className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+            <Input
+              className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="System Label"
             />
           </div>
-          
+
           {type === "department" && (
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Parent Department</Label>
@@ -430,12 +430,12 @@ export function InfrastructureDialog({
                   {getTreeList((departments || []).filter(d => d.id !== item?.id)).map(d => (
                     <SelectItem key={d.id} value={d.id} className="py-3">
                       <div className="flex items-center gap-2">
-                         {Array.from({ length: d.depth }).map((_, i) => (
-                           <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
-                         ))}
-                         <span className={cn(d.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
-                           {d.name}
-                         </span>
+                        {Array.from({ length: d.depth }).map((_, i) => (
+                          <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
+                        ))}
+                        <span className={cn(d.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
+                          {d.name}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -445,8 +445,8 @@ export function InfrastructureDialog({
           )}
         </div>
         <div className="p-8 border-t bg-muted/20">
-          <Button 
-            onClick={handleAction} 
+          <Button
+            onClick={handleAction}
             disabled={isSubmitting}
             className="w-full h-14 font-black uppercase tracking-[0.2em] text-xs rounded-none shadow-xl shadow-primary/20"
           >
@@ -460,16 +460,16 @@ export function InfrastructureDialog({
   );
 }
 
-export function RoutingRuleDialog({ 
-  categories, 
-  departments, 
-  users, 
-  item 
-}: { 
-  categories: any[], 
-  departments: any[], 
-  users: any[], 
-  item?: any 
+export function RoutingRuleDialog({
+  categories,
+  departments,
+  users,
+  item
+}: {
+  categories: any[],
+  departments: any[],
+  users: any[],
+  item?: any
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -487,11 +487,11 @@ export function RoutingRuleDialog({
     if (!categoryId || !departmentId) return toast.error("Classification and Assigned Unit are required");
     setIsSubmitting(true);
     try {
-      const payload = { 
-        categoryId, 
+      const payload = {
+        categoryId,
         departmentId
       };
-      
+
       if (item) {
         await updateRoutingRule(item.id, payload);
         toast.success("Routing protocol updated");
@@ -511,11 +511,11 @@ export function RoutingRuleDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger 
+      <DialogTrigger
         render={
           item ? (
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-9 w-9 rounded-none transition-all">
-               <Edit2 className="size-4" />
+              <Edit2 className="size-4" />
             </Button>
           ) : (
             <Button size="sm" className="font-bold uppercase tracking-wider px-6 h-9 rounded-none shadow-lg shadow-primary/10">
@@ -527,7 +527,7 @@ export function RoutingRuleDialog({
       <DialogContent className="sm:max-w-[700px] border shadow-none bg-background p-0 overflow-hidden rounded-sm">
         <DialogHeader className="p-6 bg-muted/10 border-b flex flex-row items-center gap-4">
           <div className="size-10 bg-[#0176D3] flex items-center justify-center rounded-sm">
-             <Briefcase className="size-5 text-white" />
+            <Briefcase className="size-5 text-white" />
           </div>
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Protocol" : "Workflow Routing"}</DialogTitle>
@@ -546,12 +546,12 @@ export function RoutingRuleDialog({
                   {getTreeList(categories).map(c => (
                     <SelectItem key={c.id} value={c.id} className="py-3 text-sm">
                       <div className="flex items-center gap-2">
-                         {Array.from({ length: c.depth }).map((_, i) => (
-                           <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
-                         ))}
-                         <span className={cn(c.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold")}>
-                           {c.name}
-                         </span>
+                        {Array.from({ length: c.depth }).map((_, i) => (
+                          <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
+                        ))}
+                        <span className={cn(c.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold")}>
+                          {c.name}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -568,12 +568,12 @@ export function RoutingRuleDialog({
                   {getTreeList(departments).map(d => (
                     <SelectItem key={d.id} value={d.id} className="py-3">
                       <div className="flex items-center gap-2">
-                         {Array.from({ length: d.depth }).map((_, i) => (
-                           <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
-                         ))}
-                         <span className={cn(d.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
-                           {d.name}
-                         </span>
+                        {Array.from({ length: d.depth }).map((_, i) => (
+                          <div key={i} className="w-4 border-l h-4 border-muted-foreground/30 -ml-1" />
+                        ))}
+                        <span className={cn(d.depth > 0 ? "text-xs font-medium text-muted-foreground" : "text-sm font-bold uppercase tracking-tighter")}>
+                          {d.name}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -583,8 +583,8 @@ export function RoutingRuleDialog({
           </div>
         </div>
         <div className="p-8 border-t bg-muted/20">
-          <Button 
-            onClick={handleAction} 
+          <Button
+            onClick={handleAction}
             disabled={isSubmitting}
             className="w-full h-14 font-black uppercase tracking-[0.2em] text-xs rounded-none shadow-xl shadow-primary/20"
           >
@@ -598,10 +598,10 @@ export function RoutingRuleDialog({
   );
 }
 
-export function DataTemplateDialog({ 
-  item 
-}: { 
-  item?: any 
+export function DataTemplateDialog({
+  item
+}: {
+  item?: any
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -668,7 +668,7 @@ export function DataTemplateDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-7xl p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-[95vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
         <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
@@ -679,8 +679,8 @@ export function DataTemplateDialog({
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Template Name</Label>
-              <Input 
-                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+              <Input
+                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Supplier Onboarding"
@@ -688,8 +688,8 @@ export function DataTemplateDialog({
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Description (Optional)</Label>
-              <Input 
-                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all" 
+              <Input
+                className="h-10 bg-transparent rounded-sm border font-medium text-sm w-full px-3 focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Briefly describe the purpose"
@@ -710,7 +710,7 @@ export function DataTemplateDialog({
                 <div key={index} className="flex items-center gap-4 p-3 border rounded-sm bg-muted/5 relative group">
                   <div className="flex-[2] space-y-1">
                     <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
-                    <Input 
+                    <Input
                       className="h-8 text-xs bg-background"
                       value={field.name}
                       onChange={(e) => updateField(index, { name: e.target.value })}
@@ -734,7 +734,7 @@ export function DataTemplateDialog({
                   {field.type === "list" && (
                     <div className="flex-[2] space-y-1 animate-in slide-in-from-left-2 duration-200">
                       <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
-                      <Input 
+                      <Input
                         className="h-8 text-xs bg-background"
                         value={field.options?.join(", ") || ""}
                         onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
@@ -743,10 +743,10 @@ export function DataTemplateDialog({
                     </div>
                   )}
                   <div className="flex-none pt-4">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
                       className="size-8 text-muted-foreground hover:text-destructive shrink-0"
                       onClick={() => removeField(index)}
                     >
@@ -764,15 +764,15 @@ export function DataTemplateDialog({
           </div>
         </div>
         <DialogFooter className="p-8 bg-muted/30 border-t gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setIsOpen(false)} 
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
             className="h-10 text-[10px] font-bold tracking-widest px-8 rounded-none border-2"
           >
             CANCEL
           </Button>
-          <Button 
-            onClick={handleAction} 
+          <Button
+            onClick={handleAction}
             disabled={isSubmitting}
             className="h-10 bg-foreground text-background hover:bg-foreground/90 text-[10px] font-bold tracking-widest px-8 rounded-none min-w-[140px]"
           >
