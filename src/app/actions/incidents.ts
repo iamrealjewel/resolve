@@ -354,7 +354,6 @@ export async function createIncident(formData: any) {
       raiserApprover: raiserApproverId ? { connect: { id: raiserApproverId } } : undefined,
       resolverApprover: resolverApproverId ? { connect: { id: resolverApproverId } } : undefined,
       accessList: {
-        set: [], // Clear first
         connect: formData.accessList?.map((id: string) => ({ id })) || []
       },
       templateData: formData.templateData || [],
