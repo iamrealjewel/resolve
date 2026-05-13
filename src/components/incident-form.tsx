@@ -170,6 +170,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
       status: initialData.incident?.status || "NEW",
       assigneeId: initialData.incident?.assigneeId || null,
       accessList: initialData.incident?.accessList?.map((u: any) => u.id) || [],
+      reference: initialData.incident?.reference || "",
     },
   });
 
@@ -328,11 +329,11 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
       // Ensure data is plain objects only
       const cleanTemplateData = templateData ? JSON.parse(JSON.stringify(templateData)) : [];
       const cleanAttachments = attachments ? JSON.parse(JSON.stringify(attachments)) : [];
-      
-      const payload = { 
-        ...values, 
-        attachments: cleanAttachments, 
-        templateData: cleanTemplateData 
+
+      const payload = {
+        ...values,
+        attachments: cleanAttachments,
+        templateData: cleanTemplateData
       };
       if (isCreate) {
         await createIncident(payload);
@@ -519,128 +520,128 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
             <div className="flex items-center gap-8">
               <div className="flex flex-col min-w-max">
                 <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Status</span>
-              {isEdit && !effectiveIsView ? (
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <Select 
-                      disabled={isPendingOperational}
-                      onValueChange={field.onChange} 
-                      value={field.value || "NEW"}
-                    >
-                      <SelectTrigger className={cn(
-                        "h-7 min-w-[200px] text-[10px] font-bold uppercase tracking-wider rounded-sm border-none shadow-sm transition-all",
-                        STATUS_COLOR_MAP[field.value || "NEW"],
-                        isPendingOperational && "opacity-50 cursor-not-allowed"
-                      )}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from(new Set(Object.values(STATUS_MAP))).map((label) => {
-                          const val = Object.entries(STATUS_MAP).find(([_, l]) => l === label)?.[0];
-                          return (
-                            <SelectItem key={val} value={val || ""} className="text-[10px] font-bold uppercase tracking-wider">{label}</SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              ) : (
-                <Badge className={cn("rounded-sm px-2 py-0 text-[10px] font-bold uppercase tracking-wider", STATUS_COLOR_MAP[form.getValues("status") || "NEW"])}>
-                  {STATUS_MAP[form.getValues("status") || "NEW"]}
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex flex-col min-w-max">
-              <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Priority</span>
-              {isEdit && !effectiveIsView ? (
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <Select 
-                      disabled={isPendingOperational} 
-                      onValueChange={field.onChange} 
-                      value={field.value || "MEDIUM"}
-                    >
-                      <SelectTrigger className={cn(
-                        "h-7 min-w-[120px] text-[10px] font-bold uppercase tracking-wider bg-white border-[#0176D3]/20 focus:ring-0 rounded-sm",
-                        isPendingOperational && "opacity-50 cursor-not-allowed"
-                      )}>
-                        <div className="flex items-center gap-1.5">
-                          <div className={cn("size-2 rounded-full", 
-                            field.value === "CRITICAL" ? "bg-red-500" :
-                            field.value === "HIGH" ? "bg-orange-500" :
-                            field.value === "MEDIUM" ? "bg-amber-500" : "bg-blue-500"
-                          )} />
+                {isEdit && !effectiveIsView ? (
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <Select
+                        disabled={isPendingOperational}
+                        onValueChange={field.onChange}
+                        value={field.value || "NEW"}
+                      >
+                        <SelectTrigger className={cn(
+                          "h-7 min-w-[200px] text-[10px] font-bold uppercase tracking-wider rounded-sm border-none shadow-sm transition-all",
+                          STATUS_COLOR_MAP[field.value || "NEW"],
+                          isPendingOperational && "opacity-50 cursor-not-allowed"
+                        )}>
                           <SelectValue />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(PRIORITY_MAP).map(([val, label]) => (
-                          <SelectItem key={val} value={val} className="text-[10px] font-bold uppercase tracking-wider">{label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <div className={cn("size-2 rounded-full", 
-                    form.getValues("priority") === "CRITICAL" ? "bg-red-500" :
-                    form.getValues("priority") === "HIGH" ? "bg-orange-500" :
-                    form.getValues("priority") === "MEDIUM" ? "bg-amber-500" : "bg-blue-500"
-                  )} />
-                  <span className="text-sm font-semibold text-foreground">{PRIORITY_MAP[form.getValues("priority")]}</span>
-                </div>
-              )}
-            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from(new Set(Object.values(STATUS_MAP))).map((label) => {
+                            const val = Object.entries(STATUS_MAP).find(([_, l]) => l === label)?.[0];
+                            return (
+                              <SelectItem key={val} value={val || ""} className="text-[10px] font-bold uppercase tracking-wider">{label}</SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                ) : (
+                  <Badge className={cn("rounded-sm px-2 py-0 text-[10px] font-bold uppercase tracking-wider", STATUS_COLOR_MAP[form.getValues("status") || "NEW"])}>
+                    {STATUS_MAP[form.getValues("status") || "NEW"]}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="flex flex-col min-w-max">
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Priority</span>
+                {isEdit && !effectiveIsView ? (
+                  <FormField
+                    control={form.control}
+                    name="priority"
+                    render={({ field }) => (
+                      <Select
+                        disabled={isPendingOperational}
+                        onValueChange={field.onChange}
+                        value={field.value || "MEDIUM"}
+                      >
+                        <SelectTrigger className={cn(
+                          "h-7 min-w-[120px] text-[10px] font-bold uppercase tracking-wider bg-white border-[#0176D3]/20 focus:ring-0 rounded-sm",
+                          isPendingOperational && "opacity-50 cursor-not-allowed"
+                        )}>
+                          <div className="flex items-center gap-1.5">
+                            <div className={cn("size-2 rounded-full",
+                              field.value === "CRITICAL" ? "bg-red-500" :
+                                field.value === "HIGH" ? "bg-orange-500" :
+                                  field.value === "MEDIUM" ? "bg-amber-500" : "bg-blue-500"
+                            )} />
+                            <SelectValue />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(PRIORITY_MAP).map(([val, label]) => (
+                            <SelectItem key={val} value={val} className="text-[10px] font-bold uppercase tracking-wider">{label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <div className={cn("size-2 rounded-full",
+                      form.getValues("priority") === "CRITICAL" ? "bg-red-500" :
+                        form.getValues("priority") === "HIGH" ? "bg-orange-500" :
+                          form.getValues("priority") === "MEDIUM" ? "bg-amber-500" : "bg-blue-500"
+                    )} />
+                    <span className="text-sm font-semibold text-foreground">{PRIORITY_MAP[form.getValues("priority")]}</span>
+                  </div>
+                )}
+              </div>
 
 
-            <div className="flex flex-col min-w-max">
-              <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Assignee</span>
-              {isEdit && !effectiveIsView ? (
-                <FormField
-                  control={form.control}
-                  name="assigneeId"
-                  render={({ field }) => (
-                    <Select 
-                      disabled={isPendingOperational}
-                      onValueChange={field.onChange} 
-                      value={field.value || "PENDING_ASSIGNMENT"}
-                    >
-                      <SelectTrigger className={cn(
-                        "h-7 min-w-[150px] text-[10px] font-bold uppercase tracking-wider bg-white border-[#0176D3]/20 focus:ring-0 rounded-sm",
-                        isPendingOperational && "opacity-50 cursor-not-allowed"
-                      )}>
-                        <div className="truncate">
-                          {field.value && field.value !== "PENDING_ASSIGNMENT" ? (
-                            resolverUsers.find(u => u.id === field.value)?.name || 
-                            initialData.users.find(u => u.id === field.value)?.name || 
-                            assigneeName || 
-                            field.value
-                          ) : (
-                            "Pending Assignment..."
-                          )}
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PENDING_ASSIGNMENT" className="text-[10px] font-bold uppercase tracking-wider italic">Pending Assignment</SelectItem>
-                        {resolverUsers.map(u => (
-                          <SelectItem key={u.id} value={u.id} className="text-[10px] font-bold uppercase tracking-wider">{u.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              ) : (
-                <span className="text-sm font-medium text-foreground">{assigneeName}</span>
-              )}
+              <div className="flex flex-col min-w-max">
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Assignee</span>
+                {isEdit && !effectiveIsView ? (
+                  <FormField
+                    control={form.control}
+                    name="assigneeId"
+                    render={({ field }) => (
+                      <Select
+                        disabled={isPendingOperational}
+                        onValueChange={field.onChange}
+                        value={field.value || "PENDING_ASSIGNMENT"}
+                      >
+                        <SelectTrigger className={cn(
+                          "h-7 min-w-[150px] text-[10px] font-bold uppercase tracking-wider bg-white border-[#0176D3]/20 focus:ring-0 rounded-sm",
+                          isPendingOperational && "opacity-50 cursor-not-allowed"
+                        )}>
+                          <div className="truncate">
+                            {field.value && field.value !== "PENDING_ASSIGNMENT" ? (
+                              resolverUsers.find(u => u.id === field.value)?.name ||
+                              initialData.users.find(u => u.id === field.value)?.name ||
+                              assigneeName ||
+                              field.value
+                            ) : (
+                              "Pending Assignment..."
+                            )}
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PENDING_ASSIGNMENT" className="text-[10px] font-bold uppercase tracking-wider italic">Pending Assignment</SelectItem>
+                          {resolverUsers.map(u => (
+                            <SelectItem key={u.id} value={u.id} className="text-[10px] font-bold uppercase tracking-wider">{u.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-foreground">{assigneeName}</span>
+                )}
+              </div>
             </div>
-          </div>
 
             <div className="flex flex-col min-w-max ml-auto text-right">
               <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Created Date</span>
@@ -729,15 +730,15 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                           <div className="flex items-center justify-between">
                             <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">CATEGORY</FormLabel>
                             {template && (
-                              <Button 
+                              <Button
                                 type="button"
-                                variant="outline" 
+                                variant="outline"
                                 size="sm"
                                 onClick={() => setTemplateDialogOpen(true)}
                                 className={cn(
                                   "h-7 text-[10px] font-bold gap-2 px-3 rounded-none uppercase tracking-widest border-2 transition-all shadow-sm",
-                                  templateData.length > 0 
-                                    ? "text-green-700 border-green-200 bg-green-50 hover:bg-green-100" 
+                                  templateData.length > 0
+                                    ? "text-green-700 border-green-200 bg-green-50 hover:bg-green-100"
                                     : "text-[#0176D3] border-[#0176D3]/20 bg-[#0176D3]/5 hover:bg-[#0176D3]/10"
                                 )}
                               >
@@ -780,10 +781,10 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                         <FormItem className="space-y-1">
                           <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">External Reference</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Optional Ref / PO #"
+                            <Input
+                              placeholder="PO/CSP/SO/PR etc."
                               readOnly={effectiveIsView}
-                              {...field} 
+                              {...field}
                               value={field.value || ""}
                               className={cn(
                                 "h-8 bg-transparent px-0 border-b border-t-0 border-x-0 rounded-none focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all text-[13px] font-semibold",
@@ -1063,7 +1064,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
       </div>
 
       {template && (
-        <TemplateGridDialog 
+        <TemplateGridDialog
           isOpen={templateDialogOpen}
           setIsOpen={setTemplateDialogOpen}
           template={template}
