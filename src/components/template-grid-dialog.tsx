@@ -65,20 +65,28 @@ export function TemplateGridDialog({
   isOpen: boolean,
   setIsOpen: (open: boolean) => void
 }) {
-  const [rows, setRows] = useState<any[]>(data.length > 0 ? data : [{}]);
+  const createEmptyRow = () => {
+    const row: any = {};
+    template.fields.forEach(f => {
+      row[f.name] = f.type === "boolean" ? false : "";
+    });
+    return row;
+  };
+
+  const [rows, setRows] = useState<any[]>(data.length > 0 ? data : [createEmptyRow()]);
   
   useEffect(() => {
     if (isOpen && data.length > 0) {
       setRows(data);
-    } else if (isOpen && rows.length === 0) {
-      setRows([{}]);
+    } else if (isOpen && (rows.length === 0 || (rows.length === 1 && Object.keys(rows[0]).length === 0))) {
+      setRows([createEmptyRow()]);
     }
-  }, [isOpen, data]);
+  }, [isOpen, data, template]);
 
-  const addRow = () => setRows([...rows, {}]);
+  const addRow = () => setRows([...rows, createEmptyRow()]);
   const removeRow = (index: number) => {
     const newRows = rows.filter((_, i) => i !== index);
-    setRows(newRows.length === 0 ? [{}] : newRows);
+    setRows(newRows.length === 0 ? [createEmptyRow()] : newRows);
   };
 
   const updateCell = (rowIndex: number, fieldName: string, value: any) => {
@@ -141,7 +149,7 @@ export function TemplateGridDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[95vw] w-[1200px] p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-[98vw] w-[1400px] min-h-[500px] p-0 overflow-hidden border-none rounded-none shadow-2xl flex flex-col">
         <DialogHeader className="p-6 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-1">
@@ -172,8 +180,8 @@ export function TemplateGridDialog({
           </div>
         </DialogHeader>
 
-        <div className="p-0 overflow-auto max-h-[70vh]">
-          <Table className="border-collapse">
+        <div className="flex-1 overflow-auto max-h-[75vh] border-b">
+          <Table className="w-full border-collapse">
             <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
               <TableRow className="hover:bg-transparent border-b">
                 <TableHead className="w-12 text-center text-[10px] font-bold uppercase p-0 h-10">#</TableHead>
