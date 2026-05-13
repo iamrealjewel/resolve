@@ -59,7 +59,8 @@ export function TemplateGridDialog({
   data,
   onSave,
   isOpen,
-  setIsOpen
+  setIsOpen,
+  isReadOnly
 }: { 
   template: Template,
   data: any[],
