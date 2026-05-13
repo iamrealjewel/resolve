@@ -79,7 +79,38 @@ export function ClientLayout({
             </main>
           </SidebarInset>
         </div>
+        <Footer />
       </div>
     </SidebarProvider>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="w-full bg-white dark:bg-[#1A1A1A] border-t py-4 px-6 mt-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+            © {new Date().getFullYear()} QTrack Incident Management
+          </span>
+          <Separator orientation="vertical" className="h-3 hidden md:block" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#0176D3]">
+            v2.4.0-Operational
+          </span>
+        </div>
+        <div className="flex items-center gap-6">
+          <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-[#0176D3] transition-colors">
+            Help Center
+          </Link>
+          <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-[#0176D3] transition-colors">
+            Terms of Service
+          </Link>
+          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+            <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-700">System Online</span>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
