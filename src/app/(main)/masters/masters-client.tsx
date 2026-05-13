@@ -118,9 +118,9 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                       {category.approvers.map((ap: any) => ap.user && (
                         <div key={ap.id} className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/40 border border-muted-foreground/10 rounded-full" title={`${ap.type === "RAISER" ? "Business" : "Operational"} Approver Override: ${ap.user.name}`}>
                           <Users className="size-2.5 text-muted-foreground" />
-                          <span className="text-[9px] font-bold text-foreground/70">{ap.user.name}</span>
+                          <span className="text-[10px] font-bold text-foreground/70">{ap.user.name}</span>
                           <span className={cn(
-                            "text-[7px] font-black uppercase px-1 rounded-[1px]",
+                            "text-[8px] font-black uppercase px-1 rounded-[1px]",
                             ap.type === "RAISER" ? "bg-amber-600 text-white" : "bg-orange-600 text-white"
                           )}>
                             {ap.type === "RAISER" ? "BA" : "OA"}
