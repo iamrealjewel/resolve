@@ -8,295 +8,231 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { 
+  AlertCircle, 
+  Clock, 
+  Activity,
+  ShieldAlert,
+  ArrowRight,
   Zap,
-  History,
   TrendingUp,
-  TrendingDown,
-  Users,
-  Clock,
+  BarChart3,
   CheckCircle2,
-  AlertCircle,
-  MoreHorizontal,
-  ChevronRight,
-  Activity
+  Inbox,
+  AlertTriangle,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { format, subDays, startOfDay } from "date-fns";
+import { format } from "date-fns";
 
 export default async function DashboardPage() {
   const session = await checkAuth();
   const user = session.user as any;
   const accessFilter = getIncidentAccessFilter(user);
 
-  // FETCH DATA
   const [
-    totalIncidents,
-    resolvedIncidents,
-    openIncidents,
-    allIncidents,
-    resolvers,
-    last7DaysData
+    totalCount,
+    newCount,
+    assignedCount,
+    wipCount,
+    resolvedCount,
+    closedCount,
+    rejectedCount,
+    criticalCount,
+    highCount,
+    mediumCount,
+    lowCount,
+    recentLogs
   ] = await Promise.all([
     prisma.incident.count({ where: accessFilter }),
-    prisma.incident.count({ where: { ...accessFilter, status: { in: ["RESOLVED", "CLOSED"] } } }),
-    prisma.incident.count({ where: { ...accessFilter, status: { notIn: ["RESOLVED", "CLOSED", "REJECTED"] } } }),
-    prisma.incident.findMany({
-      where: accessFilter,
-      include: { assignee: true, reporter: true },
+    prisma.incident.count({ where: { ...accessFilter, status: "NEW" } }),
+    prisma.incident.count({ where: { ...accessFilter, status: "ASSIGNED" } }),
+    prisma.incident.count({ where: { ...accessFilter, status: "IN_PROGRESS" } }),
+    prisma.incident.count({ where: { ...accessFilter, status: "RESOLVED" } }),
+    prisma.incident.count({ where: { ...accessFilter, status: "CLOSED" } }),
+    prisma.incident.count({ where: { ...accessFilter, status: "REJECTED" } }),
+    prisma.incident.count({ where: { ...accessFilter, priority: "CRITICAL" } }),
+    prisma.incident.count({ where: { ...accessFilter, priority: "HIGH" } }),
+    prisma.incident.count({ where: { ...accessFilter, priority: "MEDIUM" } }),
+    prisma.incident.count({ where: { ...accessFilter, priority: "LOW" } }),
+    prisma.incidentLog.findMany({
+      where: getLogAccessFilter(user),
+      include: { user: true, incident: true },
       orderBy: { createdAt: "desc" },
-      take: 10
-    }),
-    prisma.user.findMany({
-      where: { role: "RESOLVER", companyId: user.companyId },
-      include: {
-        _count: { 
-          select: { 
-            assignedIncidents: { where: { status: { in: ["RESOLVED", "CLOSED"] } } } 
-          } 
-        }
-      },
-      take: 5
-    }),
-    Promise.all(
-      Array.from({ length: 7 }).map((_, i) => {
-        const date = startOfDay(subDays(new Date(), 6 - i));
-        return prisma.incident.count({
-          where: {
-            ...accessFilter,
-            createdAt: {
-              gte: date,
-              lte: new Date(date.getTime() + 24 * 60 * 60 * 1000)
-            }
-          }
-        });
-      })
-    )
+      take: 8
+    })
   ]);
 
-  // CALCULATE MTTR (Mocking a more realistic calc based on resolved incidents if we had resolvedAt)
-  // For now, we'll show "N/A" if no resolved incidents, or a placeholder based on real volume
-  const mttr = resolvedIncidents > 0 ? "4.8" : "0.0";
-  
-  // ANALYST PERFORMANCE (Deriving more from real counts)
-  const analystStats = resolvers.map(r => ({
-    name: r.name,
-    resolved: r._count.assignedIncidents,
-    efficiency: r._count.assignedIncidents > 0 ? "92%" : "0%",
-  })).sort((a, b) => b.resolved - a.resolved);
-
-  const resolutionRate = totalIncidents > 0 ? Math.round((resolvedIncidents / totalIncidents) * 100) : 0;
+  const activeCount = newCount + assignedCount + wipCount;
+  const efficiency = totalCount > 0 ? Math.round(((resolvedCount + closedCount) / totalCount) * 100) : 100;
 
   return (
-    <div className="space-y-8 pb-20 px-6 bg-[#F8F9FB] min-h-screen">
+    <div className="space-y-6 pb-20 px-6">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-6 border-b">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Operational Overview</h1>
-          <p className="text-sm text-muted-foreground font-medium max-w-2xl">
-            Live system performance metrics and incident management lifecycle for {user.name}.
+          <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Zap className="size-5 text-[#0176D3]" />
+            Command Center
+          </h2>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
+            Operational Intelligence • {user.name}
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href="/audit-trail">
-            <Button variant="outline" className="h-10 font-bold text-xs uppercase tracking-widest px-6 border-slate-200">
-              <History className="size-4 mr-2" /> System Logs
+            <Button variant="outline" size="sm" className="h-9 font-bold text-[10px] uppercase tracking-wider px-4 gap-2">
+              <History className="size-3.5" /> Full Audit
             </Button>
           </Link>
           <Link href="/incidents/create">
-            <Button className="h-10 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-xs uppercase tracking-widest px-8 shadow-sm">
-              <Zap className="size-4 mr-2" /> Log Incident
+            <Button size="sm" className="h-9 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-[10px] uppercase tracking-wider px-6 shadow-lg shadow-blue-500/20">
+              New Incident
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* TOP KPI ROW */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* TOTAL TICKETS */}
-        <Card className="border-none shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Tickets</p>
-                <h3 className="text-3xl font-bold tabular-nums">{totalIncidents}</h3>
-              </div>
-              <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs">
-                <Activity className="size-3" /> All Time
-              </div>
+      {/* CORE KPI GRID (COMPACT & COLORED) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
+        {[
+          { label: "Active", value: activeCount, icon: Inbox, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+          { label: "Critical", value: criticalCount, icon: AlertCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+          { label: "WIP", value: wipCount, icon: Activity, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
+          { label: "Resolved", value: resolvedCount, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+          { label: "Efficiency", value: `${efficiency}%`, icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
+        ].map((kpi, idx) => (
+          <div key={idx} className={cn("p-4 border rounded-sm flex items-center gap-4 transition-all hover:shadow-md hover:-translate-y-0.5", kpi.bg, kpi.border)}>
+            <div className={cn("p-2 rounded-sm bg-white/80 shadow-sm", kpi.color)}>
+              <kpi.icon className="size-5" />
             </div>
-            <div className="h-16 flex items-end gap-1">
-              {last7DaysData.map((v, i) => (
-                <div 
-                  key={i} 
-                  className="flex-1 bg-[#0176D3]/10 hover:bg-[#0176D3]/20 transition-colors rounded-t-sm" 
-                  style={{ height: `${totalIncidents > 0 ? (v / Math.max(...last7DaysData, 1)) * 100 : 0}%` }}
-                />
-              ))}
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">{kpi.label}</span>
+              <span className="text-xl font-bold tracking-tight">{kpi.value}</span>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* AVERAGE RESOLUTION TIME */}
-        <Card className="border-none shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Avg. Resolution</p>
-                <h3 className="text-3xl font-bold tabular-nums">{mttr}h</h3>
-              </div>
-              <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
-                <Clock className="size-3" /> Mean Time
-              </div>
-            </div>
-            <div className="relative h-20 flex flex-col items-center justify-end overflow-hidden">
-               <svg viewBox="0 0 100 50" className="w-full max-w-[120px]">
-                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" strokeWidth="8" strokeLinecap="round" />
-                  <path d="M 10 50 A 40 40 0 0 1 70 20" fill="none" stroke="#0176D3" strokeWidth="8" strokeLinecap="round" />
-               </svg>
-               <div className="absolute bottom-0 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Efficiency Gauge</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* SUCCESS RATE */}
-        <Card className="border-none shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Success Rate</p>
-                <h3 className="text-3xl font-bold tabular-nums">{resolutionRate}%</h3>
-              </div>
-              <div className="flex items-center gap-1 text-[#0176D3] font-bold text-xs">
-                <CheckCircle2 className="size-3" /> Closure
-              </div>
-            </div>
-            <div className="flex items-center gap-6">
-               <div className="relative size-16">
-                  <svg viewBox="0 0 36 36" className="size-full">
-                    <circle cx="18" cy="18" r="16" fill="none" stroke="#E2E8F0" strokeWidth="4" />
-                    <circle cx="18" cy="18" r="16" fill="none" stroke="#0176D3" strokeWidth="4" strokeDasharray={`${resolutionRate}, 100`} />
-                  </svg>
-               </div>
-               <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight">
-                    <div className="size-2 rounded-full bg-[#0176D3]" /> 
-                    <span>{resolvedIncidents} Closed</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight">
-                    <div className="size-2 rounded-full bg-slate-200" /> 
-                    <span>{openIncidents} Pending</span>
-                  </div>
-               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ACTIVE WORKLOAD */}
-        <Card className="border-none shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Workload</p>
-                <h3 className="text-3xl font-bold tabular-nums">{openIncidents}</h3>
-              </div>
-              <div className="flex items-center gap-1 text-rose-500 font-bold text-xs">
-                <AlertCircle className="size-3" /> In Progress
-              </div>
-            </div>
-            <div className="h-16 w-full flex items-center justify-center">
-              <svg viewBox="0 0 200 40" className="w-full overflow-visible">
-                <path d="M 0 30 Q 50 10 100 25 T 200 15" fill="none" stroke="#0176D3" strokeWidth="2" strokeDasharray="4 2" />
-              </svg>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        ))}
       </div>
 
-      {/* MIDDLE SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* PERFORMANCE BREAKDOWN */}
-        <Card className="border-none shadow-sm rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between p-6">
-            <CardTitle className="text-lg font-bold">Performance Breakdown</CardTitle>
-            <Link href="/reports">
-              <Button variant="ghost" size="sm" className="text-xs font-bold text-[#0176D3]">Full Analytics <ChevronRight className="size-3 ml-1" /></Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b pb-3">
-                <span>Resolver Name</span>
-                <span className="text-center">Tickets Closed</span>
-                <span className="text-right">Success Ratio</span>
-              </div>
-              {analystStats.map((a, i) => (
-                <div key={i} className="grid grid-cols-3 items-center group cursor-pointer py-1">
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 group-hover:bg-[#0176D3]/10 group-hover:text-[#0176D3] transition-colors uppercase">
-                      {a.name?.substring(0, 2) || "NA"}
-                    </div>
-                    <span className="text-sm font-bold text-foreground">{a.name}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* LEFT SECTION: STATUS & PRIORITY */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="border shadow-none rounded-sm">
+            <CardHeader className="p-4 border-b bg-muted/5 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 className="size-4 text-[#0176D3]" />
+                Status Distribution
+              </CardTitle>
+              <Badge variant="outline" className="text-[9px] font-bold px-1.5 py-0 rounded-none uppercase">{totalCount} Total</Badge>
+            </CardHeader>
+            <CardContent className="p-4 space-y-5">
+              {[
+                { label: "New", count: newCount, color: "bg-blue-500" },
+                { label: "Assigned", count: assignedCount, color: "bg-indigo-500" },
+                { label: "In Progress", count: wipCount, color: "bg-amber-500" },
+                { label: "Resolved", count: resolvedCount, color: "bg-emerald-500" },
+                { label: "Rejected", count: rejectedCount, color: "bg-red-500" },
+              ].map((s) => (
+                <div key={s.label} className="space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-muted-foreground">{s.label}</span>
+                    <span className="text-foreground">{s.count}</span>
                   </div>
-                  <span className="text-center text-sm font-medium">{a.resolved}</span>
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="h-1.5 w-16 bg-muted rounded-full overflow-hidden">
-                       <div className="h-full bg-[#0176D3]" style={{ width: a.efficiency }} />
-                    </div>
-                    <span className="text-xs font-black">{a.efficiency}</span>
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className={cn("h-full rounded-full transition-all duration-1000", s.color)} 
+                      style={{ width: `${totalCount > 0 ? (s.count / totalCount) * 100 : 0}%` }} 
+                    />
                   </div>
                 </div>
               ))}
-              {analystStats.length === 0 && (
-                 <div className="text-center py-10 text-muted-foreground italic text-sm">No operational data within this scope</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* RECENT ACTIVITIES */}
-        <Card className="border-none shadow-sm rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between p-6">
-            <CardTitle className="text-lg font-bold">Recent Activities</CardTitle>
-            <Badge variant="outline" className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest bg-slate-50 border-slate-200">Latest 10 Entries</Badge>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="space-y-6">
-               <div className="grid grid-cols-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b pb-3">
-                <span>Ticket ID</span>
-                <span>Priority</span>
-                <span>Current Status</span>
-                <span className="text-right">Action</span>
+          <Card className="border shadow-none rounded-sm">
+            <CardHeader className="p-4 border-b bg-muted/5">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <AlertTriangle className="size-4 text-red-500" />
+                Priority Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Critical", count: criticalCount, color: "text-red-600 bg-red-50 border-red-100" },
+                  { label: "High", count: highCount, color: "text-orange-600 bg-orange-50 border-orange-100" },
+                  { label: "Medium", count: mediumCount, color: "text-amber-600 bg-amber-50 border-amber-100" },
+                  { label: "Low", count: lowCount, color: "text-blue-600 bg-blue-50 border-blue-100" },
+                ].map((p) => (
+                  <div key={p.label} className={cn("p-3 border rounded-sm text-center", p.color)}>
+                    <div className="text-lg font-bold">{p.count}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-wider">{p.label}</div>
+                  </div>
+                ))}
               </div>
-              {allIncidents.map((inc) => (
-                 <div key={inc.id} className="grid grid-cols-4 items-center group">
-                    <Link href={`/incidents/${inc.id}`} className="text-xs font-black text-[#0176D3] hover:underline uppercase tracking-tight">
-                      #{inc.ticketId}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RIGHT SECTION: ACTIVITY FEED */}
+        <Card className="lg:col-span-8 border shadow-none rounded-sm flex flex-col">
+          <CardHeader className="p-4 border-b bg-muted/5 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+              <Activity className="size-4 text-[#0176D3]" />
+              Operational Activity
+            </CardTitle>
+            <Link href="/audit-trail" className="text-[10px] font-bold text-[#0176D3] hover:underline uppercase tracking-wider">
+              View All Activity
+            </Link>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 overflow-y-auto">
+            <div className="divide-y">
+              {recentLogs.map((log) => {
+                if (!log || !log.incident || !log.user) return null;
+                const userName = log.user.name || "System";
+                const actionLabel = getActionLabel(log.action);
+                const contentSnippet = (log.content || "").replace(/<[^>]*>?/gm, ' ');
+
+                return (
+                  <div key={log.id} className="p-4 flex items-center justify-between hover:bg-muted/5 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className="size-10 rounded-full bg-slate-50 border flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:border-[#0176D3]/30 group-hover:text-[#0176D3] transition-all">
+                        {userName.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex flex-col gap-0.5 max-w-[500px]">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-black text-[#0176D3] uppercase tracking-tighter">
+                            {log.incident.ticketId}
+                          </span>
+                          <span className="text-muted-foreground/30">•</span>
+                          <span className="text-xs font-bold text-foreground">
+                            {userName} <span className="font-medium text-muted-foreground">{actionLabel}</span>
+                          </span>
+                        </div>
+                        <div 
+                          className="text-[11px] text-muted-foreground line-clamp-1 italic font-medium"
+                          dangerouslySetInnerHTML={{ __html: contentSnippet }}
+                        />
+                        <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">
+                          {format(new Date(log.createdAt), "HH:mm • MMM d, yyyy")}
+                        </div>
+                      </div>
+                    </div>
+                    <Link href={`/incidents/${log.incidentId}`}>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-[#0176D3]/10 hover:text-[#0176D3] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ArrowRight className="size-4" />
+                      </Button>
                     </Link>
-                    <div>
-                      <Badge variant="outline" className={cn(
-                        "text-[9px] font-black rounded-none uppercase px-1.5 h-5",
-                        inc.priority === "CRITICAL" ? "bg-rose-50 text-rose-600 border-rose-200" :
-                        inc.priority === "HIGH" ? "bg-orange-50 text-orange-600 border-orange-200" :
-                        "bg-blue-50 text-blue-600 border-blue-200"
-                      )}>
-                        {inc.priority}
-                      </Badge>
-                    </div>
-                    <div className="text-[10px] font-bold text-foreground capitalize">{inc.status.replace(/_/g, ' ').toLowerCase()}</div>
-                    <div className="flex justify-end">
-                       <Link href={`/incidents/${inc.id}`}>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-[#0176D3]/10 hover:text-[#0176D3]">
-                          <MoreHorizontal className="size-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                 </div>
-              ))}
-              {allIncidents.length === 0 && (
-                 <div className="text-center py-10 text-muted-foreground italic text-sm">No recent activity detected</div>
+                  </div>
+                );
+              })}
+              {recentLogs.length === 0 && (
+                <div className="py-20 text-center space-y-3">
+                  <History className="size-12 text-muted-foreground/10 mx-auto" />
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">No recent activity detected</p>
+                </div>
               )}
             </div>
           </CardContent>
@@ -305,18 +241,6 @@ export default async function DashboardPage() {
     </div>
   );
 }
-
-const Badge = ({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) => (
-  <span className={cn(
-    "inline-flex items-center border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-    variant === "outline" ? "text-foreground border-input bg-background" : 
-    variant === "secondary" ? "bg-secondary text-secondary-foreground border-transparent" :
-    "bg-primary text-primary-foreground border-transparent",
-    className
-  )}>
-    {children}
-  </span>
-);
 
 function getActionLabel(action: string) {
   if (!action) return "performed an action";
@@ -331,3 +255,14 @@ function getActionLabel(action: string) {
   };
   return labels[action] || action.toLowerCase().replace("_", " ");
 }
+
+const Badge = ({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) => (
+  <span className={cn(
+    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+    variant === "outline" ? "text-foreground border border-input bg-background" : "bg-primary text-primary-foreground",
+    className
+  )}>
+    {children}
+  </span>
+);
+
