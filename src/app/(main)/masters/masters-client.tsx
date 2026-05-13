@@ -51,7 +51,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
           depth > 0 && "bg-muted/5"
         )}
       >
-        <div className="flex items-center gap-2 py-2 pr-6">
+        <div className="flex items-center gap-2 py-0.5 pr-6">
           {Array.from({ length: depth }).map((_, i) => (
             <div key={i} className="absolute h-full border-l border-muted-foreground/20 border-dashed" style={{ left: `${i * 24 + 12}px` }} />
           ))}
