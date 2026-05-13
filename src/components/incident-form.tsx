@@ -16,7 +16,7 @@ import {
   Loader2, Send, Search, MessageSquare, History, User, Building2, MapPin,
   Tag, Clock, UserPlus, ShieldCheck, Paperclip, FileText, FileIcon,
   ImageIcon, X, Download, ChevronRight, ChevronDown, ChevronLeft, Edit, Users, AlertCircle,
-  FilePenLine, MessageSquarePlus, Plus, Check, ShieldAlert, FileSpreadsheet
+  FilePenLine, MessageSquarePlus, Plus, Check, CheckCircle2, ShieldAlert, FileSpreadsheet
 } from "lucide-react";
 
 import { TemplateGridDialog } from "./template-grid-dialog";
@@ -765,6 +765,48 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                               </div>
                             </PopoverContent>
                           </Popover>
+
+                          {template && (
+                            <div className={cn(
+                              "mt-3 p-3 border rounded-sm flex items-start gap-3 transition-all",
+                              templateData.length > 0 ? "bg-green-50 border-green-200" : "bg-[#0176D3]/5 border-[#0176D3]/20"
+                            )}>
+                              <div className={cn(
+                                "p-1.5 rounded-sm flex-shrink-0",
+                                templateData.length > 0 ? "bg-green-100 text-green-700" : "bg-[#0176D3]/10 text-[#0176D3]"
+                              )}>
+                                {templateData.length > 0 ? <CheckCircle2 className="size-4" /> : <AlertCircle className="size-4" />}
+                              </div>
+                              <div className="flex-1 space-y-1">
+                                <p className={cn(
+                                  "text-[11px] font-bold uppercase tracking-tight",
+                                  templateData.length > 0 ? "text-green-800" : "text-[#0176D3]"
+                                )}>
+                                  {templateData.length > 0 ? "Worksheet Captured" : "Structured Data Required"}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground leading-tight">
+                                  {templateData.length > 0 
+                                    ? `Successfully captured ${templateData.length} record(s) for the ${template.name} schema.`
+                                    : `This classification requires a ${template.name} worksheet to be completed before submission.`
+                                  }
+                                </p>
+                                {!effectiveIsView && (
+                                  <Button 
+                                    type="button"
+                                    variant="link" 
+                                    size="sm" 
+                                    onClick={() => setTemplateDialogOpen(true)}
+                                    className={cn(
+                                      "h-auto p-0 text-[10px] font-bold uppercase tracking-widest underline-offset-4 mt-1",
+                                      templateData.length > 0 ? "text-green-700" : "text-[#0176D3]"
+                                    )}
+                                  >
+                                    {templateData.length > 0 ? "Review/Edit Data" : "Open Worksheet Now"}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </FormItem>
                       )}
                     />
