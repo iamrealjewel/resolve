@@ -87,14 +87,27 @@ export function IncidentsTable({
     start: "",
     end: "",
   });
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [filters, setFilters] = useState({
-    companyId: "all",
-    locationId: "all",
-    categoryId: "all",
-    priority: "all",
-    status: "all",
+    companyIds: [] as string[],
+    locationIds: [] as string[],
+    categoryIds: [] as string[],
+    priorities: [] as string[],
+    statuses: [] as string[],
   });
+
+  const toggleFilter = (key: keyof typeof filters, value: string) => {
+    setFilters(prev => {
+      const current = prev[key] as string[];
+      if (current.includes(value)) {
+        return { ...prev, [key]: current.filter(v => v !== value) };
+      }
+      return { ...prev, [key]: [...current, value] };
+    });
+    setCurrentPage(1);
+  };
 
   const filteredIncidents = incidents.filter((incident) => {
     const matchesSearch = 
@@ -103,17 +116,15 @@ export function IncidentsTable({
       incident.company.name.toLowerCase().includes(search.toLowerCase()) ||
       incident.reporter.name.toLowerCase().includes(search.toLowerCase());
     
-    const matchesCompany = filters.companyId === "all" || incident.companyId === filters.companyId;
-    const matchesLocation = filters.locationId === "all" || incident.locationId === filters.locationId;
-    const matchesCategory = filters.categoryId === "all" || incident.categoryId === filters.categoryId;
-    const matchesPriority = filters.priority === "all" || incident.priority === filters.priority;
-    const matchesStatus = filters.status === "all" || incident.status === filters.status;
+    const matchesCompany = filters.companyIds.length === 0 || filters.companyIds.includes(incident.companyId);
+    const matchesLocation = filters.locationIds.length === 0 || filters.locationIds.includes(incident.locationId);
+    const matchesCategory = filters.categoryIds.length === 0 || filters.categoryIds.includes(incident.categoryId);
+    const matchesPriority = filters.priorities.length === 0 || filters.priorities.includes(incident.priority);
+    const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(incident.status);
     
-    // Closed logic: Hide closed unless showClosed is true OR status filter is explicitly CLOSED/RESOLVED
     const isClosed = incident.status === "CLOSED" || incident.status === "RESOLVED";
-    const matchesClosed = showClosed || !isClosed || filters.status === "CLOSED" || filters.status === "RESOLVED";
+    const matchesClosed = showClosed || !isClosed || filters.statuses.some(s => s === "CLOSED" || s === "RESOLVED");
 
-    // Date range logic
     const incidentDate = new Date(incident.createdAt);
     const matchesStartDate = !dateFilter.start || incidentDate >= new Date(dateFilter.start);
     const matchesEndDate = !dateFilter.end || incidentDate <= new Date(dateFilter.end + "T23:59:59");
@@ -121,17 +132,24 @@ export function IncidentsTable({
     return matchesSearch && matchesCompany && matchesLocation && matchesCategory && matchesPriority && matchesStatus && matchesClosed && matchesStartDate && matchesEndDate;
   });
 
+  const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage);
+  const paginatedIncidents = filteredIncidents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const clearFilters = () => {
     setFilters({
-      companyId: "all",
-      locationId: "all",
-      categoryId: "all",
-      priority: "all",
-      status: "all",
+      companyIds: [],
+      locationIds: [],
+      categoryIds: [],
+      priorities: [],
+      statuses: [],
     });
     setSearch("");
     setShowClosed(false);
     setDateFilter({ start: "", end: "" });
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = 
@@ -139,161 +157,77 @@ export function IncidentsTable({
     showClosed !== false ||
     dateFilter.start !== "" ||
     dateFilter.end !== "" ||
-    Object.values(filters).some(v => v !== "all");
+    Object.values(filters).some(v => v.length > 0);
 
   return (
     <div className="space-y-6">
-      {/* ADVANCED FILTER PANEL */}
-      <div className="bg-white border p-5 space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b">
-          <div className="flex items-center gap-2">
-            <Filter className="size-4 text-[#0176D3]" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Operational Filters</h3>
-          </div>
-          {hasActiveFilters && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearFilters}
-              className="h-8 text-xs font-bold text-[#0176D3] hover:bg-blue-50 px-3 uppercase tracking-wider"
-            >
-              <X className="mr-1.5 size-3.5" /> Reset All
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap gap-x-6 gap-y-4">
+      {/* MINIMAL TOP FILTER PANEL */}
+      <div className="bg-white border p-6">
+        <div className="flex flex-wrap items-end gap-6">
           {/* SEARCH FIELD */}
-          <div className="w-full lg:w-72 flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global Search</label>
+          <div className="flex-1 min-w-[300px] flex flex-col gap-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Live Search</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
               <input 
                 type="text" 
-                placeholder="Ticket ID, Title, User..." 
+                placeholder="Search Ticket ID, Title, User or Company..." 
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-9 pl-9 pr-4 bg-background border rounded-none text-xs font-bold focus:outline-none focus:border-[#0176D3] transition-all placeholder:font-medium"
+                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                className="w-full h-10 pl-10 pr-4 bg-background border rounded-none text-xs font-bold focus:outline-none focus:border-[#0176D3] transition-all placeholder:font-medium placeholder:text-muted-foreground/40"
               />
             </div>
           </div>
 
-          {/* ORGANIZATIONAL SCOPE */}
-          <div className="flex items-end gap-3 flex-1 min-w-[300px]">
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Company</label>
-              <Select value={filters.companyId} onValueChange={(v) => setFilters({...filters, companyId: v})}>
-                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
-                  <SelectValue placeholder="All Companies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" label="All Companies">All Companies</SelectItem>
-                  {companies.map(c => (
-                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Location</label>
-              <Select value={filters.locationId} onValueChange={(v) => setFilters({...filters, locationId: v})}>
-                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
-                  <SelectValue placeholder="All Locations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" label="All Locations">All Locations</SelectItem>
-                  {locations.map(l => (
-                    <SelectItem key={l.id} value={l.id} label={l.name}>{l.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* DATE RANGE */}
+          <div className="w-[450px] flex flex-col gap-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Timeline Discovery</label>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 h-10">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
+                <input 
+                  type="date" 
+                  value={dateFilter.start}
+                  onChange={(e) => { setDateFilter({...dateFilter, start: e.target.value}); setCurrentPage(1); }}
+                  className="w-full h-full pl-10 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
+                />
+              </div>
+              <div className="text-muted-foreground text-[8px] font-black tracking-tighter px-1">TO</div>
+              <div className="relative flex-1 h-10">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
+                <input 
+                  type="date" 
+                  value={dateFilter.end}
+                  onChange={(e) => { setDateFilter({...dateFilter, end: e.target.value}); setCurrentPage(1); }}
+                  className="w-full h-full pl-10 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
+                />
+              </div>
             </div>
           </div>
 
-          {/* CLASSIFICATION */}
-          <div className="flex items-end gap-3 flex-1 min-w-[300px]">
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Category</label>
-              <Select value={filters.categoryId} onValueChange={(v) => setFilters({...filters, categoryId: v})}>
-                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" label="All Categories">All Categories</SelectItem>
-                  {categories.map(c => (
-                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Priority</label>
-              <Select value={filters.priority} onValueChange={(v) => setFilters({...filters, priority: v})}>
-                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
-                  <SelectValue placeholder="All Priorities" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" label="All Priorities">All Priorities</SelectItem>
-                  {Object.entries(PRIORITY_MAP).map(([val, label]) => (
-                    <SelectItem key={val} value={val} label={label}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* STATUS & DATE */}
-          <div className="flex items-end gap-3 w-full xl:w-auto xl:flex-1">
-            <div className="w-48 flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</label>
-              <div className="flex gap-2">
-                <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
-                  <SelectTrigger className="h-9 flex-1 bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" label="All Statuses">All Statuses</SelectItem>
-                    {Object.entries(STATUS_MAP).map(([val, label]) => (
-                      <SelectItem key={val} value={val} label={label}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div 
-                  className={cn(
-                    "flex items-center gap-2 px-3 border transition-all cursor-pointer rounded-none h-9",
-                    showClosed ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-background border-input text-muted-foreground"
-                  )} 
-                  onClick={() => setShowClosed(!showClosed)}
-                >
-                  <label htmlFor="showClosed" className="text-[9px] font-black uppercase tracking-widest cursor-pointer select-none">Closed</label>
-                </div>
-              </div>
+          {/* OPTIONS */}
+          <div className="flex items-center gap-4">
+            <div 
+              className={cn(
+                "flex items-center gap-2.5 px-4 border transition-all cursor-pointer rounded-none h-10",
+                showClosed ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-background border-input text-muted-foreground hover:border-[#0176D3]/50"
+              )} 
+              onClick={() => { setShowClosed(!showClosed); setCurrentPage(1); }}
+            >
+              <Check className={cn("size-3.5", showClosed ? "opacity-100" : "opacity-20")} />
+              <label className="text-[10px] font-black uppercase tracking-widest cursor-pointer select-none">Show Closed</label>
             </div>
 
-            <div className="flex-1 flex flex-col gap-2 min-w-[200px]">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Timeline Range</label>
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1 h-9">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
-                  <input 
-                    type="date" 
-                    value={dateFilter.start}
-                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
-                    className="w-full h-full pl-9 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
-                  />
-                </div>
-                <div className="text-muted-foreground text-[8px] font-black tracking-tighter">TO</div>
-                <div className="relative flex-1 h-9">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
-                  <input 
-                    type="date" 
-                    value={dateFilter.end}
-                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
-                    className="w-full h-full pl-9 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
-                  />
-                </div>
-              </div>
-            </div>
+            {hasActiveFilters && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearFilters}
+                className="h-10 text-[10px] font-black text-red-500 hover:bg-red-50 px-4 uppercase tracking-widest rounded-none border-red-100"
+              >
+                Reset
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -303,35 +237,147 @@ export function IncidentsTable({
           <Table>
             <TableHeader className="bg-muted/30 border-b">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[140px] font-bold text-muted-foreground text-[10px] uppercase tracking-wider pl-8 h-10">ID</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10">Incident</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10">Reporter</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10">Assignee</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10">Classification</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10 text-center">Docs</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10 text-center">Priority</TableHead>
-                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-10">Status</TableHead>
-                <TableHead className="w-[80px] h-10"></TableHead>
+                <TableHead className="w-[140px] font-bold text-muted-foreground text-[10px] uppercase tracking-wider pl-8 h-12">Ticket ID</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">Incident Title</TableHead>
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">Reporter</TableHead>
+                
+                {/* ORGANIZATIONAL SCOPE FILTER */}
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">
+                  <Popover>
+                    <PopoverTrigger className="flex items-center gap-2 hover:text-[#0176D3] transition-colors uppercase">
+                      Company <Filter className={cn("size-3", filters.companyIds.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-0 rounded-none border-muted-foreground/20 shadow-2xl" align="start">
+                      <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Company</span>
+                        {filters.companyIds.length > 0 && (
+                          <button onClick={() => setFilters(f => ({...f, companyIds: []}))} className="text-[9px] font-bold text-[#0176D3] hover:underline">Clear</button>
+                        )}
+                      </div>
+                      <div className="max-h-60 overflow-y-auto p-2">
+                        {companies.map(c => (
+                          <div 
+                            key={c.id} 
+                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                            onClick={() => toggleFilter("companyIds", c.id)}
+                          >
+                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.companyIds.includes(c.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                              {filters.companyIds.includes(c.id) && <Check className="size-2.5" />}
+                            </div>
+                            <span className="text-xs font-bold text-foreground">{c.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </TableHead>
+
+                {/* CLASSIFICATION FILTER */}
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">
+                  <Popover>
+                    <PopoverTrigger className="flex items-center gap-2 hover:text-[#0176D3] transition-colors uppercase">
+                      Classification <Filter className={cn("size-3", filters.categoryIds.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-0 rounded-none border-muted-foreground/20 shadow-2xl" align="start">
+                      <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Category</span>
+                        {filters.categoryIds.length > 0 && (
+                          <button onClick={() => setFilters(f => ({...f, categoryIds: []}))} className="text-[9px] font-bold text-[#0176D3] hover:underline">Clear</button>
+                        )}
+                      </div>
+                      <div className="max-h-60 overflow-y-auto p-2">
+                        {categories.map(c => (
+                          <div 
+                            key={c.id} 
+                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                            onClick={() => toggleFilter("categoryIds", c.id)}
+                          >
+                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.categoryIds.includes(c.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                              {filters.categoryIds.includes(c.id) && <Check className="size-2.5" />}
+                            </div>
+                            <span className="text-xs font-bold text-foreground">{c.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </TableHead>
+
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12 text-center">Docs</TableHead>
+                
+                {/* PRIORITY FILTER */}
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">
+                  <Popover>
+                    <PopoverTrigger className="flex items-center gap-2 hover:text-[#0176D3] transition-colors mx-auto uppercase">
+                      Priority <Filter className={cn("size-3", filters.priorities.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-0 rounded-none border-muted-foreground/20 shadow-2xl" align="center">
+                      <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Priority</span>
+                      </div>
+                      <div className="p-2">
+                        {Object.entries(PRIORITY_MAP).map(([val, label]) => (
+                          <div 
+                            key={val} 
+                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                            onClick={() => toggleFilter("priorities", val)}
+                          >
+                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.priorities.includes(val) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                              {filters.priorities.includes(val) && <Check className="size-2.5" />}
+                            </div>
+                            <span className="text-xs font-bold text-foreground">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </TableHead>
+
+                {/* STATUS FILTER */}
+                <TableHead className="font-bold text-muted-foreground text-[10px] uppercase tracking-wider h-12">
+                  <Popover>
+                    <PopoverTrigger className="flex items-center gap-2 hover:text-[#0176D3] transition-colors uppercase">
+                      Status <Filter className={cn("size-3", filters.statuses.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-0 rounded-none border-muted-foreground/20 shadow-2xl" align="start">
+                      <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Current State</span>
+                      </div>
+                      <div className="p-2">
+                        {Object.entries(STATUS_MAP).map(([val, label]) => (
+                          <div 
+                            key={val} 
+                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                            onClick={() => toggleFilter("statuses", val)}
+                          >
+                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.statuses.includes(val) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                              {filters.statuses.includes(val) && <Check className="size-2.5" />}
+                            </div>
+                            <span className="text-xs font-bold text-foreground">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </TableHead>
+                <TableHead className="w-[80px] h-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredIncidents.length === 0 ? (
+              {paginatedIncidents.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={9} className="h-64 text-center">
                     <div className="flex flex-col items-center justify-center space-y-4">
                       <AlertCircle className="size-10 text-muted-foreground/30" />
                       <div className="space-y-1">
-                        <p className="text-foreground font-bold text-sm">No records matching active sifts</p>
-                        <p className="text-muted-foreground text-[10px] font-medium">Adjust your filters to reveal hidden incident records</p>
+                        <p className="text-foreground font-bold text-sm">No records found</p>
+                        <p className="text-muted-foreground text-[10px] font-medium">Try clearing your filters or search terms</p>
                       </div>
-                      <Button onClick={clearFilters} variant="outline" size="sm" className="font-bold rounded-none h-10 px-8 mt-2">
-                        Reset Filters
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredIncidents.map((incident) => (
+                paginatedIncidents.map((incident) => (
                   <TableRow key={incident.id} className="group hover:bg-muted/20 transition-all border-b last:border-0 cursor-pointer" onClick={() => window.location.href = `/incidents/${incident.id}`}>
                     <TableCell className="pl-8 py-3">
                       <div className="flex flex-col">
@@ -367,31 +413,15 @@ export function IncidentsTable({
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
-                      {incident.assignee ? (
-                        <div className="flex items-center gap-3">
-                          <div className="size-8 bg-blue-50 flex items-center justify-center font-bold text-[10px] text-[#0176D3] border border-blue-100">
-                            {incident.assignee.name.charAt(0)}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold text-foreground">{incident.assignee.name}</span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                               <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">{(incident.assignee.department as any)?.name || "Resolver"}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                           <div className="size-8 bg-muted/20 border border-dashed flex items-center justify-center font-bold text-[10px] text-muted-foreground/40">
-                             ?
-                           </div>
-                           <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest italic">Unassigned</span>
-                        </div>
-                      )}
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-foreground">{(incident.company as any)?.name}</span>
+                        <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">{(incident.location as any)?.name || "Site"}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="py-4">
                        <div className="flex flex-col">
                           <span className="text-xs font-bold text-foreground">{incident.category?.name || "Unclassified"}</span>
-                          <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">{(incident.company as any)?.name}</span>
+                          <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">Dept: {(incident.department as any)?.name}</span>
                        </div>
                     </TableCell>
                     <TableCell className="py-4 text-center">
@@ -503,18 +533,6 @@ export function IncidentsTable({
                         >
                           <Eye className="size-3.5" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="size-8 rounded-none border border-transparent hover:border-border hover:bg-background transition-all text-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.location.href = `/incidents/${incident.id}/edit`;
-                          }}
-                          title="Edit Incident"
-                        >
-                          <Edit className="size-3.5" />
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -523,6 +541,49 @@ export function IncidentsTable({
             </TableBody>
           </Table>
         </div>
+
+        {/* PAGINATION CONTROLS */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t bg-muted/10 flex items-center justify-between">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              Showing {Math.min(filteredIncidents.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredIncidents.length, currentPage * itemsPerPage)} of {filteredIncidents.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                className="h-8 px-3 rounded-none text-[10px] font-bold uppercase tracking-wider disabled:opacity-30"
+              >
+                Previous
+              </Button>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <Button
+                  key={i}
+                  variant={currentPage === i + 1 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={cn(
+                    "h-8 w-8 rounded-none text-[10px] font-bold transition-all",
+                    currentPage === i + 1 ? "bg-[#0176D3] text-white border-[#0176D3]" : "hover:border-[#0176D3] hover:text-[#0176D3]"
+                  )}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                className="h-8 px-3 rounded-none text-[10px] font-bold uppercase tracking-wider disabled:opacity-30"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
