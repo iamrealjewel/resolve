@@ -104,14 +104,6 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                     )}
                   </div>
 
-                  {/* Template Info */}
-                  {category.template && (
-                    <div className="flex items-center gap-1 text-[9px] font-medium text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
-                      <FolderTree className="size-2.5" />
-                      {category.template.name}
-                    </div>
-                  )}
-
                   {/* Override Approvers - Side by Side */}
                   {category.approvers && category.approvers.length > 0 && (
                     <div className="flex items-center gap-1.5 border-l border-muted-foreground/20 pl-2 ml-1">
@@ -127,6 +119,15 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                           </span>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Template Info - Moved to last */}
+                  {category.template && (
+                    <div className="flex items-center gap-1 text-[9px] font-medium text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
+                      <FolderTree className="size-2.5" />
+                      <span className="opacity-60 mr-0.5">Template:</span>
+                      {category.template.name}
                     </div>
                   )}
                 </div>
