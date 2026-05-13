@@ -47,7 +47,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex flex-col border-b hover:bg-accent/30 transition-none group relative",
+          "flex flex-col border-b hover:bg-[#0176D3]/10 hover:border-l-4 hover:border-l-[#0176D3] transition-all group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
@@ -169,7 +169,7 @@ function DepartmentTreeNode({ department, allDepartments, companies, depth = 0 }
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex items-center justify-between py-0.5 border-b hover:bg-accent/50 transition-none group relative",
+          "flex items-center justify-between py-0.5 border-b hover:bg-[#0176D3]/10 hover:border-l-4 hover:border-l-[#0176D3] transition-all group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
@@ -311,7 +311,7 @@ export function MastersClient({ data }: { data: any }) {
                 </TableHeader>
                 <TableBody>
                   {companies.map((company: any) => (
-                    <TableRow key={company.id} className="group hover:bg-muted/30 transition-none">
+                    <TableRow key={company.id} className="group hover:bg-[#0176D3]/10 transition-all">
                       <TableCell className="pl-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="size-8 bg-muted/50 flex items-center justify-center border rounded-sm">
@@ -389,7 +389,7 @@ export function MastersClient({ data }: { data: any }) {
                   <Table>
                     <TableBody>
                       {locations.map((loc: any) => (
-                        <TableRow key={loc.id}>
+                        <TableRow key={loc.id} className="hover:bg-[#0176D3]/10 transition-all">
                           <TableCell className="font-medium text-xs pl-6 py-1.5">{loc.name}</TableCell>
                           <TableCell className="text-right pr-6 py-1.5">
                             <div className="flex items-center justify-end gap-1">
@@ -430,7 +430,7 @@ export function MastersClient({ data }: { data: any }) {
                 <TableBody>
                   {designations.length > 0 ? (
                     designations.map((d: any) => (
-                      <TableRow key={d.id} className="group hover:bg-accent transition-none">
+                      <TableRow key={d.id} className="group hover:bg-[#0176D3]/10 transition-all">
                         <TableCell className="pl-6 py-0.5">
                           <span className="text-xs font-medium">{d.title}</span>
                         </TableCell>
@@ -496,7 +496,7 @@ export function MastersClient({ data }: { data: any }) {
                 </TableHeader>
                 <TableBody>
                   {rules.map((rule: any) => (
-                    <TableRow key={rule.id} className="group hover:bg-accent transition-none">
+                    <TableRow key={rule.id} className="group hover:bg-[#0176D3]/10 transition-all">
                       <TableCell className="pl-6 py-1.5">
                         <div className="flex items-center gap-3">
                           <div className="size-7 bg-muted flex items-center justify-center border">
@@ -550,7 +550,7 @@ export function MastersClient({ data }: { data: any }) {
                     </TableHeader>
                     <TableBody>
                       {templates?.map((template: any) => (
-                        <TableRow key={template.id} className="hover:bg-muted/10">
+                        <TableRow key={template.id} className="hover:bg-[#0176D3]/10 transition-all">
                           <TableCell className="py-3 font-bold text-[13px]">{template.name}</TableCell>
                           <TableCell className="py-3">
                             <div className="flex flex-wrap gap-1">
