@@ -192,20 +192,25 @@ export default async function DashboardPage() {
               {recentLogs.map((log) => (
                 <div key={log.id} className="p-4 flex items-center justify-between hover:bg-muted/5 transition-colors group">
                   <div className="flex items-center gap-4">
-                    <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 group-hover:bg-[#0176D3]/10 group-hover:text-[#0176D3] transition-colors">
+                    <div className="size-10 rounded-full bg-slate-50 border flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:border-[#0176D3]/30 group-hover:text-[#0176D3] transition-all">
                       {log.user.name.substring(0, 2).toUpperCase()}
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold uppercase tracking-tight text-foreground">{log.action.replace("_", " ")}</span>
-                        <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-none uppercase tabular-nums">
+                    <div className="flex flex-col gap-0.5 max-w-[500px]">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-black text-[#0176D3] uppercase tracking-tighter">
                           {log.incident.ticketId}
                         </span>
+                        <span className="text-muted-foreground/30">•</span>
+                        <span className="text-xs font-bold text-foreground">
+                          {log.user.name} <span className="font-medium text-muted-foreground">{getActionLabel(log.action)}</span>
+                        </span>
                       </div>
-                      <div className="text-[11px] text-muted-foreground font-medium flex items-center gap-2">
-                        <span className="font-bold text-slate-700">{log.user.name}</span>
-                        <span>•</span>
-                        <span>{format(new Date(log.createdAt), "MMM d, HH:mm")}</span>
+                      <div 
+                        className="text-[11px] text-muted-foreground line-clamp-1 italic font-medium"
+                        dangerouslySetInnerHTML={{ __html: log.content.replace(/<[^>]*>?/gm, ' ') }}
+                      />
+                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">
+                        {format(new Date(log.createdAt), "HH:mm • MMM d, yyyy")}
                       </div>
                     </div>
                   </div>
@@ -228,6 +233,19 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
+}
+
+function getActionLabel(action: string) {
+  const labels: Record<string, string> = {
+    CREATE: "created this incident",
+    COMMENT: "posted an update",
+    STATUS_CHANGE: "updated the status",
+    ASSIGNMENT: "assigned the incident",
+    DETAIL_UPDATE: "modified incident details",
+    RESOLUTION: "resolved the ticket",
+    REJECTION: "rejected the request",
+  };
+  return labels[action] || action.toLowerCase().replace("_", " ");
 }
 
 const Badge = ({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) => (
