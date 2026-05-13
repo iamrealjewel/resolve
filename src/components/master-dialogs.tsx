@@ -130,8 +130,8 @@ export function CategoryDialog({
         setResolverApprovers([]);
       }
       setIsOpen(false);
-    } catch (error) {
-      toast.error(item ? "Failed to update category" : "Failed to create category");
+    } catch (error: any) {
+      toast.error(error.message || (item ? "Failed to update category" : "Failed to create category"));
     } finally {
       setIsSubmitting(false);
     }

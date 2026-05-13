@@ -145,24 +145,29 @@ export async function createCategory(data: {
   templateId?: string | null;
 }) {
   await checkAuth("SUPER_ADMIN");
-  const { raiserApprovers, resolverApprovers, ...categoryData } = data;
-  
-  const raiserList = raiserApprovers?.filter(Boolean) || [];
-  const resolverList = resolverApprovers?.filter(Boolean) || [];
+  try {
+    const { raiserApprovers, resolverApprovers, ...categoryData } = data;
+    
+    const raiserList = raiserApprovers?.filter(Boolean) || [];
+    const resolverList = resolverApprovers?.filter(Boolean) || [];
 
-  const category = await prisma.incidentCategory.create({ 
-    data: {
-      ...categoryData,
-      approvers: {
-        create: [
-          ...raiserList.map(userId => ({ userId, type: "RAISER" })),
-          ...resolverList.map(userId => ({ userId, type: "RESOLVER" }))
-        ]
+    const category = await prisma.incidentCategory.create({ 
+      data: {
+        ...categoryData,
+        approvers: {
+          create: [
+            ...raiserList.map(userId => ({ userId, type: "RAISER" })),
+            ...resolverList.map(userId => ({ userId, type: "RESOLVER" }))
+          ]
+        }
       }
-    }
-  });
-  revalidatePath("/masters");
-  return category;
+    });
+    revalidatePath("/masters");
+    return category;
+  } catch (error: any) {
+    console.error("CREATE_CATEGORY_ERROR:", error);
+    throw new Error(error.message || "Failed to create category");
+  }
 }
 
 export async function updateCategory(id: string, data: { 
@@ -175,34 +180,39 @@ export async function updateCategory(id: string, data: {
   templateId?: string | null;
 }) {
   await checkAuth("SUPER_ADMIN");
-  const { raiserApprovers, resolverApprovers, ...categoryData } = data;
+  try {
+    const { raiserApprovers, resolverApprovers, ...categoryData } = data;
 
-  const raiserList = raiserApprovers?.filter(Boolean) || [];
-  const resolverList = resolverApprovers?.filter(Boolean) || [];
+    const raiserList = raiserApprovers?.filter(Boolean) || [];
+    const resolverList = resolverApprovers?.filter(Boolean) || [];
 
-  const category = await prisma.$transaction(async (tx) => {
-    // 1. Delete existing approvers
-    await tx.categoryApprover.deleteMany({
-      where: { categoryId: id }
-    });
+    const category = await prisma.$transaction(async (tx) => {
+      // 1. Delete existing approvers
+      await tx.categoryApprover.deleteMany({
+        where: { categoryId: id }
+      });
 
-    // 2. Update category and create new approvers
-    return tx.incidentCategory.update({
-      where: { id },
-      data: {
-        ...categoryData,
-        approvers: {
-          create: [
-            ...raiserList.map(userId => ({ userId, type: "RAISER" })),
-            ...resolverList.map(userId => ({ userId, type: "RESOLVER" }))
-          ]
+      // 2. Update category and create new approvers
+      return tx.incidentCategory.update({
+        where: { id },
+        data: {
+          ...categoryData,
+          approvers: {
+            create: [
+              ...raiserList.map(userId => ({ userId, type: "RAISER" })),
+              ...resolverList.map(userId => ({ userId, type: "RESOLVER" }))
+            ]
+          }
         }
-      }
+      });
     });
-  });
 
-  revalidatePath("/masters");
-  return category;
+    revalidatePath("/masters");
+    return category;
+  } catch (error: any) {
+    console.error("UPDATE_CATEGORY_ERROR:", error);
+    throw new Error(error.message || "Failed to update category");
+  }
 }
 
 export async function deleteCategory(id: string) {
