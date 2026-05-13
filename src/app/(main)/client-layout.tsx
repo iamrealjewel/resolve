@@ -105,10 +105,6 @@ function Footer() {
           <Link href="#" className="text-xs font-medium text-muted-foreground hover:text-[#0176D3] transition-colors">
             Terms of Service
           </Link>
-          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-            <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Online</span>
-          </div>
         </div>
       </div>
     </footer>
