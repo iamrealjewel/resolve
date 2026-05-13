@@ -68,47 +68,47 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                 <div className="size-4" />
               )}
               <div className="size-2 shrink-0 bg-[#0176D3]/40 rounded-full" />
-              <div className="flex flex-col">
+              <div className="flex items-center gap-4 flex-1">
                 <span className={cn(
-                  "text-[13px] font-bold tracking-tight",
+                  "text-[13px] font-bold tracking-tight whitespace-nowrap",
                   depth === 0 ? "text-foreground" : "text-foreground/80"
                 )}>
                   {category.name}
                 </span>
                 
-                {/* Workflow Summary in Tree */}
-                <div className="flex items-center gap-3 mt-1">
+                {/* Workflow Summary in Tree - Now Side by Side */}
+                <div className="flex items-center gap-2">
                   {/* Routing Rule Info */}
                   {categoryRules.length > 0 && (
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-[#0176D3] uppercase tracking-wider bg-[#0176D3]/5 px-1.5 py-0.5 rounded-sm border border-[#0176D3]/10">
+                    <div className="flex items-center gap-1 text-[9px] font-bold text-[#0176D3] uppercase tracking-wider bg-[#0176D3]/5 px-1.5 py-0.5 rounded-sm border border-[#0176D3]/10 whitespace-nowrap">
                       <GitBranch className="size-2.5" />
-                      Team: {categoryRules[0].department?.name || "N/A"}
+                      {categoryRules[0].department?.name || "N/A"}
                     </div>
                   )}
 
                   {/* Approval Matrix Indicators */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     {category.requiresRaiserApproval && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-[9px] font-bold text-amber-600 border border-amber-200 rounded-sm leading-none" title="Business Approval Required">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-[9px] font-bold text-amber-600 border border-amber-200 rounded-sm leading-none whitespace-nowrap" title="Business Approval Required">
                         <ShieldCheck className="size-2.5" />
                         BA
-                        {category.approvers?.some(a => a.type === "RAISER") && <span className="ml-1 text-[8px] px-1 bg-amber-600 text-white rounded-[2px]">OVERRIDE</span>}
+                        {category.approvers?.some(a => a.type === "RAISER") && <span className="ml-1 text-[7px] px-1 bg-amber-600 text-white rounded-[1px]">OVR</span>}
                       </div>
                     )}
                     {category.requiresResolverApproval && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 text-[9px] font-bold text-orange-600 border border-orange-200 rounded-sm leading-none" title="Operational Approval Required">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 text-[9px] font-bold text-orange-600 border border-orange-200 rounded-sm leading-none whitespace-nowrap" title="Operational Approval Required">
                         <ShieldCheck className="size-2.5" />
                         OA
-                        {category.approvers?.some(a => a.type === "RESOLVER") && <span className="ml-1 text-[8px] px-1 bg-orange-600 text-white rounded-[2px]">OVERRIDE</span>}
+                        {category.approvers?.some(a => a.type === "RESOLVER") && <span className="ml-1 text-[7px] px-1 bg-orange-600 text-white rounded-[1px]">OVR</span>}
                       </div>
                     )}
                   </div>
                   
                   {/* Template Info */}
                   {category.template && (
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200" title={`Template: ${category.template.name}`}>
+                    <div className="flex items-center gap-1 text-[9px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
                       <FolderTree className="size-2.5" />
-                      Template: {category.template.name}
+                      {category.template.name}
                     </div>
                   )}
                 </div>

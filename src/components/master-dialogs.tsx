@@ -144,8 +144,8 @@ export function CategoryDialog({
           )
         }
       />
-      <DialogContent className="sm:max-w-[700px] border shadow-none bg-background p-0 overflow-hidden rounded-sm">
-        <DialogHeader className="p-6 bg-muted/10 border-b flex flex-row items-center gap-4">
+      <DialogContent className="sm:max-w-[700px] border shadow-none bg-background p-0 overflow-hidden rounded-sm flex flex-col max-h-[95vh]">
+        <DialogHeader className="p-6 bg-muted/10 border-b flex flex-row items-center gap-4 shrink-0">
           <div className="size-10 bg-[#0176D3] flex items-center justify-center rounded-sm">
             <Tag className="size-5 text-white" />
           </div>
@@ -154,7 +154,7 @@ export function CategoryDialog({
             <DialogDescription className="text-xs text-muted-foreground leading-none">{item ? "Update classification properties" : "Define a new system classification entry"}</DialogDescription>
           </div>
         </DialogHeader>
-        <div className="grid gap-6 p-8">
+        <div className="grid gap-6 p-8 overflow-y-auto custom-scrollbar">
           <div className="space-y-2">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Classification Name</Label>
             <Input
@@ -304,7 +304,7 @@ export function CategoryDialog({
             </div>
           </div>
         </div>
-        <div className="p-6 border-t bg-muted/10">
+        <div className="p-6 border-t bg-muted/10 shrink-0">
           <Button
             onClick={handleAction}
             disabled={isSubmitting}
@@ -815,7 +815,7 @@ export function DataTemplateDialog({
             </div>
           </div>
         </div>
-        <DialogFooter className="p-8 bg-muted/30 border-t gap-2">
+        <DialogFooter className="p-8 bg-muted/30 border-t gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={() => setIsOpen(false)}
