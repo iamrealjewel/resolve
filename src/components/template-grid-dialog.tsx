@@ -92,6 +92,8 @@ export function TemplateGridDialog({
     setRows(newRows.length === 0 ? [createEmptyRow()] : newRows);
   };
 
+  const dataRows = rows.filter(row => Object.values(row).some(v => v !== "" && v !== false));
+
   const updateCell = (rowIndex: number, fieldName: string, value: any) => {
     const newRows = [...rows];
     newRows[rowIndex] = { ...newRows[rowIndex], [fieldName]: value };
@@ -130,7 +132,6 @@ export function TemplateGridDialog({
     }
 
     // Add existing data if any
-    const dataRows = rows.filter(row => Object.values(row).some(v => v !== ""));
     if (dataRows.length > 0) {
       dataRows.forEach((row, idx) => {
         const rowData = template.fields.map(f => {
