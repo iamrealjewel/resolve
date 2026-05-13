@@ -27,5 +27,5 @@ if (process.env.NODE_ENV !== "production") {
   }
   globalForPrisma.prisma = prisma;
 }
-// Last regenerated: 2026-05-12T18:40:00
+// Last regenerated: 2026-05-13T11:55:00
 
