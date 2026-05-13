@@ -686,13 +686,13 @@ export function DataTemplateDialog({
         )}
       </DialogTrigger>
       <DialogContent className="max-w-[100vw] sm:max-w-[45vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
-        <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
+        <DialogHeader className="p-6 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground leading-none">Define the worksheet columns and data types</DialogDescription>
           </div>
         </DialogHeader>
-        <div className="grid gap-6 p-8">
+        <div className="grid gap-6 p-6">
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Template Name</Label>
@@ -717,14 +717,9 @@ export function DataTemplateDialog({
           <div className="space-y-4 pt-4 border-t">
             <div className="flex items-center justify-between mb-2">
               <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Template Fields (Columns)</Label>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter">
-                  {fields.length} {fields.length === 1 ? 'Field' : 'Fields'} Defined
-                </Badge>
-                <Button onClick={() => addField()} type="button" variant="outline" size="sm" className="h-7 text-[9px] font-bold gap-1 px-3 border-[#0176D3] text-[#0176D3] hover:bg-[#0176D3]/10">
-                  <Plus className="size-3" /> ADD FIELD
-                </Button>
-              </div>
+              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter">
+                {fields.length} {fields.length === 1 ? 'Field' : 'Fields'} Defined
+              </Badge>
             </div>
 
             <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -744,7 +739,7 @@ export function DataTemplateDialog({
                       <div className="flex-1 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
                         <Input
-                          className="h-9 text-xs bg-muted/5 font-bold focus-visible:bg-background transition-colors"
+                          className="h-9 text-xs bg-muted/5 focus-visible:bg-background transition-colors"
                           value={field.name}
                           onChange={(e) => updateField(index, { name: e.target.value })}
                           placeholder="Column Header"
@@ -752,7 +747,7 @@ export function DataTemplateDialog({
                       </div>
 
                       {/* 2. DATA TYPE */}
-                      <div className="w-[220px] shrink-0 space-y-1">
+                      <div className="flex-1 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
                         <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
                           <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium">
@@ -793,7 +788,7 @@ export function DataTemplateDialog({
                       </div>
                     </div>
 
-                    {/* ADD FIELD BUTTON BENEATH ROW */}
+                    {/* INLINE ADD FIELD BUTTON (HOVER) */}
                     <div className="flex justify-center -mb-2 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         onClick={() => addField(index)}
@@ -808,6 +803,19 @@ export function DataTemplateDialog({
                 ))}
               </Reorder.Group>
 
+              {fields.length > 0 && (
+                <div className="flex justify-center py-4">
+                  <Button 
+                    onClick={() => addField()} 
+                    type="button" 
+                    variant="outline" 
+                    className="h-8 text-[10px] font-bold uppercase tracking-widest gap-2 px-6 border-dashed border-2 hover:border-[#0176D3] hover:text-[#0176D3] transition-all"
+                  >
+                    <Plus className="size-3" /> Append New Field
+                  </Button>
+                </div>
+              )}
+
               {fields.length === 0 && (
                 <div className="text-center py-12 border-2 border-dashed rounded-sm bg-muted/5">
                   <Database className="size-8 text-muted-foreground/20 mx-auto mb-2" />
@@ -820,7 +828,7 @@ export function DataTemplateDialog({
             </div>
           </div>
         </div>
-        <DialogFooter className="p-8 bg-muted/30 border-t gap-2 shrink-0">
+        <DialogFooter className="p-6 bg-muted/30 border-t gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={() => setIsOpen(false)}
