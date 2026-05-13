@@ -115,16 +115,16 @@ export default async function DashboardPage() {
 
       {/* TOP KPI ROW */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* TOTAL INCIDENTS */}
+        {/* TOTAL TICKETS */}
         <Card className="border-none shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Gross Volume</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Tickets</p>
                 <h3 className="text-3xl font-bold tabular-nums">{totalIncidents}</h3>
               </div>
               <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs">
-                <Activity className="size-3" /> Live
+                <Activity className="size-3" /> All Time
               </div>
             </div>
             <div className="h-16 flex items-end gap-1">
@@ -139,16 +139,16 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* AVERAGE MTTR */}
+        {/* AVERAGE RESOLUTION TIME */}
         <Card className="border-none shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Avg. MTTR</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Avg. Resolution</p>
                 <h3 className="text-3xl font-bold tabular-nums">{mttr}h</h3>
               </div>
               <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
-                <Clock className="size-3" /> Response
+                <Clock className="size-3" /> Mean Time
               </div>
             </div>
             <div className="relative h-20 flex flex-col items-center justify-end overflow-hidden">
@@ -156,21 +156,21 @@ export default async function DashboardPage() {
                   <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" strokeWidth="8" strokeLinecap="round" />
                   <path d="M 10 50 A 40 40 0 0 1 70 20" fill="none" stroke="#0176D3" strokeWidth="8" strokeLinecap="round" />
                </svg>
-               <div className="absolute bottom-0 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Velocity Scale</div>
+               <div className="absolute bottom-0 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Efficiency Gauge</div>
             </div>
           </CardContent>
         </Card>
 
-        {/* RESOLUTION RATE */}
+        {/* SUCCESS RATE */}
         <Card className="border-none shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Resolution Rate</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Success Rate</p>
                 <h3 className="text-3xl font-bold tabular-nums">{resolutionRate}%</h3>
               </div>
               <div className="flex items-center gap-1 text-[#0176D3] font-bold text-xs">
-                <CheckCircle2 className="size-3" /> Efficiency
+                <CheckCircle2 className="size-3" /> Closure
               </div>
             </div>
             <div className="flex items-center gap-6">
@@ -183,27 +183,27 @@ export default async function DashboardPage() {
                <div className="space-y-1">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight">
                     <div className="size-2 rounded-full bg-[#0176D3]" /> 
-                    <span>{resolvedIncidents} Resolved</span>
+                    <span>{resolvedIncidents} Closed</span>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight">
                     <div className="size-2 rounded-full bg-slate-200" /> 
-                    <span>{openIncidents} Open</span>
+                    <span>{openIncidents} Pending</span>
                   </div>
                </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* ACTIVE LOAD */}
+        {/* ACTIVE WORKLOAD */}
         <Card className="border-none shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">System Pressure</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Workload</p>
                 <h3 className="text-3xl font-bold tabular-nums">{openIncidents}</h3>
               </div>
               <div className="flex items-center gap-1 text-rose-500 font-bold text-xs">
-                <AlertCircle className="size-3" /> Action Req.
+                <AlertCircle className="size-3" /> In Progress
               </div>
             </div>
             <div className="h-16 w-full flex items-center justify-center">
@@ -217,20 +217,20 @@ export default async function DashboardPage() {
 
       {/* MIDDLE SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* RESOLVER PERFORMANCE */}
+        {/* PERFORMANCE BREAKDOWN */}
         <Card className="border-none shadow-sm rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between p-6">
-            <CardTitle className="text-lg font-bold">Resolver Performance Matrix</CardTitle>
+            <CardTitle className="text-lg font-bold">Performance Breakdown</CardTitle>
             <Link href="/reports">
-              <Button variant="ghost" size="sm" className="text-xs font-bold text-[#0176D3]">Full Report <ChevronRight className="size-3 ml-1" /></Button>
+              <Button variant="ghost" size="sm" className="text-xs font-bold text-[#0176D3]">Full Analytics <ChevronRight className="size-3 ml-1" /></Button>
             </Link>
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <div className="space-y-6">
               <div className="grid grid-cols-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b pb-3">
                 <span>Resolver Name</span>
-                <span className="text-center">Tickets Resolved</span>
-                <span className="text-right">Success Rate</span>
+                <span className="text-center">Tickets Closed</span>
+                <span className="text-right">Success Ratio</span>
               </div>
               {analystStats.map((a, i) => (
                 <div key={i} className="grid grid-cols-3 items-center group cursor-pointer py-1">
@@ -243,7 +243,7 @@ export default async function DashboardPage() {
                   <span className="text-center text-sm font-medium">{a.resolved}</span>
                   <div className="flex items-center justify-end gap-2">
                     <div className="h-1.5 w-16 bg-muted rounded-full overflow-hidden">
-                       <div className="h-full bg-emerald-500" style={{ width: a.efficiency }} />
+                       <div className="h-full bg-[#0176D3]" style={{ width: a.efficiency }} />
                     </div>
                     <span className="text-xs font-black">{a.efficiency}</span>
                   </div>
@@ -256,10 +256,10 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* RECENT INCIDENTS */}
+        {/* RECENT ACTIVITIES */}
         <Card className="border-none shadow-sm rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between p-6">
-            <CardTitle className="text-lg font-bold">Operational Lifecycle</CardTitle>
+            <CardTitle className="text-lg font-bold">Recent Activities</CardTitle>
             <Badge variant="outline" className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest bg-slate-50 border-slate-200">Latest 10 Entries</Badge>
           </CardHeader>
           <CardContent className="px-6 pb-6">
