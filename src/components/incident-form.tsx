@@ -324,7 +324,15 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const payload = { ...values, attachments, templateData };
+      // Ensure data is plain objects only
+      const cleanTemplateData = templateData ? JSON.parse(JSON.stringify(templateData)) : [];
+      const cleanAttachments = attachments ? JSON.parse(JSON.stringify(attachments)) : [];
+      
+      const payload = { 
+        ...values, 
+        attachments: cleanAttachments, 
+        templateData: cleanTemplateData 
+      };
       if (isCreate) {
         await createIncident(payload);
         toast.success("Incident reported successfully");
