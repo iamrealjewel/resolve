@@ -730,7 +730,7 @@ export function DataTemplateDialog({
                     value={field}
                     className="relative"
                   >
-                    <div className="flex items-center gap-3 p-3 border rounded-sm bg-background hover:border-[#0176D3]/30 transition-all group shadow-sm">
+                    <div className="flex items-center gap-3 p-2 border rounded-sm bg-background hover:border-[#0176D3]/30 transition-all group shadow-sm">
                       <div className="flex-none cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-[#0176D3] transition-colors">
                         <GripVertical className="size-4" />
                       </div>
@@ -747,7 +747,7 @@ export function DataTemplateDialog({
                       </div>
 
                       {/* 2. DATA TYPE */}
-                      <div className="flex-1 space-y-1">
+                      <div className="min-w-[150px] flex-1 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
                         <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
                           <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium">
