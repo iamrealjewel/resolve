@@ -299,7 +299,7 @@ export function MastersClient({ data }: { data: any }) {
               </div>
               <CompanyCRUD />
             </div>
-            <Card className="border-none shadow-none rounded-sm overflow-hidden bg-white dark:bg-[#1A1A1A]">
+            <Card className="border shadow-none rounded-sm overflow-hidden bg-white dark:bg-[#1A1A1A]">
               <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent border-b">
@@ -364,7 +364,7 @@ export function MastersClient({ data }: { data: any }) {
                   </div>
                   <InfrastructureDialog type="department" departments={departments} />
                 </div>
-                <Card className="border-none shadow-none overflow-hidden rounded-none">
+                <Card className="border shadow-none overflow-hidden rounded-none">
                   <div className="bg-muted/50 border-b px-6 py-2.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Departmental Nodes</span>
                   </div>
@@ -385,7 +385,7 @@ export function MastersClient({ data }: { data: any }) {
                   </div>
                   <InfrastructureDialog type="location" />
                 </div>
-                <Card className="border-none shadow-none overflow-hidden rounded-none">
+                <Card className="border shadow-none overflow-hidden rounded-none">
                   <Table>
                     <TableBody>
                       {locations.map((loc: any) => (
@@ -419,7 +419,7 @@ export function MastersClient({ data }: { data: any }) {
               <InfrastructureDialog type="designation" departments={departments} />
             </div>
 
-            <Card className="border-none shadow-none overflow-hidden rounded-none">
+            <Card className="border shadow-none overflow-hidden rounded-none">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent border-b">
@@ -467,8 +467,8 @@ export function MastersClient({ data }: { data: any }) {
               <CategoryDialog categories={categories} users={users} templates={templates} />
             </div>
 
-            <Card className="border-none shadow-none overflow-hidden rounded-none">
-              <div className="divide-y divide-border/50 border-none rounded-none">
+            <Card className="border shadow-none overflow-hidden rounded-none">
+              <div className="divide-y divide-border/50 border rounded-none">
                 {rootCategories.map((cat: any) => (
                   <CategoryTreeNode key={cat.id} category={cat} categories={categories} users={users} templates={templates} rules={rules} />
                 ))}
@@ -485,7 +485,7 @@ export function MastersClient({ data }: { data: any }) {
               <RoutingRuleDialog categories={categories} departments={departments} users={users} />
             </div>
 
-            <Card className="border-none shadow-none overflow-hidden rounded-none">
+            <Card className="border shadow-none overflow-hidden rounded-none">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent border-b">

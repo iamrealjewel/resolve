@@ -33,7 +33,12 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database, GripVertical } from "lucide-react";
+import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database, GripVertical, Search, Users as UsersIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 import { Reorder } from "framer-motion";
 import {
@@ -71,6 +76,9 @@ export function CategoryDialog({
   const [raiserApprovers, setRaiserApprovers] = useState<string[]>(item?.approvers?.filter((a: any) => a.type === "RAISER").map((a: any) => a.userId) || []);
   const [resolverApprovers, setResolverApprovers] = useState<string[]>(item?.approvers?.filter((a: any) => a.type === "RESOLVER").map((a: any) => a.userId) || []);
   const [templateId, setTemplateId] = useState<string | null>(item?.templateId || "none");
+  const [raiserSearch, setRaiserSearch] = useState("");
+  const [resolverSearch, setResolverSearch] = useState("");
+  const [templateSearch, setTemplateSearch] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -213,19 +221,57 @@ export function CategoryDialog({
                 {requiresRaiserApproval && (
                   <div className="space-y-2 pt-2 border-t">
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground">Custom Approver Override</Label>
-                    <Select onValueChange={(val) => val && !raiserApprovers.includes(val) && setRaiserApprovers([...raiserApprovers, val])}>
-                      <SelectTrigger className="h-8 text-xs bg-background">
-                        <span>Add user...</span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {users.filter(u => !raiserApprovers.includes(u.id)).map(u => (
-                          <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-[300px] h-9 justify-between text-xs font-normal bg-background border-muted-foreground/20">
+                          <span className="truncate">Add business approver...</span>
+                          <Search className="size-3.5 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0 w-[300px] rounded-none border-2" align="start">
+                        <div className="p-2 border-b bg-muted/20">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                            <Input 
+                              placeholder="Search users..." 
+                              className="h-8 pl-8 text-xs bg-background rounded-none border-muted-foreground/20"
+                              value={raiserSearch}
+                              onChange={(e) => setRaiserSearch(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-[250px] overflow-y-auto">
+                          {users
+                            .filter(u => !raiserApprovers.includes(u.id))
+                            .filter(u => u.name.toLowerCase().includes(raiserSearch.toLowerCase()) || u.email.toLowerCase().includes(raiserSearch.toLowerCase()))
+                            .map(u => (
+                            <button
+                              key={u.id}
+                              className="w-full text-left px-3 py-2 hover:bg-[#0176D3]/10 border-b last:border-0 transition-colors group"
+                              onClick={() => {
+                                setRaiserApprovers([...raiserApprovers, u.id]);
+                                setRaiserSearch("");
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold group-hover:text-[#0176D3]">{u.name}</span>
+                                <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground uppercase tracking-tighter">
+                                  <span>{u.department?.name || "No Dept"}</span>
+                                  <div className="size-0.5 bg-muted-foreground/30 rounded-full" />
+                                  <span>{u.designation?.title || "No Title"}</span>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
                     <div className="flex flex-wrap gap-1">
                       {raiserApprovers.map(id => (
-                        <Badge key={id} variant="secondary" className="text-[10px] py-0 h-5 gap-1 pr-1 bg-white border font-medium">
+                        <Badge key={id} variant="secondary" className="text-[10px] py-0 h-6 gap-1 pr-1 bg-white border font-medium">
+                          <UsersIcon className="size-3 text-[#0176D3]/40" />
                           {users.find(u => u.id === id)?.name}
                           <button type="button" onClick={() => setRaiserApprovers(raiserApprovers.filter(uid => uid !== id))} className="hover:text-destructive">
                             <X className="size-3" />
@@ -259,19 +305,57 @@ export function CategoryDialog({
                 {requiresResolverApproval && (
                   <div className="space-y-2 pt-2 border-t">
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground">Custom Approver Override</Label>
-                    <Select onValueChange={(val) => val && !resolverApprovers.includes(val) && setResolverApprovers([...resolverApprovers, val])}>
-                      <SelectTrigger className="h-8 text-xs bg-background">
-                        <span>Add user...</span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {users.filter(u => !resolverApprovers.includes(u.id)).map(u => (
-                          <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-[300px] h-9 justify-between text-xs font-normal bg-background border-muted-foreground/20">
+                          <span className="truncate">Add operational approver...</span>
+                          <Search className="size-3.5 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0 w-[300px] rounded-none border-2" align="start">
+                        <div className="p-2 border-b bg-muted/20">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                            <Input 
+                              placeholder="Search users..." 
+                              className="h-8 pl-8 text-xs bg-background rounded-none border-muted-foreground/20"
+                              value={resolverSearch}
+                              onChange={(e) => setResolverSearch(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-[250px] overflow-y-auto">
+                          {users
+                            .filter(u => !resolverApprovers.includes(u.id))
+                            .filter(u => u.name.toLowerCase().includes(resolverSearch.toLowerCase()) || u.email.toLowerCase().includes(resolverSearch.toLowerCase()))
+                            .map(u => (
+                            <button
+                              key={u.id}
+                              className="w-full text-left px-3 py-2 hover:bg-[#0176D3]/10 border-b last:border-0 transition-colors group"
+                              onClick={() => {
+                                setResolverApprovers([...resolverApprovers, u.id]);
+                                setResolverSearch("");
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold group-hover:text-[#0176D3]">{u.name}</span>
+                                <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground uppercase tracking-tighter">
+                                  <span>{u.department?.name || "No Dept"}</span>
+                                  <div className="size-0.5 bg-muted-foreground/30 rounded-full" />
+                                  <span>{u.designation?.title || "No Title"}</span>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
                     <div className="flex flex-wrap gap-1">
                       {resolverApprovers.map(id => (
-                        <Badge key={id} variant="secondary" className="text-[10px] py-0 h-5 gap-1 pr-1 bg-white border font-medium">
+                        <Badge key={id} variant="secondary" className="text-[10px] py-0 h-6 gap-1 pr-1 bg-white border font-medium">
+                          <UsersIcon className="size-3 text-[#0176D3]/40" />
                           {users.find(u => u.id === id)?.name}
                           <button type="button" onClick={() => setResolverApprovers(resolverApprovers.filter(uid => uid !== id))} className="hover:text-destructive">
                             <X className="size-3" />
@@ -290,17 +374,56 @@ export function CategoryDialog({
             <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Data Template Assignment</Label>
             <div className="p-4 border rounded-sm bg-[#0176D3]/5 border-[#0176D3]/10">
               <p className="text-[10px] text-muted-foreground leading-tight mb-3">Require users to fill out a structured data sheet when creating incidents in this category.</p>
-              <Select value={templateId || "none"} onValueChange={setTemplateId}>
-                <SelectTrigger className="h-9 text-xs bg-background">
-                  <SelectValue placeholder="No template required" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none" className="text-xs font-bold uppercase tracking-wider italic text-muted-foreground">None / Not Required</SelectItem>
-                  {templates.map(t => (
-                    <SelectItem key={t.id} value={t.id} className="text-xs">{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-[300px] h-10 justify-between text-xs font-medium bg-background border-muted-foreground/20">
+                    <span className="truncate">{templateId && templateId !== "none" ? templates.find(t => t.id === templateId)?.name : "No template required"}</span>
+                    <Layers className="size-3.5 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[300px] rounded-none border-2" align="start">
+                  <div className="p-2 border-b bg-muted/20">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                      <Input 
+                        placeholder="Search templates..." 
+                        className="h-8 pl-8 text-xs bg-background rounded-none border-muted-foreground/20"
+                        value={templateSearch}
+                        onChange={(e) => setTemplateSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-[250px] overflow-y-auto">
+                    <button
+                      className="w-full text-left px-3 py-2 hover:bg-destructive/5 border-b transition-colors text-xs font-bold uppercase tracking-widest text-destructive"
+                      onClick={() => {
+                        setTemplateId("none");
+                        setTemplateSearch("");
+                      }}
+                    >
+                      None / Not Required
+                    </button>
+                    {templates
+                      .filter(t => t.name.toLowerCase().includes(templateSearch.toLowerCase()))
+                      .map(t => (
+                      <button
+                        key={t.id}
+                        className={cn(
+                          "w-full text-left px-3 py-2 hover:bg-[#0176D3]/10 border-b last:border-0 transition-colors text-xs font-medium",
+                          templateId === t.id && "bg-[#0176D3]/5 text-[#0176D3] font-bold"
+                        )}
+                        onClick={() => {
+                          setTemplateId(t.id);
+                          setTemplateSearch("");
+                        }}
+                      >
+                        {t.name}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
