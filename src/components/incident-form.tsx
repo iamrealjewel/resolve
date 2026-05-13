@@ -665,7 +665,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
           <Form {...form}>
             <form className="flex-1 flex overflow-hidden">
               {/* LEFT COLUMN: REPORTER INFO */}
-              <div className="w-[300px] border-r bg-[#EBF5FF] dark:bg-[#002D5C]/30 p-6 overflow-y-auto space-y-6">
+              <div className="w-[300px] border-r bg-white/60 dark:bg-muted/10 p-6 overflow-y-auto space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-4 pb-2 border-b">
                     <User className="size-4 text-[#0176D3]" />
