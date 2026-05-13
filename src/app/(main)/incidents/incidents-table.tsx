@@ -144,154 +144,154 @@ export function IncidentsTable({
   return (
     <div className="space-y-6">
       {/* ADVANCED FILTER PANEL */}
-      <div className="bg-white border p-4 space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b">
+      <div className="bg-white border p-5 space-y-5">
+        <div className="flex items-center justify-between pb-3 border-b">
           <div className="flex items-center gap-2">
-            <Filter className="size-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold">Filters</h3>
+            <Filter className="size-4 text-[#0176D3]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Operational Filters</h3>
           </div>
           {hasActiveFilters && (
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={clearFilters}
-              className="h-8 text-xs font-semibold text-[#0176D3] hover:bg-blue-50 px-3"
+              className="h-8 text-xs font-bold text-[#0176D3] hover:bg-blue-50 px-3 uppercase tracking-wider"
             >
-              <X className="mr-1.5 size-3.5" /> Clear All
+              <X className="mr-1.5 size-3.5" /> Reset All
             </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Search</label>
-            <div className="h-9 relative">
+        <div className="flex flex-wrap gap-x-6 gap-y-4">
+          {/* SEARCH FIELD */}
+          <div className="w-full lg:w-72 flex flex-col gap-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global Search</label>
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
               <input 
                 type="text" 
-                placeholder="ID, Title, Requester..." 
+                placeholder="Ticket ID, Title, User..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-full pl-9 pr-4 bg-background border rounded-sm text-sm font-medium focus:outline-none focus:border-[#0176D3] transition-all"
+                className="w-full h-9 pl-9 pr-4 bg-background border rounded-none text-xs font-bold focus:outline-none focus:border-[#0176D3] transition-all placeholder:font-medium"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Company</label>
-            <div className="h-9">
+          {/* ORGANIZATIONAL SCOPE */}
+          <div className="flex items-end gap-3 flex-1 min-w-[300px]">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Company</label>
               <Select value={filters.companyId} onValueChange={(v) => setFilters({...filters, companyId: v})}>
-                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
                   <SelectValue placeholder="All Companies" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm" label="All Companies">All Companies</SelectItem>
+                  <SelectItem value="all" label="All Companies">All Companies</SelectItem>
                   {companies.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-sm" label={c.name}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Location</label>
-            <div className="h-9">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Location</label>
               <Select value={filters.locationId} onValueChange={(v) => setFilters({...filters, locationId: v})}>
-                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
                   <SelectValue placeholder="All Locations" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm" label="All Locations">All Locations</SelectItem>
+                  <SelectItem value="all" label="All Locations">All Locations</SelectItem>
                   {locations.map(l => (
-                    <SelectItem key={l.id} value={l.id} className="text-sm" label={l.name}>{l.name}</SelectItem>
+                    <SelectItem key={l.id} value={l.id} label={l.name}>{l.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Category</label>
-            <div className="h-9">
+          {/* CLASSIFICATION */}
+          <div className="flex items-end gap-3 flex-1 min-w-[300px]">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Category</label>
               <Select value={filters.categoryId} onValueChange={(v) => setFilters({...filters, categoryId: v})}>
-                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm" label="All Categories">All Categories</SelectItem>
+                  <SelectItem value="all" label="All Categories">All Categories</SelectItem>
                   {categories.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-sm" label={c.name}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id} label={c.name}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Priority</label>
-            <div className="h-9">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Priority</label>
               <Select value={filters.priority} onValueChange={(v) => setFilters({...filters, priority: v})}>
-                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                <SelectTrigger className="h-9 w-full bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
                   <SelectValue placeholder="All Priorities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm" label="All Priorities">All Priorities</SelectItem>
+                  <SelectItem value="all" label="All Priorities">All Priorities</SelectItem>
                   {Object.entries(PRIORITY_MAP).map(([val, label]) => (
-                    <SelectItem key={val} value={val} className="text-sm" label={label}>{label}</SelectItem>
+                    <SelectItem key={val} value={val} label={label}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Status</label>
-            <div className="h-9 flex gap-2">
-              <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
-                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3 flex-1">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="text-sm" label="All Statuses">All Statuses</SelectItem>
-                  {Object.entries(STATUS_MAP).map(([val, label]) => (
-                    <SelectItem key={val} value={val} className="text-sm" label={label}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-2 px-3 border bg-background whitespace-nowrap hover:border-[#0176D3] transition-all cursor-pointer rounded-sm" onClick={() => setShowClosed(!showClosed)}>
-                <input 
-                  type="checkbox" 
-                  id="showClosed" 
-                  checked={showClosed} 
-                  onChange={(e) => setShowClosed(e.target.checked)}
-                  className="size-3.5 rounded-sm border-muted-foreground/30 accent-[#0176D3] cursor-pointer"
-                />
-                <label htmlFor="showClosed" className="text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none">Closed</label>
+          {/* STATUS & DATE */}
+          <div className="flex items-end gap-3 w-full xl:w-auto xl:flex-1">
+            <div className="w-48 flex flex-col gap-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</label>
+              <div className="flex gap-2">
+                <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
+                  <SelectTrigger className="h-9 flex-1 bg-background rounded-none border text-xs font-bold focus:ring-0 px-3">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" label="All Statuses">All Statuses</SelectItem>
+                    {Object.entries(STATUS_MAP).map(([val, label]) => (
+                      <SelectItem key={val} value={val} label={label}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div 
+                  className={cn(
+                    "flex items-center gap-2 px-3 border transition-all cursor-pointer rounded-none h-9",
+                    showClosed ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-background border-input text-muted-foreground"
+                  )} 
+                  onClick={() => setShowClosed(!showClosed)}
+                >
+                  <label htmlFor="showClosed" className="text-[9px] font-black uppercase tracking-widest cursor-pointer select-none">Closed</label>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-1.5 col-span-full xl:col-span-2 mt-2">
-            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Date Range</label>
-            <div className="flex items-center gap-2 h-9">
-              <div className="relative flex-1 h-full">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
-                <input 
-                  type="date" 
-                  value={dateFilter.start}
-                  onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
-                  className="w-full h-full pl-9 pr-2 bg-background border rounded-sm text-xs font-medium focus:outline-none focus:border-[#0176D3] transition-all"
-                />
-              </div>
-              <div className="text-muted-foreground text-[10px] font-bold">TO</div>
-              <div className="relative flex-1 h-full">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
-                <input 
-                  type="date" 
-                  value={dateFilter.end}
-                  onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
-                  className="w-full h-full pl-9 pr-2 bg-background border rounded-sm text-xs font-medium focus:outline-none focus:border-[#0176D3] transition-all"
-                />
+
+            <div className="flex-1 flex flex-col gap-2 min-w-[200px]">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Timeline Range</label>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1 h-9">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
+                  <input 
+                    type="date" 
+                    value={dateFilter.start}
+                    onChange={(e) => setDateFilter({...dateFilter, start: e.target.value})}
+                    className="w-full h-full pl-9 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
+                  />
+                </div>
+                <div className="text-muted-foreground text-[8px] font-black tracking-tighter">TO</div>
+                <div className="relative flex-1 h-9">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
+                  <input 
+                    type="date" 
+                    value={dateFilter.end}
+                    onChange={(e) => setDateFilter({...dateFilter, end: e.target.value})}
+                    className="w-full h-full pl-9 pr-2 bg-background border rounded-none text-[10px] font-bold focus:outline-none focus:border-[#0176D3] transition-all uppercase"
+                  />
+                </div>
               </div>
             </div>
           </div>
