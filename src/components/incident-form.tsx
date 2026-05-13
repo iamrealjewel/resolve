@@ -506,24 +506,6 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
               </div>
             </div>
 
-            {template && (
-              <div className="flex items-center gap-2 pl-6 border-l shrink-0">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => setTemplateDialogOpen(true)}
-                  className={cn(
-                    "h-10 gap-2 px-4 rounded-sm border-2 font-bold text-[10px] uppercase tracking-wider transition-all",
-                    templateData.length > 0 
-                      ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100" 
-                      : "bg-[#0176D3]/5 border-[#0176D3]/20 text-[#0176D3] hover:bg-[#0176D3]/10"
-                  )}
-                >
-                  <FileSpreadsheet className="size-4" />
-                  {templateData.length > 0 ? `${templateData.length} Records Captured` : "Fill Data Worksheet"}
-                </Button>
-              </div>
-            )}
 
             <div className="flex items-center gap-8">
               <div className="flex flex-col min-w-max">
