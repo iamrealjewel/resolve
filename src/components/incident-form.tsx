@@ -85,7 +85,7 @@ const formSchema = z.object({
   reporterId: z.string().optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   status: z.string().optional(),
-  assigneeId: z.string().optional().nullable(),
+  assigneeId: z.string().nullable().optional(),
   accessList: z.array(z.string()).default([]),
   reference: z.string().optional(),
 });
@@ -602,8 +602,11 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
 
               <div className="flex flex-col min-w-max">
-                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Assignee</span>
-                {isEdit && !effectiveIsView ? (
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Assignee</span>
+                  <span className="text-red-500 text-[10px] font-bold">*</span>
+                </div>
+                {(isEdit || (isCreate && (isSuperAdmin || isResolver))) && !effectiveIsView ? (
                   <FormField
                     control={form.control}
                     name="assigneeId"

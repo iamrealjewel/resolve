@@ -87,8 +87,10 @@ export function IncidentsTable({
     start: "",
     end: "",
   });
+  const [reporterSearch, setReporterSearch] = useState("");
+  const [assigneeSearch, setAssigneeSearch] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   const [filters, setFilters] = useState({
     companyIds: [] as string[],
@@ -259,19 +261,33 @@ export function IncidentsTable({
                       <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Reporter</span>
                       </div>
+                      <div className="p-2 border-b">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/40" />
+                          <input 
+                            type="text" 
+                            placeholder="Filter reporters..." 
+                            value={reporterSearch}
+                            onChange={(e) => setReporterSearch(e.target.value)}
+                            className="w-full h-8 pl-8 pr-2 bg-muted/20 border-none text-[10px] font-bold focus:ring-0"
+                          />
+                        </div>
+                      </div>
                       <div className="max-h-60 overflow-y-auto p-2">
-                        {uniqueReporters.map((u: any) => (
-                          <div 
-                            key={u.id} 
-                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
-                            onClick={() => toggleFilter("reporterIds", u.id)}
-                          >
-                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.reporterIds.includes(u.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
-                              {filters.reporterIds.includes(u.id) && <Check className="size-2.5" />}
+                        {uniqueReporters
+                          .filter((u: any) => u.name.toLowerCase().includes(reporterSearch.toLowerCase()))
+                          .map((u: any) => (
+                            <div 
+                              key={u.id} 
+                              className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                              onClick={() => toggleFilter("reporterIds", u.id)}
+                            >
+                              <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.reporterIds.includes(u.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                                {filters.reporterIds.includes(u.id) && <Check className="size-2.5" />}
+                              </div>
+                              <span className="text-xs font-bold text-foreground">{u.name}</span>
                             </div>
-                            <span className="text-xs font-bold text-foreground">{u.name}</span>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </PopoverContent>
                   </Popover>
@@ -287,19 +303,33 @@ export function IncidentsTable({
                       <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Assignee</span>
                       </div>
+                      <div className="p-2 border-b">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/40" />
+                          <input 
+                            type="text" 
+                            placeholder="Filter assignees..." 
+                            value={assigneeSearch}
+                            onChange={(e) => setAssigneeSearch(e.target.value)}
+                            className="w-full h-8 pl-8 pr-2 bg-muted/20 border-none text-[10px] font-bold focus:ring-0"
+                          />
+                        </div>
+                      </div>
                       <div className="max-h-60 overflow-y-auto p-2">
-                        {uniqueAssignees.map((u: any) => (
-                          <div 
-                            key={u.id} 
-                            className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
-                            onClick={() => toggleFilter("assigneeIds", u.id)}
-                          >
-                            <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.assigneeIds.includes(u.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
-                              {filters.assigneeIds.includes(u.id) && <Check className="size-2.5" />}
+                        {uniqueAssignees
+                          .filter((u: any) => u.name.toLowerCase().includes(assigneeSearch.toLowerCase()))
+                          .map((u: any) => (
+                            <div 
+                              key={u.id} 
+                              className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer"
+                              onClick={() => toggleFilter("assigneeIds", u.id)}
+                            >
+                              <div className={cn("size-3.5 border flex items-center justify-center transition-all", filters.assigneeIds.includes(u.id) ? "bg-[#0176D3] border-[#0176D3] text-white" : "bg-white border-muted-foreground/30")}>
+                                {filters.assigneeIds.includes(u.id) && <Check className="size-2.5" />}
+                              </div>
+                              <span className="text-xs font-bold text-foreground">{u.name}</span>
                             </div>
-                            <span className="text-xs font-bold text-foreground">{u.name}</span>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </PopoverContent>
                   </Popover>
@@ -340,7 +370,7 @@ export function IncidentsTable({
                 <TableHead className="w-[140px] font-semibold text-muted-foreground text-[10px] uppercase tracking-wider h-12">
                   <Popover>
                     <PopoverTrigger className="flex items-center gap-2 hover:text-[#0176D3] transition-colors uppercase">
-                      Category <Filter className={cn("size-3", filters.categoryIds.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
+                      Classification <Filter className={cn("size-3", filters.categoryIds.length > 0 && "text-[#0176D3] fill-[#0176D3]")} />
                     </PopoverTrigger>
                     <PopoverContent className="w-64 p-0 rounded-none border-muted-foreground/20 shadow-2xl" align="start">
                       <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
@@ -584,47 +614,61 @@ export function IncidentsTable({
         </div>
 
         {/* PAGINATION CONTROLS */}
-        {totalPages > 1 && (
-          <div className="p-3 border-t bg-muted/10 flex items-center justify-between">
+        <div className="p-3 border-t bg-muted/10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
               Showing {Math.min(filteredIncidents.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredIncidents.length, currentPage * itemsPerPage)} of {filteredIncidents.length}
             </span>
-            <div className="flex items-center gap-1">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => prev - 1)}
-                className="h-7 px-2 rounded-none text-[9px] font-bold uppercase tracking-wider disabled:opacity-30"
-              >
-                Prev
-              </Button>
-              {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => (
-                <Button
-                  key={i}
-                  variant={currentPage === i + 1 ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={cn(
-                    "h-7 w-7 rounded-none text-[9px] font-bold transition-all",
-                    currentPage === i + 1 ? "bg-[#0176D3] text-white border-[#0176D3]" : "hover:border-[#0176D3] hover:text-[#0176D3]"
-                  )}
-                >
-                  {i + 1}
-                </Button>
-              ))}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => prev + 1)}
-                className="h-7 px-2 rounded-none text-[9px] font-bold uppercase tracking-wider disabled:opacity-30"
-              >
-                Next
-              </Button>
+            <div className="flex items-center gap-2 border-l pl-4">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Per Page</span>
+              <Select value={itemsPerPage.toString()} onValueChange={(val) => { setItemsPerPage(parseInt(val)); setCurrentPage(1); }}>
+                <SelectTrigger className="h-7 w-16 text-[10px] font-bold rounded-none bg-transparent border-muted-foreground/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        )}
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(prev => prev - 1)}
+              className="h-7 px-2 rounded-none text-[9px] font-bold uppercase tracking-wider disabled:opacity-30"
+            >
+              Prev
+            </Button>
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => (
+              <Button
+                key={i}
+                variant={currentPage === i + 1 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(i + 1)}
+                className={cn(
+                  "h-7 w-7 rounded-none text-[9px] font-bold transition-all",
+                  currentPage === i + 1 ? "bg-[#0176D3] text-white border-[#0176D3]" : "hover:border-[#0176D3] hover:text-[#0176D3]"
+                )}
+              >
+                {i + 1}
+              </Button>
+            ))}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              className="h-7 px-2 rounded-none text-[9px] font-bold uppercase tracking-wider disabled:opacity-30"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </Card>
     </div>
   );
