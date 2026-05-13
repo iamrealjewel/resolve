@@ -47,7 +47,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex flex-col hover:bg-accent/30 transition-none group relative",
+          "flex flex-col border-b hover:bg-accent/30 transition-none group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
@@ -70,7 +70,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
               <div className="size-2 shrink-0 bg-[#0176D3]/40 rounded-full" />
               <div className="flex items-center gap-4 flex-1">
                 <span className={cn(
-                  "text-[13px] font-bold tracking-tight whitespace-nowrap",
+                  "text-[13px] font-semibold tracking-tight whitespace-nowrap",
                   depth === 0 ? "text-foreground" : "text-foreground/80"
                 )}>
                   {category.name}
@@ -80,7 +80,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                 <div className="flex items-center gap-2">
                   {/* Routing Rule Info */}
                   {categoryRules.length > 0 && (
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-[#0176D3] uppercase tracking-wider bg-[#0176D3]/5 px-1.5 py-0.5 rounded-sm border border-[#0176D3]/10 whitespace-nowrap">
+                    <div className="flex items-center gap-1 text-[9px] font-medium text-[#0176D3] uppercase tracking-wider bg-[#0176D3]/5 px-1.5 py-0.5 rounded-sm border border-[#0176D3]/10 whitespace-nowrap">
                       <GitBranch className="size-2.5" />
                       {categoryRules[0].department?.name || "N/A"}
                     </div>
@@ -89,14 +89,14 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                   {/* Approval Matrix Indicators */}
                   <div className="flex items-center gap-1">
                     {category.requiresRaiserApproval && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-[9px] font-bold text-amber-600 border border-amber-200 rounded-sm leading-none whitespace-nowrap" title="Business Approval Required">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-[9px] font-medium text-amber-600 border border-amber-200 rounded-sm leading-none whitespace-nowrap" title="Business Approval Required">
                         <ShieldCheck className="size-2.5" />
                         BA
                         {category.approvers?.some(a => a.type === "RAISER") && <span className="ml-1 text-[7px] px-1 bg-amber-600 text-white rounded-[1px]">OVR</span>}
                       </div>
                     )}
                     {category.requiresResolverApproval && (
-                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 text-[9px] font-bold text-orange-600 border border-orange-200 rounded-sm leading-none whitespace-nowrap" title="Operational Approval Required">
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-50 text-[9px] font-medium text-orange-600 border border-orange-200 rounded-sm leading-none whitespace-nowrap" title="Operational Approval Required">
                         <ShieldCheck className="size-2.5" />
                         OA
                         {category.approvers?.some(a => a.type === "RESOLVER") && <span className="ml-1 text-[7px] px-1 bg-orange-600 text-white rounded-[1px]">OVR</span>}
@@ -106,7 +106,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
 
                   {/* Template Info */}
                   {category.template && (
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
+                    <div className="flex items-center gap-1 text-[9px] font-medium text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
                       <FolderTree className="size-2.5" />
                       {category.template.name}
                     </div>
@@ -118,7 +118,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                       {category.approvers.map((ap: any) => ap.user && (
                         <div key={ap.id} className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/40 border border-muted-foreground/10 rounded-full " title={`${ap.type === "RAISER" ? "Business" : "Operational"} Approver Override: ${ap.user.name}`}>
                           <Users className="size-3 text-muted-foreground" />
-                          <span className="text-[12px] font-bold text-foreground/70">{ap.user.name}</span>
+                          <span className="text-[12px] font-semibold text-foreground/70">{ap.user.name}</span>
                           <span className={cn(
                             "text-[9px] font-black uppercase px-1.5 py-0.5 rounded-[4px] leading-none",
                             ap.type === "RAISER" ? "bg-amber-600 text-white" : "bg-orange-600 text-white"
@@ -169,7 +169,7 @@ function DepartmentTreeNode({ department, allDepartments, companies, depth = 0 }
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex items-center justify-between py-0.5 hover:bg-accent/50 transition-none group relative",
+          "flex items-center justify-between py-0.5 border-b hover:bg-accent/50 transition-none group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
