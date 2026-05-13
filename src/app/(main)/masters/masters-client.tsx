@@ -47,7 +47,7 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex flex-col border-b hover:bg-accent/30 transition-none group relative",
+          "flex flex-col hover:bg-accent/30 transition-none group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
@@ -169,7 +169,7 @@ function DepartmentTreeNode({ department, allDepartments, companies, depth = 0 }
     <div className="flex flex-col">
       <div
         className={cn(
-          "flex items-center justify-between py-0.5 border-b hover:bg-accent/50 transition-none group relative",
+          "flex items-center justify-between py-0.5 hover:bg-accent/50 transition-none group relative",
           depth > 0 && "bg-muted/5"
         )}
       >
