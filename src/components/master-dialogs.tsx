@@ -33,8 +33,9 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database } from "lucide-react";
+import { Plus, Loader2, Tag, Building2, MapPin, Briefcase, Edit2, X, Check, Trash2, Database, GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import { Reorder } from "framer-motion";
 import {
   createCategory,
   createDepartment,
@@ -607,23 +608,33 @@ export function DataTemplateDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(item?.name || "");
   const [description, setDescription] = useState(item?.description || "");
-  const [fields, setFields] = useState<any[]>(item?.fields || [{ name: "", type: "string", required: true }]);
+  const [fields, setFields] = useState<any[]>(item?.fields?.map((f: any) => ({ ...f, id: f.id || Math.random().toString(36).substr(2, 9) })) || [{ id: Math.random().toString(36).substr(2, 9), name: "", type: "string", required: true }]);
 
   useEffect(() => {
     if (isOpen) {
       if (item) {
         setName(item.name);
         setDescription(item.description || "");
-        setFields(item.fields || []);
+        setFields(item.fields?.map((f: any) => ({ ...f, id: f.id || Math.random().toString(36).substr(2, 9) })) || []);
       } else {
         setName("");
         setDescription("");
-        setFields([{ name: "", type: "string", required: true }]);
+        setFields([{ id: Math.random().toString(36).substr(2, 9), name: "", type: "string", required: true }]);
       }
     }
   }, [isOpen, item]);
 
-  const addField = () => setFields([...fields, { name: "", type: "string", required: true }]);
+  const addField = (index?: number) => {
+    const newField = { id: Math.random().toString(36).substr(2, 9), name: "", type: "string", required: true };
+    if (typeof index === 'number') {
+      const newFields = [...fields];
+      newFields.splice(index + 1, 0, newField);
+      setFields(newFields);
+    } else {
+      setFields([...fields, newField]);
+    }
+  };
+  
   const removeField = (index: number) => setFields(fields.filter((_, i) => i !== index));
   const updateField = (index: number, updates: any) => {
     const newFields = [...fields];
@@ -638,7 +649,12 @@ export function DataTemplateDialog({
 
     setIsSubmitting(true);
     try {
-      const payload = { name, description, fields };
+      // Remove temporary IDs before saving
+      const payload = { 
+        name, 
+        description, 
+        fields: fields.map(({ id, ...rest }) => rest) 
+      };
       if (item) {
         await updateDataTemplate(item.id, payload);
         toast.success("Template updated successfully");
@@ -668,7 +684,7 @@ export function DataTemplateDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[55vw] sm:max-w-[55vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-[85vw] sm:max-w-[85vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
         <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
@@ -698,67 +714,101 @@ export function DataTemplateDialog({
           </div>
 
           <div className="space-y-4 pt-4 border-t">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Template Fields (Columns)</Label>
-              <Button onClick={addField} type="button" variant="outline" size="sm" className="h-7 text-[10px] font-bold gap-1 px-3">
-                <Plus className="size-3" /> ADD FIELD
-              </Button>
+              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter">
+                {fields.length} {fields.length === 1 ? 'Field' : 'Fields'} Defined
+              </Badge>
             </div>
 
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-              {fields.map((field, index) => (
-                <div key={index} className="flex items-center gap-4 p-3 border rounded-sm bg-muted/5 relative group">
-                  <div className="flex-[2] space-y-1">
-                    <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
-                    <Input 
-                      className="h-8 text-xs bg-background"
-                      value={field.name}
-                      onChange={(e) => updateField(index, { name: e.target.value })}
-                      placeholder="Column Header"
-                    />
-                  </div>
-                  <div className="w-[180px] shrink-0 space-y-1">
-                    <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
-                    <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
-                      <SelectTrigger className="h-8 text-xs bg-background">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
-                        <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
-                        <SelectItem value="email" className="text-xs">Email</SelectItem>
-                        <SelectItem value="boolean" className="text-xs">Boolean (Yes/No)</SelectItem>
-                        <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {field.type === "list" && (
-                    <div className="flex-[2] space-y-1 animate-in slide-in-from-left-2 duration-200">
-                      <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
-                      <Input
-                        className="h-8 text-xs bg-background"
-                        value={field.options?.join(", ") || ""}
-                        onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
-                        placeholder="Option 1, Option 2, Option 3"
-                      />
+            <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              <Reorder.Group axis="y" values={fields} onReorder={setFields} className="space-y-1">
+                {fields.map((field, index) => (
+                  <Reorder.Item 
+                    key={field.id} 
+                    value={field}
+                    className="relative"
+                  >
+                    <div className="flex items-center gap-3 p-3 border rounded-sm bg-background hover:border-[#0176D3]/30 transition-all group shadow-sm">
+                      <div className="flex-none cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-[#0176D3] transition-colors">
+                        <GripVertical className="size-4" />
+                      </div>
+
+                      {/* 1. FIELD NAME */}
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
+                        <Input 
+                          className="h-9 text-xs bg-muted/5 font-bold focus-visible:bg-background transition-colors"
+                          value={field.name}
+                          onChange={(e) => updateField(index, { name: e.target.value })}
+                          placeholder="Column Header"
+                        />
+                      </div>
+
+                      {/* 2. DATA TYPE */}
+                      <div className="w-[180px] shrink-0 space-y-1">
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
+                        <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
+                          <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="string" className="text-xs">Text (String)</SelectItem>
+                            <SelectItem value="numeric" className="text-xs">Number (Numeric)</SelectItem>
+                            <SelectItem value="email" className="text-xs">Email</SelectItem>
+                            <SelectItem value="boolean" className="text-xs">Boolean (Yes/No)</SelectItem>
+                            <SelectItem value="list" className="text-xs">Dropdown (List)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* 3. VALUES (IF LIST) */}
+                      <div className={cn("flex-1 space-y-1 transition-all duration-300", field.type === "list" ? "opacity-100" : "opacity-0 invisible w-0 p-0 overflow-hidden")}>
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">List Options (Comma Separated)</Label>
+                        <Input
+                          className="h-9 text-xs bg-muted/5"
+                          value={field.options?.join(", ") || ""}
+                          onChange={(e) => updateField(index, { options: e.target.value.split(",").map(o => o.trim()) })}
+                          placeholder="Option 1, Option 2, Option 3"
+                        />
+                      </div>
+
+                      {/* 4. ACTION BUTTON */}
+                      <div className="flex-none pt-4">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:text-destructive shrink-0"
+                          onClick={() => removeField(index)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex-none pt-4">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive shrink-0"
-                      onClick={() => removeField(index)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+
+                    {/* ADD FIELD BUTTON BENEATH ROW */}
+                    <div className="flex justify-center -mb-2 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        onClick={() => addField(index)} 
+                        type="button" 
+                        variant="ghost" 
+                        className="h-6 w-6 p-0 rounded-full bg-[#0176D3] text-white hover:scale-110 transition-transform shadow-lg border-2 border-background"
+                      >
+                        <Plus className="size-3" />
+                      </Button>
+                    </div>
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+
               {fields.length === 0 && (
-                <div className="text-center py-8 border-2 border-dashed rounded-sm">
-                  <p className="text-xs text-muted-foreground">No fields defined yet.</p>
+                <div className="text-center py-12 border-2 border-dashed rounded-sm bg-muted/5">
+                  <Database className="size-8 text-muted-foreground/20 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">No fields defined yet.</p>
+                  <Button onClick={() => addField()} variant="outline" size="sm" className="mt-4 h-8 text-[10px] font-bold uppercase tracking-widest">
+                    Initialize First Column
+                  </Button>
                 </div>
               )}
             </div>
