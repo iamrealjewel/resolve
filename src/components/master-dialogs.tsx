@@ -635,7 +635,7 @@ export function DataTemplateDialog({
       setFields([...fields, newField]);
     }
   };
-  
+
   const removeField = (index: number) => setFields(fields.filter((_, i) => i !== index));
   const updateField = (index: number, updates: any) => {
     const newFields = [...fields];
@@ -651,10 +651,10 @@ export function DataTemplateDialog({
     setIsSubmitting(true);
     try {
       // Remove temporary IDs before saving
-      const payload = { 
-        name, 
-        description, 
-        fields: fields.map(({ id, ...rest }) => rest) 
+      const payload = {
+        name,
+        description,
+        fields: fields.map(({ id, ...rest }) => rest)
       };
       if (item) {
         await updateDataTemplate(item.id, payload);
@@ -685,7 +685,7 @@ export function DataTemplateDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[85vw] sm:max-w-[85vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
+      <DialogContent className="max-w-[100vw] sm:max-w-[45vw] p-0 overflow-hidden border-none rounded-none shadow-2xl">
         <DialogHeader className="p-8 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <DialogTitle className="text-lg font-bold text-foreground leading-none mb-1">{item ? "Modify Template" : "New Template"}</DialogTitle>
@@ -717,16 +717,21 @@ export function DataTemplateDialog({
           <div className="space-y-4 pt-4 border-t">
             <div className="flex items-center justify-between mb-2">
               <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#0176D3]">Template Fields (Columns)</Label>
-              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter">
-                {fields.length} {fields.length === 1 ? 'Field' : 'Fields'} Defined
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter">
+                  {fields.length} {fields.length === 1 ? 'Field' : 'Fields'} Defined
+                </Badge>
+                <Button onClick={() => addField()} type="button" variant="outline" size="sm" className="h-7 text-[9px] font-bold gap-1 px-3 border-[#0176D3] text-[#0176D3] hover:bg-[#0176D3]/10">
+                  <Plus className="size-3" /> ADD FIELD
+                </Button>
+              </div>
             </div>
 
             <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
               <Reorder.Group axis="y" values={fields} onReorder={setFields} className="space-y-1">
                 {fields.map((field, index) => (
-                  <Reorder.Item 
-                    key={field.id} 
+                  <Reorder.Item
+                    key={field.id}
                     value={field}
                     className="relative"
                   >
@@ -738,7 +743,7 @@ export function DataTemplateDialog({
                       {/* 1. FIELD NAME */}
                       <div className="flex-1 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Field Name</Label>
-                        <Input 
+                        <Input
                           className="h-9 text-xs bg-muted/5 font-bold focus-visible:bg-background transition-colors"
                           value={field.name}
                           onChange={(e) => updateField(index, { name: e.target.value })}
@@ -747,7 +752,7 @@ export function DataTemplateDialog({
                       </div>
 
                       {/* 2. DATA TYPE */}
-                      <div className="w-[180px] shrink-0 space-y-1">
+                      <div className="w-[220px] shrink-0 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
                         <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
                           <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium">
@@ -790,10 +795,10 @@ export function DataTemplateDialog({
 
                     {/* ADD FIELD BUTTON BENEATH ROW */}
                     <div className="flex justify-center -mb-2 relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        onClick={() => addField(index)} 
-                        type="button" 
-                        variant="ghost" 
+                      <Button
+                        onClick={() => addField(index)}
+                        type="button"
+                        variant="ghost"
                         className="h-6 w-6 p-0 rounded-full bg-[#0176D3] text-white hover:scale-110 transition-transform shadow-lg border-2 border-background"
                       >
                         <Plus className="size-3" />
