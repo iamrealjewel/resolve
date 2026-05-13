@@ -113,6 +113,7 @@ model Incident {
   description String   @db.Text
   status      String   @default("NEW") // NEW, PENDING_RAISER_APPROVAL, PENDING_RESOLVER_APPROVAL, ASSIGNED, IN_PROGRESS, RESOLVED, CLOSED
   priority    String?
+  reference   String?
   
   // Relations
   companyId    String

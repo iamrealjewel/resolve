@@ -345,6 +345,7 @@ export async function createIncident(formData: any) {
       title: formData.title,
       description: formData.description,
       priority: formData.priority,
+      reference: formData.reference,
       status: initialStatus,
       company: { connect: { id: formData.company } },
       location: formData.location ? { connect: { id: formData.location } } : undefined,
@@ -493,6 +494,7 @@ export async function updateIncident(id: string, data: any) {
     title: data.title,
     description: data.description,
     priority: data.priority,
+    reference: data.reference,
     categoryId: data.categoryId || incident.categoryId,
     locationId: data.locationId || incident.locationId,
     companyId: data.companyId || incident.companyId,
@@ -546,6 +548,9 @@ export async function updateIncident(id: string, data: any) {
   }
   if (data.priority && data.priority !== incident.priority) {
     logEntries.push({ userId: user.id, action: "DETAIL_UPDATE", content: `Priority changed from ${incident.priority} to ${data.priority}` });
+  }
+  if (data.reference !== undefined && data.reference !== incident.reference) {
+    logEntries.push({ userId: user.id, action: "DETAIL_UPDATE", content: `Reference updated from "${incident.reference || "None"}" to "${data.reference || "None"}"` });
   }
   if (data.categoryId && data.categoryId !== incident.categoryId) {
     const oldCat = incident.category?.name || "Unknown";

@@ -87,6 +87,7 @@ const formSchema = z.object({
   status: z.string().optional(),
   assigneeId: z.string().optional().nullable(),
   accessList: z.array(z.string()).default([]),
+  reference: z.string().optional(),
 });
 
 interface IncidentFormProps {
@@ -506,6 +507,14 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
               </div>
             </div>
 
+            <div className="w-[180px] flex items-center gap-3 border-l pl-6 shrink-0">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Reference</span>
+                <span className="text-sm font-bold text-foreground truncate">
+                  {initialData.incident?.reference || "None"}
+                </span>
+              </div>
+            </div>
 
             <div className="flex items-center gap-8">
               <div className="flex flex-col min-w-max">
@@ -761,6 +770,31 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       )}
                     />
 
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                    <FormField
+                      control={form.control}
+                      name="reference"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1">
+                          <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">External Reference</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Optional Ref / PO #"
+                              readOnly={effectiveIsView}
+                              {...field} 
+                              value={field.value || ""}
+                              className={cn(
+                                "h-8 bg-transparent px-0 border-b border-t-0 border-x-0 rounded-none focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all text-[13px] font-semibold",
+                                isView && "border-transparent cursor-default"
+                              )}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <FormField
