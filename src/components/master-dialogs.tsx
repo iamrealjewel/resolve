@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { Reorder } from "framer-motion";
 import {
   createCategory,
+  updateCategory,
   createDepartment,
   createLocation,
   createDesignation,
