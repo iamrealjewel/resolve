@@ -722,7 +722,7 @@ export function DataTemplateDialog({
               </Badge>
             </div>
 
-            <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
               <Reorder.Group axis="y" values={fields} onReorder={setFields} className="space-y-1">
                 {fields.map((field, index) => (
                   <Reorder.Item
@@ -750,7 +750,7 @@ export function DataTemplateDialog({
                       <div className="min-w-[150px] flex-1 space-y-1">
                         <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
                         <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
-                          <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium">
+                          <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium w-full">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -805,10 +805,10 @@ export function DataTemplateDialog({
 
               {fields.length > 0 && (
                 <div className="flex justify-center py-4">
-                  <Button 
-                    onClick={() => addField()} 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    onClick={() => addField()}
+                    type="button"
+                    variant="outline"
                     className="h-8 text-[10px] font-bold uppercase tracking-widest gap-2 px-6 border-dashed border-2 hover:border-[#0176D3] hover:text-[#0176D3] transition-all"
                   >
                     <Plus className="size-3" /> Append New Field
