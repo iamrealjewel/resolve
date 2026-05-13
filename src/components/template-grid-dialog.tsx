@@ -65,7 +65,8 @@ export function TemplateGridDialog({
   data: any[],
   onSave: (data: any[]) => void,
   isOpen: boolean,
-  setIsOpen: (open: boolean) => void
+  setIsOpen: (open: boolean) => void,
+  isReadOnly?: boolean
 }) {
   const createEmptyRow = () => {
     const row: any = {};
@@ -126,6 +127,19 @@ export function TemplateGridDialog({
       });
       // Hide the reference sheet to keep it clean
       listSheet.state = "hidden";
+    }
+
+    // Add existing data if any
+    const dataRows = rows.filter(row => Object.values(row).some(v => v !== ""));
+    if (dataRows.length > 0) {
+      dataRows.forEach((row, idx) => {
+        const rowData = template.fields.map(f => {
+          const val = row[f.name];
+          if (f.type === "boolean") return val ? "Yes" : "No";
+          return val || "";
+        });
+        worksheet.getRow(idx + 2).values = rowData;
+      });
     }
 
     // Apply data validation to 100 rows
@@ -232,19 +246,21 @@ export function TemplateGridDialog({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExport} className="h-8 text-[10px] font-bold gap-1.5 rounded-sm">
-              <Download className="size-3.5" /> DOWNLOAD TEMPLATE
+              <Download className="size-3.5" /> DOWNLOAD {dataRows.length > 0 ? "DATA" : "TEMPLATE"}
             </Button>
-            <div className="relative">
-              <Button variant="outline" size="sm" className="h-8 text-[10px] font-bold gap-1.5 rounded-sm">
-                <Upload className="size-3.5" /> IMPORT EXCEL
-              </Button>
-              <input 
-                type="file" 
-                accept=".xlsx, .xls" 
-                className="absolute inset-0 opacity-0 cursor-pointer" 
-                onChange={handleImport}
-              />
-            </div>
+            {!isReadOnly && (
+              <div className="relative">
+                <Button variant="outline" size="sm" className="h-8 text-[10px] font-bold gap-1.5 rounded-sm">
+                  <Upload className="size-3.5" /> IMPORT EXCEL
+                </Button>
+                <input 
+                  type="file" 
+                  accept=".xlsx, .xls" 
+                  className="absolute inset-0 opacity-0 cursor-pointer" 
+                  onChange={handleImport}
+                />
+              </div>
+            )}
           </div>
         </DialogHeader>
 
@@ -326,11 +342,13 @@ export function TemplateGridDialog({
           </Table>
         </div>
 
-        <div className="p-4 border-t bg-muted/10">
-          <Button onClick={addRow} variant="ghost" size="sm" className="h-8 text-[10px] font-black text-[#0176D3] gap-1.5 hover:bg-[#0176D3]/10">
-            <Plus className="size-4" /> ADD ANOTHER RECORD
-          </Button>
-        </div>
+        {!isReadOnly && (
+          <div className="p-4 border-t bg-muted/10">
+            <Button onClick={addRow} variant="ghost" size="sm" className="h-8 text-[10px] font-black text-[#0176D3] gap-1.5 hover:bg-[#0176D3]/10">
+              <Plus className="size-4" /> ADD ANOTHER RECORD
+            </Button>
+          </div>
+        )}
 
         <DialogFooter className="p-6 bg-muted/30 border-t flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -341,11 +359,13 @@ export function TemplateGridDialog({
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" onClick={() => setIsOpen(false)} className="h-9 text-[10px] font-bold px-6 rounded-none uppercase tracking-widest border-2">
-              CANCEL
+              {isReadOnly ? "CLOSE" : "CANCEL"}
             </Button>
-            <Button onClick={handleSave} className="h-9 bg-foreground text-background hover:bg-foreground/90 text-[10px] font-bold px-8 rounded-none uppercase tracking-widest min-w-[120px]">
-              CONFIRM DATA
-            </Button>
+            {!isReadOnly && (
+              <Button onClick={handleSave} className="h-9 bg-foreground text-background hover:bg-foreground/90 text-[10px] font-bold px-8 rounded-none uppercase tracking-widest min-w-[120px]">
+                CONFIRM DATA
+              </Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>

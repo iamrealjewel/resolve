@@ -1053,6 +1053,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
           template={template}
           data={templateData}
           onSave={setTemplateData}
+          isReadOnly={effectiveIsView}
         />
       )}
     </div>
