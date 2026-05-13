@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { 
   Select, 
   SelectContent, 
@@ -95,32 +97,79 @@ export function TemplateGridDialog({
     setRows(newRows);
   };
 
-  const handleExport = () => {
-    const headers = template.fields.map(f => f.name);
-    const ws = XLSX.utils.json_to_sheet([], { header: headers });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Template");
+  const handleExport = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Template");
 
-    // Add Reference sheet for lists
+    // Add Headers
+    const headers = template.fields.map(f => f.name);
+    worksheet.getRow(1).values = headers;
+    worksheet.getRow(1).font = { bold: true };
+
+    // Set column widths
+    worksheet.columns = template.fields.map(f => ({
+      header: f.name,
+      key: f.name,
+      width: 25
+    }));
+
+    // Add reference sheet for lists
     const listFields = template.fields.filter(f => f.type === "list" && (f as any).options?.length > 0);
+    let listSheet: ExcelJS.Worksheet | null = null;
     if (listFields.length > 0) {
-      const referenceData: any[] = [];
-      const maxOptions = Math.max(...listFields.map(f => (f as any).options.length));
-      
-      for (let i = 0; i < maxOptions; i++) {
-        const row: any = {};
-        listFields.forEach(f => {
-          row[f.name] = (f as any).options[i] || "";
+      listSheet = workbook.addWorksheet("Allowed_Options");
+      listFields.forEach((f, colIdx) => {
+        const options = (f as any).options as string[];
+        options.forEach((opt, rowIdx) => {
+          listSheet!.getCell(rowIdx + 1, colIdx + 1).value = opt;
         });
-        referenceData.push(row);
-      }
-      
-      const wsRef = XLSX.utils.json_to_sheet(referenceData);
-      XLSX.utils.book_append_sheet(wb, wsRef, "Allowed_Options");
+      });
+      // Hide the reference sheet to keep it clean
+      listSheet.state = "hidden";
     }
 
-    XLSX.writeFile(wb, `${template.name}_Template.xlsx`);
-    toast.success("Template downloaded with Allowed_Options sheet");
+    // Apply data validation to 100 rows
+    for (let i = 2; i <= 101; i++) {
+      template.fields.forEach((field, colIdx) => {
+        const cell = worksheet.getCell(i, colIdx + 1);
+        
+        if (field.type === "list" && (field as any).options?.length > 0) {
+          const colLetter = String.fromCharCode(65 + listFields.findIndex(f => f.name === field.name));
+          const optionsCount = (field as any).options.length;
+          cell.dataValidation = {
+            type: "list",
+            allowBlank: true,
+            formulae: [`Allowed_Options!$${colLetter}$1:$${colLetter}$${optionsCount}`],
+            showErrorMessage: true,
+            errorTitle: "Invalid Value",
+            error: "Please select a value from the list."
+          };
+        } else if (field.type === "boolean") {
+          cell.dataValidation = {
+            type: "list",
+            allowBlank: true,
+            formulae: ['"Yes,No"'],
+            showErrorMessage: true,
+            errorTitle: "Invalid Value",
+            error: "Please select Yes or No."
+          };
+        } else if (field.type === "numeric") {
+          cell.dataValidation = {
+            type: "whole",
+            allowBlank: true,
+            operator: "greaterThanOrEqual",
+            formulae: [0],
+            showErrorMessage: true,
+            errorTitle: "Invalid Input",
+            error: "Please enter a numeric value."
+          };
+        }
+      });
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), `${template.name}_Template.xlsx`);
+    toast.success("Excel template with dropdowns downloaded");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
