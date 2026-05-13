@@ -123,11 +123,11 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                   )}
 
                   {/* Template Info - Moved to last */}
-                  {category.template && (
-                    <div className="flex items-center gap-1 text-[9px] font-medium text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${category.template.name}`}>
+                  {(category as any).template && (
+                    <div className="flex items-center gap-1 text-[9px] font-medium text-indigo-600 uppercase tracking-wider bg-indigo-50 px-1.5 py-0.5 rounded-sm border border-indigo-200 whitespace-nowrap" title={`Template: ${(category as any).template.name}`}>
                       <FolderTree className="size-2.5" />
                       <span className="opacity-60 mr-0.5">Template:</span>
-                      {category.template.name}
+                      {(category as any).template.name}
                     </div>
                   )}
                 </div>
@@ -250,43 +250,42 @@ export function MastersClient({ data }: { data: any }) {
 
       <Tabs defaultValue="companies" className="flex-1 flex flex-col">
         <div className="border-b bg-background sticky top-0 z-10">
-          <TabsList className="h-9 bg-muted/20 p-0 gap-0 border-none flex rounded-none" variant="line">
+          <TabsList variant="line" className="h-14 bg-transparent p-0 gap-0 justify-start rounded-none border-none">
             <TabsTrigger
               value="companies"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Building2 className="size-3.5" /> Companies
             </TabsTrigger>
             <TabsTrigger
               value="organization"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Users className="size-3.5" /> Org Units
             </TabsTrigger>
             <TabsTrigger
               value="designations"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Tag className="size-3.5" /> Designations
             </TabsTrigger>
             <TabsTrigger
               value="classifications"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <GitBranch className="size-3.5" /> Service Tree
             </TabsTrigger>
             <TabsTrigger
               value="routing"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <ArrowRight className="size-3.5" /> Routing
             </TabsTrigger>
             <TabsTrigger
               value="templates"
-              className="rounded-none border-none data-[state=active]:bg-[#0176D3] data-[state=active]:text-white transition-all h-full px-4 flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
             >
-              <Layers className="size-3" />
-              Templates
+              <Layers className="size-3" /> Templates
             </TabsTrigger>
           </TabsList>
         </div>
@@ -397,6 +396,7 @@ export function MastersClient({ data }: { data: any }) {
                               <InfrastructureDialog type="location" item={loc} />
                               <ConfirmDialog
                                 title="Delete Location?"
+                                description="Are you sure you want to delete this location? This action cannot be undone."
                                 onConfirm={async () => await deleteLocation(loc.id)}
                                 trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
                               />
@@ -440,6 +440,7 @@ export function MastersClient({ data }: { data: any }) {
                             <InfrastructureDialog type="designation" item={d} />
                             <ConfirmDialog
                               title="Delete Designation?"
+                              description="Are you sure you want to delete this designation? This action cannot be undone."
                               onConfirm={async () => await deleteDesignation(d.id)}
                               trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
                             />
@@ -517,6 +518,7 @@ export function MastersClient({ data }: { data: any }) {
                           <RoutingRuleDialog categories={categories} departments={departments} users={users} item={rule} />
                           <ConfirmDialog
                             title="Delete Routing Rule?"
+                            description="Are you sure you want to delete this routing rule? This action cannot be undone."
                             onConfirm={async () => await deleteRoutingRule(rule.id)}
                             trigger={<Button variant="ghost" size="icon" className="h-8 w-8"><Trash2 className="size-4" /></Button>}
                           />
@@ -529,20 +531,18 @@ export function MastersClient({ data }: { data: any }) {
             </Card>
           </TabsContent>
 
-          <TabsContent value="templates" className="mt-0 border-none flex-1 overflow-hidden">
-            <Card className="h-full border-none shadow-none rounded-none">
-              <CardHeader className="py-6 px-0 flex flex-row items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg font-bold">Data Templates</CardTitle>
-                  <CardDescription className="text-xs">Define worksheet schemas for specialized request types</CardDescription>
-                </div>
-                <DataTemplateDialog />
-              </CardHeader>
-              <CardContent className="px-0 py-0">
-                <div className="border border-border/50">
-                  <Table>
-                    <TableHeader className="bg-muted/30">
-                      <TableRow>
+          <TabsContent value="templates" className="m-0 space-y-4 focus-visible:outline-none">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold">Data Templates</h3>
+                <p className="text-sm text-muted-foreground">Define worksheet schemas for specialized request types.</p>
+              </div>
+              <DataTemplateDialog />
+            </div>
+            <Card className="border shadow-none overflow-hidden rounded-none">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
                         <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Template Name</TableHead>
                         <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Fields (Columns)</TableHead>
                         <TableHead className="text-[10px] font-bold uppercase tracking-wider h-10">Description</TableHead>
@@ -575,11 +575,12 @@ export function MastersClient({ data }: { data: any }) {
                                   await deleteDataTemplate(template.id);
                                   toast.success("Template deleted successfully");
                                 }}
-                              >
-                                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive">
-                                  <Trash2 className="size-4" />
-                                </Button>
-                              </ConfirmDialog>
+                                trigger={
+                                  <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive">
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                }
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -593,8 +594,6 @@ export function MastersClient({ data }: { data: any }) {
                       )}
                     </TableBody>
                   </Table>
-                </div>
-              </CardContent>
             </Card>
           </TabsContent>
         </div>

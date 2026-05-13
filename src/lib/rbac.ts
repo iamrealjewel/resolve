@@ -11,11 +11,10 @@ export type Role = typeof ROLES[keyof typeof ROLES];
 export const MENU_PERMISSIONS: Record<string, Role[]> = {
   "/dashboard": ["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"],
   "/incidents": ["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"],
-  "/reports": ["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"],
   "/org": ["SUPER_ADMIN"],
   "/users": ["SUPER_ADMIN"],
   "/masters": ["SUPER_ADMIN"],
-  "/settings": ["SUPER_ADMIN"],
+  "/audit-trail": ["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"],
 };
 
 export function canAccess(role: string | undefined, path: string): boolean {

@@ -120,7 +120,7 @@ export async function getIncidents(tab: string = "all") {
     if (user.role === "SUPER_ADMIN") {
       // Super Admin sees everything in their company
     } else if (user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER") {
-      const resolverCatIds = await getResolverCategoryIds(user.departmentId);
+      const resolverCatIds = user.departmentId ? await getResolverCategoryIds(user.departmentId) : [];
       where.OR = [
         { departmentId: user.departmentId },
         { categoryId: { in: resolverCatIds } },
@@ -128,7 +128,7 @@ export async function getIncidents(tab: string = "all") {
         { accessList: { some: { id: user.id } } }
       ];
     } else if (user.role === "RESOLVER") {
-      const resolverCatIds = await getResolverCategoryIds(user.departmentId);
+      const resolverCatIds = user.departmentId ? await getResolverCategoryIds(user.departmentId) : [];
       where.AND = [
         {
           OR: [
@@ -159,8 +159,12 @@ export async function getIncidents(tab: string = "all") {
             rules: true
           }
         },
-        reporter: true,
-        assignee: true,
+        reporter: {
+          include: { department: true, designation: true }
+        },
+        assignee: {
+          include: { department: true, designation: true }
+        },
         accessList: true,
         attachments: true,
         logs: {
@@ -195,7 +199,7 @@ export async function getIncidentStats(sessionUser: any) {
   if (!user) return { allCount: 0, myCount: 0, pendingCount: 0 };
 
   const resolverCatIds = (user.role === "RESOLVER" || user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER")
-    ? await getResolverCategoryIds(user.departmentId)
+    ? (user.departmentId ? await getResolverCategoryIds(user.departmentId) : [])
     : [];
 
   const [allCount, myCount, pendingCount] = await Promise.all([
@@ -204,13 +208,13 @@ export async function getIncidentStats(sessionUser: any) {
         ...(user.role === "SUPER_ADMIN" ? {} :
           {
             ...(user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER" ?
-              { OR: [{ departmentId: user.departmentId }, { categoryId: { in: resolverCatIds } }, { reporter: { superiorId: user.id } }, { accessList: { some: { id: user.id } } }] } :
+              { OR: [{ departmentId: user.departmentId ?? undefined }, { categoryId: { in: resolverCatIds } }, { reporter: { superiorId: user.id } }, { accessList: { some: { id: user.id } } }] } :
               (user.role === "RESOLVER" ?
                 {
                   AND: [
                     {
                       OR: [
-                        { departmentId: user.departmentId },
+                        { departmentId: user.departmentId ?? undefined },
                         { categoryId: { in: resolverCatIds } },
                         { accessList: { some: { id: user.id } } }
                       ]
@@ -230,7 +234,7 @@ export async function getIncidentStats(sessionUser: any) {
           (user.role === "DEPARTMENT_HEAD" ?
             { AND: [
                 { status: { in: ["PENDING_BUSINESS_APPROVAL", "PENDING_OPERATIONAL_APPROVAL"] } },
-                { departmentId: user.departmentId }
+                { departmentId: user.departmentId ?? undefined }
               ]
             } :
             {
@@ -439,7 +443,9 @@ export async function getIncident(id: string) {
   const isReporter = incident.reporterId === user.id;
   const isAssignee = incident.assigneeId === user.id;
   const isApprover = incident.raiserApproverId === user.id || incident.resolverApproverId === user.id;
-  const mgrResolverCatIds = (user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER") ? await getResolverCategoryIds(user.departmentId) : [];
+  const mgrResolverCatIds = (user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER") 
+    ? (user.departmentId ? await getResolverCategoryIds(user.departmentId) : []) 
+    : [];
   const isDeptHead = (user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER") && (
     incident.departmentId === user.departmentId ||
     (incident.reporter as any).superiorId === user.id ||
@@ -447,7 +453,9 @@ export async function getIncident(id: string) {
   );
   const isTagged = (incident as any).accessList?.some((u: any) => u.id === user.id);
 
-  const resolverCatIds = user.role === "RESOLVER" ? await getResolverCategoryIds(user.departmentId) : [];
+  const resolverCatIds = user.role === "RESOLVER" 
+    ? (user.departmentId ? await getResolverCategoryIds(user.departmentId) : []) 
+    : [];
   const isResolverForCategory = user.role === "RESOLVER" && (
     incident.departmentId === user.departmentId ||
     resolverCatIds.includes(incident.categoryId)
@@ -466,7 +474,12 @@ export async function updateIncident(id: string, data: any) {
 
   const incident = await prisma.incident.findUnique({
     where: { id },
-    include: { category: true, reporter: true }
+    include: { 
+      category: {
+        include: { rules: true }
+      }, 
+      reporter: true 
+    }
   });
 
   if (!incident) throw new Error("Incident not found");
@@ -678,14 +691,14 @@ export async function assignIncident(id: string, assigneeId?: string) {
     // If the incident has a direct department, include that too
     if (incident.departmentId) resolverDeptIdList.push(incident.departmentId);
 
-    if (!resolverDeptIdList.includes(freshUser.departmentId)) {
+    if (!freshUser.departmentId || !resolverDeptIdList.includes(freshUser.departmentId)) {
       throw new Error("Unauthorized: You are not part of the resolver department for this incident.");
     }
 
     // If assigning to someone else, verify they are in the same department
     if (targetAssigneeId !== freshUser.id) {
       const targetUser = await prisma.user.findUnique({ where: { id: targetAssigneeId } });
-      if (!targetUser || !resolverDeptIdList.includes(targetUser.departmentId)) {
+      if (!targetUser || !targetUser.departmentId || !resolverDeptIdList.includes(targetUser.departmentId)) {
         throw new Error("Unauthorized: You can only assign to members of the same resolver department.");
       }
     }

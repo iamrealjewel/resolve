@@ -6,8 +6,7 @@ import Link from "next/link";
 import { 
   LayoutDashboard, 
   AlertCircle, 
-  BarChart3, 
-  Settings, 
+  ShieldCheck, 
   Users, 
   Building2, 
   Database,
@@ -38,16 +37,15 @@ const navMain = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Incidents", url: "/incidents", icon: AlertCircle },
   { title: "Users", url: "/users", icon: Users },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Audit Trail", url: "/audit-trail", icon: ShieldCheck },
   { title: "Master Data", url: "/masters", icon: Database },
-  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function GlobalHeader() {
   const pathname = usePathname();
   const { layoutType, toggleLayout } = useLayout();
   const { data: session } = useSession();
-  const role = session?.user?.role;
+  const role = (session?.user as any)?.role;
 
   const filteredNavMain = navMain.filter((item) => canAccess(role, item.url));
   
@@ -57,81 +55,48 @@ export function GlobalHeader() {
 
   return (
     <header className="h-14 border-b bg-background sticky top-0 z-50 flex items-center w-full px-6 justify-between">
-      <div className={cn(
-        "flex items-center h-full px-4 transition-all duration-300",
-        layoutType === "sidebar" 
-          ? (state === "expanded" ? "w-[var(--sidebar-width)] border-r" : "w-[var(--sidebar-width-icon)] border-r")
-          : "flex-1"
-      )}>
-        <Logo showText={layoutType === "topnav" || state === "expanded"} />
+      <div className="flex items-center h-full">
+        <Logo showText={true} />
         
-        {layoutType === "sidebar" && state === "expanded" && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="size-8 ml-auto"
-            onClick={toggleSidebar}
-          >
-            <Menu className="size-5" />
-          </Button>
-        )}
-
-        {layoutType === "topnav" && (
-          <div className="ml-6 flex items-center h-full">
-            <nav className="hidden md:flex items-center h-full">
-              {filteredNavMain.map((item) => {
-                const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
-                return (
-                  <Link
-                    key={item.url}
-                    href={item.url}
-                    className={cn(
-                      "h-14 px-5 flex items-center gap-2 text-sm font-medium transition-colors border-b-[3px]",
-                      isActive 
-                        ? "border-[#0176D3] text-[#0176D3]" 
-                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                    {item.title}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        )}
+        <div className="ml-6 flex items-center h-full">
+          <nav className="hidden md:flex items-center h-full">
+            {filteredNavMain.map((item) => {
+              const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
+              return (
+                <Link
+                  key={item.url}
+                  href={item.url}
+                  className={cn(
+                    "flex items-center h-14 px-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2",
+                    isActive 
+                      ? "text-[#0176D3] border-[#0176D3] bg-blue-50/50" 
+                      : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <item.icon className="size-4 mr-2" />
+                  {item.title}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
-      {layoutType === "sidebar" && state === "collapsed" && (
-        <div className="px-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="size-8"
-            onClick={toggleSidebar}
-          >
-            <Menu className="size-5" />
-          </Button>
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleLayout}
+          title="Switch to Sidebar"
+          className="size-8 text-muted-foreground hover:text-foreground"
+        >
+          <LayoutIcon className="size-4" />
+        </Button>
+        <ThemeToggle />
+        <div className="ml-2">
+          <UserNav />
         </div>
-      )}
-
-      {layoutType === "topnav" && (
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleLayout}
-            title="Switch to Sidebar"
-            className="size-8 text-muted-foreground hover:text-foreground"
-          >
-            <LayoutIcon className="size-4" />
-          </Button>
-          <ThemeToggle />
-          <div className="ml-2">
-            <UserNav />
-          </div>
-        </div>
-      )}
+      </div>
     </header>
   );
 }

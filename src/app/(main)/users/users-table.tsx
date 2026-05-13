@@ -126,7 +126,7 @@ export function UsersTable({
           <div className="flex flex-col gap-2.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Access Role</label>
             <div className="h-10">
-              <Select value={filters.role} onValueChange={(v) => setFilters({...filters, role: v})}>
+              <Select value={filters.role} onValueChange={(v) => setFilters({...filters, role: v || "all"})}>
                 <SelectTrigger className="w-full h-full bg-muted/5 rounded-sm border text-xs font-semibold focus:ring-0 focus:border-[#0176D3] focus:bg-background px-4">
                   {filters.role === "all" ? "All Roles" : ROLE_MAP[filters.role]}
                 </SelectTrigger>
@@ -143,7 +143,7 @@ export function UsersTable({
           <div className="flex flex-col gap-2.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Organization</label>
             <div className="h-10">
-              <Select value={filters.companyId} onValueChange={(v) => setFilters({...filters, companyId: v})}>
+              <Select value={filters.companyId} onValueChange={(v) => setFilters({...filters, companyId: v || "all"})}>
                 <SelectTrigger className="w-full h-full bg-muted/5 rounded-sm border text-xs font-semibold focus:ring-0 focus:border-[#0176D3] focus:bg-background px-4">
                   {filters.companyId === "all" ? "All Companies" : companies.find(c => c.id === filters.companyId)?.name || filters.companyId}
                 </SelectTrigger>
@@ -160,7 +160,7 @@ export function UsersTable({
           <div className="flex flex-col gap-2.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Department</label>
             <div className="h-10">
-              <Select value={filters.departmentId} onValueChange={(v) => setFilters({...filters, departmentId: v})}>
+              <Select value={filters.departmentId} onValueChange={(v) => setFilters({...filters, departmentId: v || "all"})}>
                 <SelectTrigger className="w-full h-full bg-muted/5 rounded-sm border text-xs font-semibold focus:ring-0 focus:border-[#0176D3] focus:bg-background px-4">
                   {filters.departmentId === "all" ? "All Departments" : departments.find(d => d.id === filters.departmentId)?.name || filters.departmentId}
                 </SelectTrigger>
@@ -177,7 +177,7 @@ export function UsersTable({
           <div className="flex flex-col gap-2.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Location</label>
             <div className="h-10">
-              <Select value={filters.locationId} onValueChange={(v) => setFilters({...filters, locationId: v})}>
+              <Select value={filters.locationId} onValueChange={(v) => setFilters({...filters, locationId: v || "all"})}>
                 <SelectTrigger className="w-full h-full bg-muted/5 rounded-sm border text-xs font-semibold focus:ring-0 focus:border-[#0176D3] focus:bg-background px-4">
                   {filters.locationId === "all" ? "All Locations" : locations.find(l => l.id === filters.locationId)?.name || filters.locationId}
                 </SelectTrigger>
@@ -194,7 +194,7 @@ export function UsersTable({
           <div className="flex flex-col gap-2.5">
             <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-0.5">Designation</label>
             <div className="h-10">
-              <Select value={filters.designationId} onValueChange={(v) => setFilters({...filters, designationId: v})}>
+              <Select value={filters.designationId} onValueChange={(v) => setFilters({...filters, designationId: v || "all"})}>
                 <SelectTrigger className="w-full h-full bg-muted/5 rounded-sm border text-xs font-semibold focus:ring-0 focus:border-[#0176D3] focus:bg-background px-4">
                   {filters.designationId === "all" ? "All Designations" : designations.find(d => d.id === filters.designationId)?.title || filters.designationId}
                 </SelectTrigger>

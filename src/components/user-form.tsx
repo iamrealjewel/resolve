@@ -301,7 +301,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Access Role</Label>
-                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
+                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v || "USER" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {ROLE_MAP[form.role] || form.role}
                   </SelectTrigger>
@@ -314,7 +314,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Entity</Label>
-                <Select value={form.companyId} onValueChange={(v) => setForm({ ...form, companyId: v })}>
+                <Select value={form.companyId} onValueChange={(v) => setForm({ ...form, companyId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.companyId ? (companies.find(c => c.id === form.companyId)?.name || form.companyId) : <span className="text-muted-foreground font-normal">Select entity...</span>}
                   </SelectTrigger>
@@ -330,7 +330,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Department</Label>
-                <Select value={form.departmentId || ""} onValueChange={(v) => setForm({ ...form, departmentId: v })}>
+                <Select value={form.departmentId || ""} onValueChange={(v) => setForm({ ...form, departmentId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.departmentId ? (departments.find(d => d.id === form.departmentId)?.name || form.departmentId) : <span className="text-muted-foreground font-normal">Select department...</span>}
                   </SelectTrigger>
@@ -346,7 +346,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Designation</Label>
-                <Select value={form.designationId || ""} onValueChange={(v) => setForm({ ...form, designationId: v })}>
+                <Select value={form.designationId || ""} onValueChange={(v) => setForm({ ...form, designationId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.designationId ? (designations.find(d => d.id === form.designationId)?.title || form.designationId) : <span className="text-muted-foreground font-normal">Select title...</span>}
                   </SelectTrigger>
@@ -363,7 +363,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Primary Site</Label>
-                <Select value={form.locationId || ""} onValueChange={(v) => setForm({ ...form, locationId: v })}>
+                <Select value={form.locationId || ""} onValueChange={(v) => setForm({ ...form, locationId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.locationId ? (locations.find(l => l.id === form.locationId)?.name || form.locationId) : <span className="text-muted-foreground font-normal">Select location...</span>}
                   </SelectTrigger>
@@ -379,7 +379,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
                 <Label className="text-xs font-medium text-muted-foreground">Reporting Manager</Label>
                 <SuperiorPicker 
                   value={form.superiorId} 
-                  onValueChange={(v) => setForm({ ...form, superiorId: v })}
+                  onValueChange={(v) => setForm({ ...form, superiorId: v || "" })}
                   users={users}
                 />
               </div>
@@ -544,7 +544,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Access Role</Label>
-                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
+                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v || "USER" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {ROLE_MAP[form.role] || form.role}
                   </SelectTrigger>
@@ -557,7 +557,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Entity</Label>
-                <Select value={form.companyId} onValueChange={(v) => setForm({ ...form, companyId: v })}>
+                <Select value={form.companyId} onValueChange={(v) => setForm({ ...form, companyId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.companyId ? (companies.find(c => c.id === form.companyId)?.name || form.companyId) : <span className="text-muted-foreground font-normal">Select entity...</span>}
                   </SelectTrigger>
@@ -573,7 +573,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Department</Label>
-                <Select value={form.departmentId || ""} onValueChange={(v) => setForm({ ...form, departmentId: v })}>
+                <Select value={form.departmentId || ""} onValueChange={(v) => setForm({ ...form, departmentId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.departmentId ? (departments.find(d => d.id === form.departmentId)?.name || form.departmentId) : <span className="text-muted-foreground font-normal">Select department...</span>}
                   </SelectTrigger>
@@ -589,7 +589,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Designation</Label>
-                <Select value={form.designationId || ""} onValueChange={(v) => setForm({ ...form, designationId: v })}>
+                <Select value={form.designationId || ""} onValueChange={(v) => setForm({ ...form, designationId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.designationId ? (designations.find(d => d.id === form.designationId)?.title || form.designationId) : <span className="text-muted-foreground font-normal">Select title...</span>}
                   </SelectTrigger>
@@ -606,7 +606,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Primary Site</Label>
-                <Select value={form.locationId || ""} onValueChange={(v) => setForm({ ...form, locationId: v })}>
+                <Select value={form.locationId || ""} onValueChange={(v) => setForm({ ...form, locationId: v || "" })}>
                   <SelectTrigger className="h-9 bg-transparent rounded-sm border text-sm font-medium w-full px-3 focus:ring-0 focus:border-[#0176D3]">
                     {form.locationId ? (locations.find(l => l.id === form.locationId)?.name || form.locationId) : <span className="text-muted-foreground font-normal">Select location...</span>}
                   </SelectTrigger>
@@ -622,7 +622,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
                 <Label className="text-xs font-medium text-muted-foreground">Reporting Manager</Label>
                 <SuperiorPicker 
                   value={form.superiorId} 
-                  onValueChange={(v) => setForm({ ...form, superiorId: v })}
+                  onValueChange={(v) => setForm({ ...form, superiorId: v || "" })}
                   users={users}
                 />
               </div>

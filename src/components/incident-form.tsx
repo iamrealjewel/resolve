@@ -142,8 +142,8 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
   const isApprover = isBusinessApprover || isOperationalApprover;
 
-  const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
-  const isResolver = session?.user?.role === "RESOLVER";
+  const isSuperAdmin = (session?.user as any)?.role === "SUPER_ADMIN";
+  const isResolver = (session?.user as any)?.role === "RESOLVER";
   const isView = mode === "VIEW";
   const isEdit = mode === "EDIT";
   const isCreate = mode === "CREATE";
@@ -163,16 +163,16 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
       title: initialData.incident?.title || "",
       description: initialData.incident?.description || "",
       priority: initialData.incident?.priority || "MEDIUM",
-      company: initialData.incident?.companyId || initialData.sessionUser?.companyId || session?.user?.companyId || initialData.companies[0]?.id || "",
+      company: initialData.incident?.companyId || initialData.sessionUser?.companyId || (session?.user as any)?.companyId || initialData.companies[0]?.id || "",
       location: initialData.incident?.locationId || initialData.sessionUser?.locationId || (session?.user as any)?.locationId || "",
-      reporterId: initialData.incident?.reporterId || initialData.sessionUser?.id || session?.user?.id || "",
+      reporterId: initialData.incident?.reporterId || initialData.sessionUser?.id || (session?.user as any)?.id || "",
       category: initialData.incident?.categoryId || "",
       status: initialData.incident?.status || "NEW",
       assigneeId: initialData.incident?.assigneeId || null,
-      accessList: initialData.incident?.accessList?.map((u: any) => u.id) || [],
+      accessList: (initialData.incident?.accessList?.map((u: any) => u.id) || []) as string[],
       reference: initialData.incident?.reference || "",
     },
-  });
+  } as any);
 
   const watchedCompanyId = form.watch("company");
   const watchedLocationId = form.watch("location");
@@ -186,11 +186,15 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   }, [watchedLocationId, initialData.locations]);
 
   const watchedAssigneeId = form.watch("assigneeId");
-  const assigneeName = React.useMemo(() => {
+  const assigneeInfo = React.useMemo(() => {
     const user = initialData.users.find(u => u.id === watchedAssigneeId) ||
       resolverUsers.find(u => u.id === watchedAssigneeId);
-    const name = user?.name;
-    return typeof name === "string" ? name : "PENDING_ASSIGNMENT";
+    
+    if (!user) return { name: "PENDING_ASSIGNMENT", dept: null };
+    return { 
+      name: user.name || "PENDING_ASSIGNMENT", 
+      dept: (user.department as any)?.name || null 
+    };
   }, [watchedAssigneeId, initialData.users, resolverUsers]);
 
   useEffect(() => {
@@ -210,7 +214,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   const canAssign = React.useMemo(() => {
     if (isSuperAdmin) return true;
     if (!session?.user || !resolverUsers.length) return false;
-    return resolverUsers.some(u => u.id === session.user.id);
+    return resolverUsers.some(u => u.id === (session.user as any).id);
   }, [isSuperAdmin, session?.user, resolverUsers]);
 
   const categoryTree = React.useMemo(() => {
@@ -373,7 +377,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
       toast.success(assigneeId ? "Incident assigned" : "Incident assigned to you");
       form.setValue("status", "ASSIGNED");
       if (assigneeId) form.setValue("assigneeId", assigneeId);
-      else form.setValue("assigneeId", session?.user?.id);
+      else form.setValue("assigneeId", (session?.user as any)?.id);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -499,7 +503,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                 <AlertCircle className="size-4 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Incident ID</span>
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-medium">Incident ID</span>
                 <Link href={`/incidents/${initialData.incident.id}`} className="hover:underline decoration-[#0176D3]/30 underline-offset-2">
                   <span className="text-sm font-bold text-[#0176D3]">
                     {initialData.incident?.ticketId || "N/A"}
@@ -510,7 +514,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
             <div className="w-[180px] flex items-center gap-3 border-l pl-6 shrink-0">
               <div className="flex flex-col">
-                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Reference</span>
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-medium">Reference</span>
                 <span className="text-sm font-bold text-foreground truncate">
                   {initialData.incident?.reference || "None"}
                 </span>
@@ -519,7 +523,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
             <div className="flex items-center gap-8">
               <div className="flex flex-col min-w-max">
-                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Status</span>
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-medium">Status</span>
                 {isEdit && !effectiveIsView ? (
                   <FormField
                     control={form.control}
@@ -556,7 +560,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
               </div>
 
               <div className="flex flex-col min-w-max">
-                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Priority</span>
+                <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-medium">Priority</span>
                 {isEdit && !effectiveIsView ? (
                   <FormField
                     control={form.control}
@@ -603,7 +607,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
               <div className="flex flex-col min-w-max">
                 <div className="flex items-center gap-1 mb-0.5">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Assignee</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Assignee</span>
                   <span className="text-red-500 text-[10px] font-bold">*</span>
                 </div>
                 {(isEdit || (isCreate && (isSuperAdmin || isResolver))) && !effectiveIsView ? (
@@ -624,7 +628,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                             {field.value && field.value !== "PENDING_ASSIGNMENT" ? (
                               resolverUsers.find(u => u.id === field.value)?.name ||
                               initialData.users.find(u => u.id === field.value)?.name ||
-                              assigneeName ||
+                              assigneeInfo.name ||
                               field.value
                             ) : (
                               "Pending Assignment..."
@@ -641,13 +645,18 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                     )}
                   />
                 ) : (
-                  <span className="text-sm font-medium text-foreground">{assigneeName}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-foreground">{assigneeInfo.name}</span>
+                    {assigneeInfo.dept && (
+                      <span className="text-[9px] font-normal text-muted-foreground uppercase">{assigneeInfo.dept}</span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
 
             <div className="flex flex-col min-w-max ml-auto text-right">
-              <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-bold">Created Date</span>
+              <span className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-medium">Created Date</span>
               <span className="text-sm font-medium text-foreground/70 tabular-nums">
                 {new Date(initialData.incident.createdAt).toLocaleDateString()}
               </span>
@@ -656,17 +665,17 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
             <div className="flex items-center gap-2 pl-4 border-l border-[#0176D3]/10">
               {effectiveIsView ? (
                 <>
-                  <Button variant="ghost" size="sm" onClick={() => router.back()} className="h-8 font-bold text-[10px] uppercase tracking-widest text-[#0176D3] hover:bg-white/50">
+                  <Button variant="ghost" size="sm" onClick={() => router.back()} className="h-8 font-medium text-[10px] uppercase tracking-widest text-[#0176D3] hover:bg-white/50">
                     <ChevronLeft className="size-4 mr-1" /> Back
                   </Button>
                   {isView && (isSuperAdmin || ((isAssignee || isResolverForCategory) && !isRestrictedRaiser && !isPendingOperational)) && (
-                    <Button onClick={() => router.push(`/incidents/${initialData.incident.id}/edit`)} size="sm" className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-[10px] uppercase tracking-widest px-4 rounded-sm shadow-sm">
+                    <Button onClick={() => router.push(`/incidents/${initialData.incident.id}/edit`)} size="sm" className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-medium text-[10px] uppercase tracking-widest px-4 rounded-sm shadow-sm">
                       <Edit className="size-3.5 mr-1.5" /> Edit
                     </Button>
                   )}
                 </>
               ) : (
-                <Button variant="ghost" size="sm" onClick={() => router.back()} className="h-8 font-bold text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white/50">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="h-8 font-medium text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white/50">
                   <ChevronLeft className="size-4 mr-1" /> Back
                 </Button>
               )}
@@ -682,7 +691,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-4 pb-2 border-b">
                     <User className="size-4 text-[#0176D3]" />
-                    <h3 className="text-sm font-semibold">Reporter Details</h3>
+                    <h3 className="text-sm font-medium">Reporter Details</h3>
                   </div>
 
                   <div className="space-y-4">
@@ -721,7 +730,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <FileText className="size-4 text-[#0176D3]" />
-                    <h3 className="text-sm font-semibold">Incident Information</h3>
+                    <h3 className="text-sm font-medium">Incident Information</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -731,7 +740,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       render={({ field }) => (
                         <FormItem className="space-y-1 col-span-2">
                           <div className="flex items-center justify-between">
-                            <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">CATEGORY</FormLabel>
+                            <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-tight">CATEGORY</FormLabel>
                             {template && (
                               <Button
                                 type="button"
@@ -739,7 +748,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                                 size="sm"
                                 onClick={() => setTemplateDialogOpen(true)}
                                 className={cn(
-                                  "h-7 text-[10px] font-bold gap-2 px-3 rounded-none uppercase tracking-widest border-2 transition-all shadow-sm",
+                                  "h-7 text-[10px] font-medium gap-2 px-3 rounded-none uppercase tracking-widest border-2 transition-all shadow-sm",
                                   templateData.length > 0
                                     ? "text-green-700 border-green-200 bg-green-50 hover:bg-green-100"
                                     : "text-[#0176D3] border-[#0176D3]/20 bg-[#0176D3]/5 hover:bg-[#0176D3]/10"
@@ -782,7 +791,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       name="reference"
                       render={({ field }) => (
                         <FormItem className="space-y-1">
-                          <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">External Reference</FormLabel>
+                          <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-tight">External Reference</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="PO/CSP/SO/PR etc."
@@ -806,14 +815,14 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                     name="title"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
-                        <FormLabel className="text-xs font-bold text-[#0176D3] uppercase tracking-wider">INCIDENT TITLE</FormLabel>
+                        <FormLabel className="text-xs font-medium text-[#0176D3] uppercase tracking-wider">INCIDENT TITLE</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="What's the issue?"
                             readOnly={effectiveIsView}
                             {...field}
                             className={cn(
-                              "h-10 text-lg font-bold bg-transparent px-0 border-b border-t-0 border-x-0 rounded-none focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all placeholder:text-muted-foreground/30",
+                              "h-10 text-lg font-medium bg-transparent px-0 border-b border-t-0 border-x-0 rounded-none focus-visible:ring-0 focus-visible:border-[#0176D3] transition-all placeholder:text-muted-foreground/30",
                               isView && "border-transparent cursor-default"
                             )}
                           />
@@ -828,7 +837,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                     name="description"
                     render={({ field }) => (
                       <FormItem className="space-y-1 pt-4">
-                        <FormLabel className="text-xs font-bold text-muted-foreground uppercase tracking-tight">TECHNICAL DESCRIPTION</FormLabel>
+                        <FormLabel className="text-xs font-medium text-muted-foreground uppercase tracking-tight">TECHNICAL DESCRIPTION</FormLabel>
                         <FormControl>
                           <Editor readOnly={effectiveIsView} content={field.value} onChange={field.onChange} placeholder="Describe the issue in detail..." />
                         </FormControl>
@@ -843,7 +852,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       <div className="flex items-center justify-between border-b pb-2 h-10">
                         <div className="flex items-center gap-2">
                           <Paperclip className="size-4 text-[#0176D3]" />
-                          <span className="text-sm font-bold uppercase tracking-wider">ATTACHMENTS</span>
+                          <span className="text-sm font-medium uppercase tracking-wider">ATTACHMENTS</span>
                         </div>
                         {!effectiveIsView && (
                           <div className="relative">
@@ -872,7 +881,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-[10px] font-bold text-muted-foreground h-14 flex items-center justify-center border border-dashed rounded bg-muted/5 uppercase tracking-widest">No files attached</p>
+                        <p className="text-[10px] font-medium text-muted-foreground h-14 flex items-center justify-center border border-dashed rounded bg-muted/5 uppercase tracking-widest">No files attached</p>
                       )}
                     </div>
 
@@ -885,7 +894,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                           <div className="flex items-center justify-between border-b pb-2 h-10">
                             <div className="flex items-center gap-2">
                               <Users className="size-4 text-[#0176D3]" />
-                              <span className="text-sm font-bold uppercase tracking-wider">ACCESS LIST</span>
+                              <span className="text-sm font-medium uppercase tracking-wider">ACCESS LIST</span>
                             </div>
                           </div>
                           <FormControl>
@@ -908,14 +917,14 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                         variant="outline"
                         type="button"
                         onClick={() => router.back()}
-                        className="h-10 font-bold text-xs px-8 uppercase tracking-widest hover:bg-muted"
+                        className="h-10 font-medium text-xs px-8 uppercase tracking-widest hover:bg-muted"
                       >
                         Cancel Request
                       </Button>
                       <Button
                         onClick={form.handleSubmit(onSubmit)}
                         disabled={isSubmitting}
-                        className="h-10 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-xs px-10 uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                        className="h-10 bg-[#0176D3] hover:bg-[#014486] text-white font-medium text-xs px-10 uppercase tracking-widest shadow-lg shadow-blue-500/20"
                       >
                         {isSubmitting ? <Loader2 className="size-4 animate-spin mr-2" /> : (isEdit ? "Update" : "Submit Incident")}
                       </Button>
@@ -930,11 +939,19 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                 <div className="w-[450px] border-l bg-[#F1F3F5] dark:bg-black/20 flex flex-col overflow-hidden">
                   <Tabs defaultValue="comments" className="flex-1 flex flex-col overflow-hidden">
                     <div className="px-4 bg-white dark:bg-[#1A1A1A] border-b">
-                      <TabsList className="h-12 w-full bg-transparent p-0 gap-8 justify-start rounded-none border-none">
-                        <TabsTrigger value="comments" className="h-full rounded-none border-x-0 border-t-0 border-b-2 border-transparent data-[state=active]:border-[#0176D3] data-[state=active]:bg-transparent data-[state=active]:text-[#0176D3] text-xs font-bold uppercase tracking-widest px-0 transition-all">
+                      <TabsList variant="line" className="h-14 w-full bg-transparent p-0 gap-0 justify-start rounded-none border-none">
+                        <TabsTrigger 
+                          value="comments" 
+                          className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                        >
+                          <MessageSquare className="size-3.5" />
                           Comments
                         </TabsTrigger>
-                        <TabsTrigger value="audit" className="h-full rounded-none border-x-0 border-t-0 border-b-2 border-transparent data-[state=active]:border-[#0176D3] data-[state=active]:bg-transparent data-[state=active]:text-[#0176D3] text-xs font-bold uppercase tracking-widest px-0 transition-all">
+                        <TabsTrigger 
+                          value="audit" 
+                          className="h-14 px-5 rounded-none border-0 border-b-2 border-b-transparent data-active:border-b-primary data-active:text-primary data-active:bg-primary/5 transition-none flex items-center gap-2 font-bold text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
+                        >
+                          <History className="size-3.5" />
                           Audit Trail
                         </TabsTrigger>
                       </TabsList>

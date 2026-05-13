@@ -117,7 +117,7 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={trigger} />
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[400px] border shadow-2xl bg-background p-0 overflow-hidden">
         <DialogHeader className="p-6 bg-muted/10 border-b">
           <div className="flex items-center gap-3">

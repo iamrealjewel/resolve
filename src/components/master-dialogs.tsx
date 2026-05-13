@@ -48,6 +48,8 @@ import {
   createLocation,
   createDesignation,
   createRoutingRule,
+  updateRoutingRule,
+  deleteRoutingRule,
   updateDepartment,
   updateLocation,
   updateDesignation,

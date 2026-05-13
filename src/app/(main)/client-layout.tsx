@@ -36,7 +36,7 @@ export function ClientLayout({
   const pathname = usePathname();
   const { layoutType } = useLayout();
   const { data: session } = useSession();
-  const role = session?.user?.role;
+  const role = (session?.user as any)?.role;
   
   const isAllowed = canAccess(role, pathname);
   

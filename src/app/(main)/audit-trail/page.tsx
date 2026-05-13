@@ -2,9 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { checkAuth } from "@/lib/auth-utils";
 import { getLogAccessFilter } from "@/lib/access-control";
 import AuditClient from "./audit-client";
+import { redirect } from "next/navigation";
 
 export default async function AuditTrailPage() {
-  const session = await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER"]);
+  const session = await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"]).catch(() => {
+    redirect("/incidents");
+  });
+
+  if (!session) return null;
   const user = session.user as any;
 
   // Fetch all logs authorized for the user

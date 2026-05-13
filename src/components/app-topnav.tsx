@@ -5,13 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   AlertCircle,
-  BarChart3,
-  Settings,
   Users,
   Building2,
-  HelpCircle,
   ShieldCheck,
-  Layout as LayoutIcon,
   Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,37 +15,31 @@ import { UserNav } from "@/components/user-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/components/layout-provider";
+import { useSession } from "next-auth/react";
+import { canAccess } from "@/lib/rbac";
+import { Logo } from "@/components/layout-elements/logo";
 
 const navMain = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Incidents", url: "/incidents", icon: AlertCircle },
   { title: "Organization", url: "/org", icon: Building2 },
   { title: "Users", url: "/users", icon: Users },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+  { title: "Audit Trail", url: "/audit-trail", icon: ShieldCheck },
   { title: "Master Data", url: "/masters", icon: Database },
-  { title: "Settings", url: "/settings", icon: Settings },
 ];
-
-import { useSession } from "next-auth/react";
-import { canAccess } from "@/lib/rbac";
 
 export function AppTopNav() {
   const pathname = usePathname();
   const { toggleLayout } = useLayout();
   const { data: session } = useSession();
-  const role = session?.user?.role;
+  const role = (session?.user as any)?.role;
 
   const filteredNavMain = navMain.filter((item) => canAccess(role, item.url));
 
   return (
     <header className="h-14 w-full border-b bg-background sticky top-0 z-50 px-6 flex items-center justify-between overflow-hidden">
       <div className="flex items-center gap-8 h-full">
-        <Link href="/" className="flex items-center gap-2 mr-4">
-          <div className="h-7 w-7 bg-primary flex items-center justify-center rounded-none">
-            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-sm tracking-tight uppercase">Resolve</span>
-        </Link>
+        <Logo />
  
         <nav className="hidden md:flex items-center h-full">
           {filteredNavMain.map((item) => {
@@ -59,13 +49,13 @@ export function AppTopNav() {
                 key={item.url}
                 href={item.url}
                 className={cn(
-                  "h-14 px-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-none border-b-2 rounded-none",
+                  "h-14 px-5 flex items-center gap-2 text-sm font-medium transition-colors border-b-[3px]",
                   isActive 
-                    ? "border-primary text-primary bg-primary/5" 
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "border-[#0176D3] text-[#0176D3]" 
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <item.icon className="size-3.5" />
+                <item.icon className="size-4" />
                 {item.title}
               </Link>
             );
@@ -73,22 +63,25 @@ export function AppTopNav() {
         </nav>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 px-3 py-1 bg-muted/30 rounded-none border text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+           Layout: Top Navigation
+        </div>
         <Button 
           variant="ghost" 
-          size="icon-sm" 
+          size="icon" 
           onClick={toggleLayout}
-          title="Switch to Sidebar"
-          className="text-muted-foreground hover:text-foreground rounded-none"
+          title="Switch to Sidebar Navigation"
+          className="size-9 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
-          <LayoutIcon className="size-4" />
+          <ShieldCheck className="size-5" />
         </Button>
-        <div className="h-4 w-px bg-border mx-1" />
         <ThemeToggle />
-        <div className="ml-2">
-          <UserNav />
-        </div>
+        <Separator orientation="vertical" className="h-6" />
+        <UserNav />
       </div>
     </header>
   );
 }
+
+import { Separator } from "@/components/ui/separator";

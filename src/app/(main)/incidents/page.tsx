@@ -70,12 +70,13 @@ export default async function IncidentsPage(props: {
   const user = session?.user as any;
   if (!user) return null;
 
-  const [incidents, stats, companies, locations, categories] = await Promise.all([
+  const [incidents, stats, companies, locations, categories, departments] = await Promise.all([
     getIncidents(activeTab),
     getIncidentStats(user),
     prisma.company.findMany(),
     prisma.location.findMany(),
     prisma.incidentCategory.findMany(),
+    prisma.department.findMany(),
   ]);
   
   const { allCount, myCount, pendingCount } = stats;
@@ -144,6 +145,7 @@ export default async function IncidentsPage(props: {
           companies={companies}
           locations={locations}
           categories={categories}
+          departments={departments}
           activeTab={activeTab}
         />
       </div>

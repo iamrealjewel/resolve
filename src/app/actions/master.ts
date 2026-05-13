@@ -11,7 +11,6 @@ export async function createCompany(data: { name: string; logo?: string }) {
   await checkAuth("SUPER_ADMIN");
   const company = await prisma.company.create({ data });
   revalidatePath("/org");
-  revalidatePath("/settings");
   return company;
 }
 
@@ -19,7 +18,6 @@ export async function updateCompany(id: string, data: { name: string; logo?: str
   await checkAuth(["SUPER_ADMIN", "DEPARTMENT_HEAD"]);
   const company = await prisma.company.update({ where: { id }, data });
   revalidatePath("/org");
-  revalidatePath("/settings");
   return company;
 }
 
@@ -27,7 +25,6 @@ export async function deleteCompany(id: string) {
   await checkAuth("SUPER_ADMIN");
   await prisma.company.delete({ where: { id } });
   revalidatePath("/org");
-  revalidatePath("/settings");
 }
 
 // --- DEPARTMENT ---
@@ -283,6 +280,25 @@ export async function deleteUser(id: string) {
   revalidatePath("/users");
 }
 
+export async function changeOwnPassword(currentPass: string, newPass: string) {
+  const session = await checkAuth();
+  const userId = (session.user as any).id;
+  
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+  
+  const isValid = await bcrypt.compare(currentPass, user.password);
+  if (!isValid) throw new Error("Incorrect current password");
+  
+  const hashedPassword = await bcrypt.hash(newPass, 10);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword }
+  });
+  
+  return { success: true };
+}
+
 // --- ROUTING RULE ---
 export async function createRoutingRule(data: { 
   categoryId: string; 
@@ -307,6 +323,5 @@ export async function updateRoutingRule(id: string, data: {
 export async function deleteRoutingRule(id: string) {
   await checkAuth("SUPER_ADMIN");
   await prisma.routingRule.delete({ where: { id } });
-  revalidatePath("/settings");
   revalidatePath("/masters");
 }
