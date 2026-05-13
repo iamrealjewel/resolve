@@ -100,8 +100,27 @@ export function TemplateGridDialog({
     const ws = XLSX.utils.json_to_sheet([], { header: headers });
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
+
+    // Add Reference sheet for lists
+    const listFields = template.fields.filter(f => f.type === "list" && (f as any).options?.length > 0);
+    if (listFields.length > 0) {
+      const referenceData: any[] = [];
+      const maxOptions = Math.max(...listFields.map(f => (f as any).options.length));
+      
+      for (let i = 0; i < maxOptions; i++) {
+        const row: any = {};
+        listFields.forEach(f => {
+          row[f.name] = (f as any).options[i] || "";
+        });
+        referenceData.push(row);
+      }
+      
+      const wsRef = XLSX.utils.json_to_sheet(referenceData);
+      XLSX.utils.book_append_sheet(wb, wsRef, "Allowed_Options");
+    }
+
     XLSX.writeFile(wb, `${template.name}_Template.xlsx`);
-    toast.success("Excel template downloaded");
+    toast.success("Template downloaded with Allowed_Options sheet");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
