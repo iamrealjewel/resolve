@@ -111,6 +111,24 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
                       {category.template.name}
                     </div>
                   )}
+
+                  {/* Override Approvers - Side by Side */}
+                  {category.approvers && category.approvers.length > 0 && (
+                    <div className="flex items-center gap-1.5 border-l border-muted-foreground/20 pl-2 ml-1">
+                      {category.approvers.map((ap: any) => ap.user && (
+                        <div key={ap.id} className="flex items-center gap-1.5 px-2 py-0.5 bg-muted/40 border border-muted-foreground/10 rounded-full" title={`${ap.type === "RAISER" ? "Business" : "Operational"} Approver Override: ${ap.user.name}`}>
+                          <Users className="size-2.5 text-muted-foreground" />
+                          <span className="text-[9px] font-bold text-foreground/70">{ap.user.name}</span>
+                          <span className={cn(
+                            "text-[7px] font-black uppercase px-1 rounded-[1px]",
+                            ap.type === "RAISER" ? "bg-amber-600 text-white" : "bg-orange-600 text-white"
+                          )}>
+                            {ap.type === "RAISER" ? "BA" : "OA"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -130,28 +148,6 @@ function CategoryTreeNode({ category, categories, users, templates, rules, depth
             </div>
           </div>
         </div>
-
-        {/* Detailed Approver Hover/Expand Info (Optional, but let's show it clearly if they exist) */}
-        {category.approvers && category.approvers.length > 0 && (
-          <div className="flex flex-wrap gap-4 px-4 pb-3 ml-[var(--depth-padding)]" style={{ paddingLeft: `${depth * 24 + 40}px` }}>
-            {category.approvers.map((ap: any) => ap.user && (
-              <div key={ap.id} className="flex flex-col text-[10px] text-muted-foreground bg-muted/30 p-2 rounded-sm border min-w-[200px]">
-                <span className="font-bold uppercase tracking-wider text-[8px] mb-1 text-foreground/60">
-                  {ap.type === "RAISER" ? "Business Approver" : "Operational Approver"}
-                </span>
-                <div className="font-bold text-foreground flex items-center gap-1">
-                  {ap.user.name}
-                </div>
-                <div className="italic text-[9px]">
-                  {ap.user.designation?.title || "N/A"}
-                </div>
-                <div className="flex items-center gap-1 mt-1 text-[8px] uppercase tracking-tighter">
-                  {ap.user.department?.name || "N/A"} • {ap.user.company?.name || "N/A"}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
       {hasChildren && isExpanded && (
         <div className="flex flex-col">

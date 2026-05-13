@@ -748,9 +748,9 @@ export function DataTemplateDialog({
 
                       {/* 2. DATA TYPE */}
                       <div className="min-w-[150px] flex-1 space-y-1">
-                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Data Type</Label>
+                        <Label className="text-[9px] font-bold uppercase text-muted-foreground pt-1">Data Type</Label>
                         <Select value={field.type} onValueChange={(val) => updateField(index, { type: val })}>
-                          <SelectTrigger className="h-9 text-xs bg-muted/5 font-medium w-full">
+                          <SelectTrigger className="w-full h-9 text-xs bg-muted/5 font-medium">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
