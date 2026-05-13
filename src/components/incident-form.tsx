@@ -714,7 +714,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
               </div>
 
               {/* MIDDLE COLUMN: INCIDENT SECTION */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-8 bg-white dark:bg-[#1A1A1A]">
+              <div className="flex-1 p-6 overflow-y-auto space-y-8 bg-white dark:bg-[#1A1A1A] pb-32">
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <FileText className="size-4 text-[#0176D3]" />
@@ -936,7 +936,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       </TabsList>
                     </div>
 
-                    <TabsContent value="comments" className="flex-1 overflow-y-auto p-4 space-y-6 m-0">
+                    <TabsContent value="comments" className="flex-1 overflow-y-auto p-4 space-y-6 m-0 pb-32">
                       {/* COMMENT BOX */}
                       <div className="bg-white dark:bg-[#1A1A1A] p-5 border rounded-none shadow-sm space-y-4">
                         <div className="flex items-center gap-2 text-[10px] font-bold text-[#0176D3] uppercase tracking-widest">
@@ -1007,7 +1007,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="audit" className="flex-1 overflow-y-auto p-4 space-y-6 m-0">
+                    <TabsContent value="audit" className="flex-1 overflow-y-auto p-4 space-y-6 m-0 pb-32">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
                           <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">System Activity</h4>
