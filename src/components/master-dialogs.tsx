@@ -52,6 +52,7 @@ import {
 export function CategoryDialog({
   categories,
   users,
+  templates,
   item,
   defaultParentId
 }: {
