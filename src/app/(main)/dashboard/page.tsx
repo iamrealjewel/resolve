@@ -76,19 +76,19 @@ export default async function DashboardPage() {
             <Zap className="size-5 text-[#0176D3]" />
             Command Center
           </h2>
-          <p className="text-xs text-muted-foreground font-black uppercase tracking-[0.2em]">
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
             Operational Intelligence • {user.name}
           </p>
         </div>
         
         <div className="flex items-center gap-2">
           <Link href="/audit-trail">
-            <Button variant="outline" size="sm" className="h-9 font-bold text-[10px] uppercase tracking-widest px-4 gap-2">
+            <Button variant="outline" size="sm" className="h-9 font-bold text-[10px] uppercase tracking-wider px-4 gap-2">
               <History className="size-3.5" /> Full Audit
             </Button>
           </Link>
           <Link href="/incidents/create">
-            <Button size="sm" className="h-9 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-[10px] uppercase tracking-widest px-6 shadow-lg shadow-blue-500/20">
+            <Button size="sm" className="h-9 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-[10px] uppercase tracking-wider px-6 shadow-lg shadow-blue-500/20">
               New Incident
             </Button>
           </Link>
@@ -109,8 +109,8 @@ export default async function DashboardPage() {
               <kpi.icon className="size-5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">{kpi.label}</span>
-              <span className="text-xl font-black tracking-tight">{kpi.value}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">{kpi.label}</span>
+              <span className="text-xl font-bold tracking-tight">{kpi.value}</span>
             </div>
           </div>
         ))}
@@ -121,11 +121,11 @@ export default async function DashboardPage() {
         <div className="lg:col-span-4 space-y-6">
           <Card className="border shadow-none rounded-sm">
             <CardHeader className="p-4 border-b bg-muted/5 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <BarChart3 className="size-4 text-[#0176D3]" />
                 Status Distribution
               </CardTitle>
-              <Badge variant="outline" className="text-[9px] font-black px-1.5 py-0 rounded-none uppercase">{totalCount} Total</Badge>
+              <Badge variant="outline" className="text-[9px] font-bold px-1.5 py-0 rounded-none uppercase">{totalCount} Total</Badge>
             </CardHeader>
             <CardContent className="p-4 space-y-5">
               {[
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
                 { label: "Rejected", count: rejectedCount, color: "bg-red-500" },
               ].map((s) => (
                 <div key={s.label} className="space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-wider">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
                     <span className="text-muted-foreground">{s.label}</span>
                     <span className="text-foreground">{s.count}</span>
                   </div>
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
 
           <Card className="border shadow-none rounded-sm">
             <CardHeader className="p-4 border-b bg-muted/5">
-              <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <AlertTriangle className="size-4 text-red-500" />
                 Priority Breakdown
               </CardTitle>
@@ -167,8 +167,8 @@ export default async function DashboardPage() {
                   { label: "Low", count: lowCount, color: "text-blue-600 bg-blue-50 border-blue-100" },
                 ].map((p) => (
                   <div key={p.label} className={cn("p-3 border rounded-sm text-center", p.color)}>
-                    <div className="text-lg font-black">{p.count}</div>
-                    <div className="text-[9px] font-black uppercase tracking-widest">{p.label}</div>
+                    <div className="text-lg font-bold">{p.count}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-wider">{p.label}</div>
                   </div>
                 ))}
               </div>
@@ -179,11 +179,11 @@ export default async function DashboardPage() {
         {/* RIGHT SECTION: ACTIVITY FEED */}
         <Card className="lg:col-span-8 border shadow-none rounded-sm flex flex-col">
           <CardHeader className="p-4 border-b bg-muted/5 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
               <Activity className="size-4 text-[#0176D3]" />
               Operational Activity
             </CardTitle>
-            <Link href="/audit-trail" className="text-[10px] font-black text-[#0176D3] hover:underline uppercase tracking-widest">
+            <Link href="/audit-trail" className="text-[10px] font-bold text-[#0176D3] hover:underline uppercase tracking-wider">
               View All Activity
             </Link>
           </CardHeader>
@@ -192,13 +192,13 @@ export default async function DashboardPage() {
               {recentLogs.map((log) => (
                 <div key={log.id} className="p-4 flex items-center justify-between hover:bg-muted/5 transition-colors group">
                   <div className="flex items-center gap-4">
-                    <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-600 group-hover:bg-[#0176D3]/10 group-hover:text-[#0176D3] transition-colors">
+                    <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 group-hover:bg-[#0176D3]/10 group-hover:text-[#0176D3] transition-colors">
                       {log.user.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-black uppercase tracking-tight text-foreground">{log.action.replace("_", " ")}</span>
-                        <span className="text-[9px] font-black bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-none uppercase tabular-nums">
+                        <span className="text-xs font-bold uppercase tracking-tight text-foreground">{log.action.replace("_", " ")}</span>
+                        <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-none uppercase tabular-nums">
                           {log.incident.ticketId}
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export default async function DashboardPage() {
               {recentLogs.length === 0 && (
                 <div className="py-20 text-center space-y-3">
                   <History className="size-12 text-muted-foreground/10 mx-auto" />
-                  <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">No recent activity detected</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">No recent activity detected</p>
                 </div>
               )}
             </div>
@@ -232,7 +232,7 @@ export default async function DashboardPage() {
 
 const Badge = ({ children, variant = "default", className }: { children: React.ReactNode, variant?: string, className?: string }) => (
   <span className={cn(
-    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
     variant === "outline" ? "text-foreground border border-input bg-background" : "bg-primary text-primary-foreground",
     className
   )}>
