@@ -113,9 +113,9 @@ export default function AuditClient({ logs: initialLogs, users }: AuditClientPro
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL" className="text-xs font-bold">ALL ACTIONS</SelectItem>
+              <SelectItem value="ALL" className="text-xs font-bold" label="ALL ACTIONS">ALL ACTIONS</SelectItem>
               {actions.map(a => (
-                <SelectItem key={a} value={a} className="text-xs font-bold uppercase">{a.replace("_", " ")}</SelectItem>
+                <SelectItem key={a} value={a} className="text-xs font-bold uppercase" label={a.replace("_", " ")}>{a.replace("_", " ")}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -128,9 +128,9 @@ export default function AuditClient({ logs: initialLogs, users }: AuditClientPro
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL" className="text-xs font-bold">ALL USERS</SelectItem>
+              <SelectItem value="ALL" className="text-xs font-bold" label="ALL USERS">ALL USERS</SelectItem>
               {users.map(u => (
-                <SelectItem key={u.id} value={u.id} className="text-xs font-bold uppercase">{u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id} className="text-xs font-bold uppercase" label={u.name}>{u.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>

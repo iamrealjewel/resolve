@@ -162,9 +162,9 @@ export function IncidentsTable({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground ml-1">Search</label>
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Search</label>
             <div className="h-9 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50" />
               <input 
@@ -178,16 +178,16 @@ export function IncidentsTable({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground ml-1">Company</label>
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Company</label>
             <div className="h-9">
               <Select value={filters.companyId} onValueChange={(v) => setFilters({...filters, companyId: v})}>
                 <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
                   <SelectValue placeholder="All Companies" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm">All Companies</SelectItem>
+                  <SelectItem value="all" className="text-sm" label="All Companies">All Companies</SelectItem>
                   {companies.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-sm">{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id} className="text-sm" label={c.name}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -195,16 +195,33 @@ export function IncidentsTable({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground ml-1">Category</label>
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Location</label>
+            <div className="h-9">
+              <Select value={filters.locationId} onValueChange={(v) => setFilters({...filters, locationId: v})}>
+                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                  <SelectValue placeholder="All Locations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-sm" label="All Locations">All Locations</SelectItem>
+                  {locations.map(l => (
+                    <SelectItem key={l.id} value={l.id} className="text-sm" label={l.name}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Category</label>
             <div className="h-9">
               <Select value={filters.categoryId} onValueChange={(v) => setFilters({...filters, categoryId: v})}>
                 <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm">All Categories</SelectItem>
+                  <SelectItem value="all" className="text-sm" label="All Categories">All Categories</SelectItem>
                   {categories.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-sm">{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id} className="text-sm" label={c.name}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -212,16 +229,33 @@ export function IncidentsTable({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground ml-1">Status</label>
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Priority</label>
+            <div className="h-9">
+              <Select value={filters.priority} onValueChange={(v) => setFilters({...filters, priority: v})}>
+                <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3">
+                  <SelectValue placeholder="All Priorities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-sm" label="All Priorities">All Priorities</SelectItem>
+                  {Object.entries(PRIORITY_MAP).map(([val, label]) => (
+                    <SelectItem key={val} value={val} className="text-sm" label={label}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Status</label>
             <div className="h-9 flex gap-2">
               <Select value={filters.status} onValueChange={(v) => setFilters({...filters, status: v})}>
                 <SelectTrigger className="w-full h-full bg-background rounded-sm border text-sm font-medium focus:ring-0 px-3 flex-1">
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all" className="text-sm">All Statuses</SelectItem>
+                  <SelectItem value="all" className="text-sm" label="All Statuses">All Statuses</SelectItem>
                   {Object.entries(STATUS_MAP).map(([val, label]) => (
-                    <SelectItem key={val} value={val} className="text-sm">{label}</SelectItem>
+                    <SelectItem key={val} value={val} className="text-sm" label={label}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -237,8 +271,8 @@ export function IncidentsTable({
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-1.5 md:col-span-2">
-            <label className="text-xs font-medium text-muted-foreground ml-1">Date Range</label>
+          <div className="flex flex-col gap-1.5 col-span-full xl:col-span-2 mt-2">
+            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Date Range</label>
             <div className="flex items-center gap-2 h-9">
               <div className="relative flex-1 h-full">
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/50" />
