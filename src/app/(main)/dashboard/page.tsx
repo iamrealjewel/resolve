@@ -189,38 +189,45 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="p-0 flex-1 overflow-y-auto">
             <div className="divide-y">
-              {recentLogs.map((log) => (
-                <div key={log.id} className="p-4 flex items-center justify-between hover:bg-muted/5 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className="size-10 rounded-full bg-slate-50 border flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:border-[#0176D3]/30 group-hover:text-[#0176D3] transition-all">
-                      {log.user.name.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex flex-col gap-0.5 max-w-[500px]">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-black text-[#0176D3] uppercase tracking-tighter">
-                          {log.incident.ticketId}
-                        </span>
-                        <span className="text-muted-foreground/30">•</span>
-                        <span className="text-xs font-bold text-foreground">
-                          {log.user.name} <span className="font-medium text-muted-foreground">{getActionLabel(log.action)}</span>
-                        </span>
+              {recentLogs.map((log) => {
+                if (!log || !log.incident || !log.user) return null;
+                const userName = log.user.name || "System";
+                const actionLabel = getActionLabel(log.action);
+                const contentSnippet = (log.content || "").replace(/<[^>]*>?/gm, ' ');
+
+                return (
+                  <div key={log.id} className="p-4 flex items-center justify-between hover:bg-muted/5 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className="size-10 rounded-full bg-slate-50 border flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:border-[#0176D3]/30 group-hover:text-[#0176D3] transition-all">
+                        {userName.substring(0, 2).toUpperCase()}
                       </div>
-                      <div 
-                        className="text-[11px] text-muted-foreground line-clamp-1 italic font-medium"
-                        dangerouslySetInnerHTML={{ __html: log.content.replace(/<[^>]*>?/gm, ' ') }}
-                      />
-                      <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">
-                        {format(new Date(log.createdAt), "HH:mm • MMM d, yyyy")}
+                      <div className="flex flex-col gap-0.5 max-w-[500px]">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-black text-[#0176D3] uppercase tracking-tighter">
+                            {log.incident.ticketId}
+                          </span>
+                          <span className="text-muted-foreground/30">•</span>
+                          <span className="text-xs font-bold text-foreground">
+                            {userName} <span className="font-medium text-muted-foreground">{actionLabel}</span>
+                          </span>
+                        </div>
+                        <div 
+                          className="text-[11px] text-muted-foreground line-clamp-1 italic font-medium"
+                          dangerouslySetInnerHTML={{ __html: contentSnippet }}
+                        />
+                        <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest mt-1">
+                          {format(new Date(log.createdAt), "HH:mm • MMM d, yyyy")}
+                        </div>
                       </div>
                     </div>
+                    <Link href={`/incidents/${log.incidentId}`}>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-[#0176D3]/10 hover:text-[#0176D3] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ArrowRight className="size-4" />
+                      </Button>
+                    </Link>
                   </div>
-                  <Link href={`/incidents/${log.incidentId}`}>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-[#0176D3]/10 hover:text-[#0176D3] opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </Link>
-                </div>
-              ))}
+                );
+              })}
               {recentLogs.length === 0 && (
                 <div className="py-20 text-center space-y-3">
                   <History className="size-12 text-muted-foreground/10 mx-auto" />
@@ -236,6 +243,7 @@ export default async function DashboardPage() {
 }
 
 function getActionLabel(action: string) {
+  if (!action) return "performed an action";
   const labels: Record<string, string> = {
     CREATE: "created this incident",
     COMMENT: "posted an update",
