@@ -149,7 +149,7 @@ export function TemplateGridDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[98vw] w-[1400px] min-h-[500px] p-0 overflow-hidden border-none rounded-none shadow-2xl flex flex-col">
+      <DialogContent className="max-w-[95vw] w-[1300px] h-[85vh] p-0 overflow-hidden border-none rounded-none shadow-2xl flex flex-col">
         <DialogHeader className="p-6 bg-muted/30 border-b flex flex-row items-center justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-1">
@@ -180,8 +180,8 @@ export function TemplateGridDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto max-h-[75vh] border-b">
-          <Table className="w-full border-collapse">
+        <div className="flex-1 overflow-auto border-b">
+          <Table className="min-w-[1200px] border-collapse">
             <TableHeader className="bg-muted/50 sticky top-0 z-10 shadow-sm">
               <TableRow className="hover:bg-transparent border-b">
                 <TableHead className="w-12 text-center text-[10px] font-bold uppercase p-0 h-10">#</TableHead>
