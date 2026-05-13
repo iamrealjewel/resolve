@@ -900,7 +900,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
                   {/* BOTTOM ACTION BUTTONS */}
                   {!effectiveIsView && (
-                    <div className="pt-8 flex items-center justify-end gap-3 border-t">
+                    <div className="pt-8 flex items-center justify-end gap-3">
                       <Button
                         variant="outline"
                         type="button"
@@ -918,6 +918,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                       </Button>
                     </div>
                   )}
+                  <div className="h-40" />
                 </div>
               </div>
 
