@@ -412,7 +412,12 @@ export async function getIncident(id: string) {
     include: {
       company: true,
       location: true,
-      category: true,
+      category: {
+        include: {
+          template: true,
+          approvers: true
+        }
+      },
       reporter: true,
       assignee: true,
       accessList: true,
@@ -821,6 +826,7 @@ export async function getFormData() {
     prisma.location.findMany(),
     prisma.incidentCategory.findMany({
       include: {
+        template: true,
         approvers: {
           include: {
             user: {
