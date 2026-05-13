@@ -714,7 +714,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
               </div>
 
               {/* MIDDLE COLUMN: INCIDENT SECTION */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-8 bg-white dark:bg-[#1A1A1A] pb-32">
+              <div className="flex-1 p-6 overflow-y-auto space-y-8 bg-white dark:bg-[#1A1A1A] pb-[200px]">
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <FileText className="size-4 text-[#0176D3]" />
@@ -900,7 +900,7 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
                   {/* BOTTOM ACTION BUTTONS */}
                   {!effectiveIsView && (
-                    <div className="pt-8 flex items-center justify-end gap-3">
+                    <div className="pt-8 flex items-center justify-end gap-3 pb-24">
                       <Button
                         variant="outline"
                         type="button"
