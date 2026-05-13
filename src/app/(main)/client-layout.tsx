@@ -77,9 +77,9 @@ export function ClientLayout({
                 </motion.div>
               </AnimatePresence>
             </main>
+            <Footer />
           </SidebarInset>
         </div>
-        <Footer />
       </div>
     </SidebarProvider>
   );
