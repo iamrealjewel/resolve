@@ -49,8 +49,8 @@ jobs:
           cp -r .next/static/. deploy/.next/static/
           cp -r public/. deploy/public/
           
-          # 3. Include prisma (ensure binaries are available for CloudLinux)
-          # The prisma output is configured as src/generated/client in schema.prisma
+          # 3. Include prisma client (Linux/CloudLinux binaries — generated in this Ubuntu runner)
+          # These binaries are compatible with CloudLinux (RHEL OpenSSL targets in schema.prisma)
           mkdir -p deploy/src
           cp -r src/generated deploy/src/
           
@@ -59,21 +59,25 @@ jobs:
             cp .htaccess deploy/
           fi
           
-          # 5. Create ZIPs
-          cd deploy && zip -r ../deploy.zip . && cd ..
-          # Create source bundle as a backup
-          zip -r source_bundle.zip . -x "node_modules/*" ".next/*" "deploy/*" ".git/*" "deploy.zip" "artifacts/*" "source_bundle.zip"
+          # 5. Create prisma_client.zip separately
+          # This is a standalone zip of ONLY the generated Prisma client (Linux binaries).
+          # Extract this on the server to update the client without regenerating it.
+          cd src/generated/client && zip -r ../../../prisma_client.zip . && cd ../../..
           
-          # 6. Move all artifacts to a clean folder for FTP
+          # 6. Create full deploy.zip
+          cd deploy && zip -r ../deploy.zip . && cd ..
+          
+          # 7. Move all artifacts to a clean folder for FTP
           mkdir -p artifacts
           cp deploy.zip artifacts/
-          cp source_bundle.zip artifacts/
+          cp prisma_client.zip artifacts/
           cp package.json artifacts/
           if [ -f ".htaccess" ]; then
             cp .htaccess artifacts/
           fi
           # Include a dummy file to ensure directory isn't empty
           touch artifacts/.keep
+
 
       - name: Deploy to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
