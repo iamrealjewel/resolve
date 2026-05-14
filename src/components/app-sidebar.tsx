@@ -61,8 +61,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar variant="sidebar" collapsible="icon" {...props} className="border-r border-border">
       <SidebarHeader className={cn(
-        "py-4 px-4 flex transition-all duration-300",
-        state === "expanded" ? "flex-row items-center justify-between" : "flex-col items-center gap-4 px-0"
+        "h-14 flex shrink-0 transition-all duration-300",
+        state === "expanded" ? "flex-row items-center justify-between px-6" : "flex-col items-center justify-center gap-4 px-0"
       )}>
         <Logo showText={state === "expanded"} />
         <Button 

@@ -696,29 +696,39 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-semibold text-muted-foreground">REPORTER NAME</label>
-                      <p className="text-sm font-medium">{initialData.users.find(u => u.id === form.getValues("reporterId"))?.name || "System"}</p>
+                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">Reporter Name</label>
+                      <p className="text-sm font-semibold">{initialData.users.find(u => u.id === form.getValues("reporterId"))?.name || "System"}</p>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-semibold text-muted-foreground">DEPARTMENT</label>
-                      <p className="text-sm font-medium">{(initialData.users.find(u => u.id === form.getValues("reporterId"))?.department as any)?.name || "N/A"}</p>
+                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">Department</label>
+                      <p className="text-sm font-medium">
+                        {(() => {
+                          const user = initialData.users.find(u => u.id === form.getValues("reporterId"));
+                          const dept = user?.department as any;
+                          if (!dept) return "N/A";
+                          return dept.parent ? `${dept.parent.name} - ${dept.name}` : dept.name;
+                        })()}
+                      </p>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-semibold text-muted-foreground">CONTACT</label>
-                      <p className="text-sm font-medium">{initialData.users.find(u => u.id === form.getValues("reporterId"))?.email || "N/A"}</p>
+                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">Contact</label>
+                      <div className="flex flex-col text-sm font-medium">
+                        <span className="text-[#0176D3]">{initialData.users.find(u => u.id === form.getValues("reporterId"))?.email || "N/A"}</span>
+                        <span className="text-muted-foreground text-xs">{initialData.users.find(u => u.id === form.getValues("reporterId"))?.phone || "No phone number"}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* COMPANY & WORKSTATION (BACK TO SIDEBAR) */}
                   <div className="space-y-4 pt-4 border-t">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">COMPANY</label>
-                      <p className="text-sm font-medium">{companyName || "N/A"}</p>
+                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">Company</label>
+                      <p className="text-sm font-semibold">{companyName || "N/A"}</p>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">WORKSTATION</label>
-                      <p className="text-sm font-medium">{locationName || initialData.incident?.location?.name || "N/A"}</p>
+                      <label className="text-[10px] font-semibold text-muted-foreground uppercase">Workstation</label>
+                      <p className="text-sm font-semibold">{locationName || initialData.incident?.location?.name || "N/A"}</p>
                     </div>
                   </div>
 

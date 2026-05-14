@@ -874,8 +874,9 @@ export async function getFormData() {
         id: true,
         name: true,
         email: true,
+        phone: true,
         company: { select: { name: true } },
-        department: { select: { name: true } },
+        department: { select: { name: true, parent: { select: { name: true } } } },
         designation: { select: { title: true } }
       }
     }),
