@@ -235,7 +235,6 @@ export function UsersTable({
                     <TableCell className="pl-8 py-5">
                       <div className="flex items-center gap-5">
                         <Avatar className="size-12 rounded border-2 border-muted-foreground/10 shadow-sm transition-transform group-hover:scale-105">
-                          <AvatarImage src={user.avatar || "/avatars/01.png"} />
                           <AvatarFallback className="rounded font-bold text-sm bg-[#0176D3] text-white uppercase">{user.name.substring(0, 2)}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">

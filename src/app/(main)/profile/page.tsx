@@ -58,7 +58,6 @@ export default async function ProfilePage() {
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
           <div className="bg-slate-100/80 p-10 flex items-center gap-8 border-b">
             <Avatar className="size-28 rounded-none border-4 border-white shadow-md">
-              <AvatarImage src="/avatars/01.png" alt={user.name} />
               <AvatarFallback className="text-3xl font-black rounded-none bg-[#0176D3] text-white">
                 {initials}
               </AvatarFallback>
