@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import fs from "fs/promises";
 import path from "path";
+import sharp from "sharp";
 
 async function findRoutingRule(categoryId: string) {
   let currentId = categoryId;
@@ -976,11 +977,54 @@ export async function uploadFile(formData: FormData) {
   if (!file) return null;
 
   const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  let buffer = Buffer.from(bytes);
+  let finalSize = file.size;
 
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
   const uploadDir = path.join(process.cwd(), "uploads_secure");
   const filePath = path.join(uploadDir, fileName);
+
+  // Resize images to limit storage (target ~50KB)
+  if (file.type.startsWith("image/") && !file.type.includes("svg")) {
+    try {
+      const image = sharp(buffer);
+      const metadata = await image.metadata();
+      
+      // If image is larger than target, or very large resolution, resize it
+      let pipeline = image;
+      
+      // Resize to a maximum of 1200px width/height to keep file size down
+      if ((metadata.width || 0) > 1200 || (metadata.height || 0) > 1200) {
+        pipeline = pipeline.resize(1200, 1200, {
+          fit: "inside",
+          withoutEnlargement: true
+        });
+      }
+
+      // Compress based on format
+      if (metadata.format === "jpeg" || metadata.format === "jpg") {
+        pipeline = pipeline.jpeg({ quality: 70, mozjpeg: true });
+      } else if (metadata.format === "png") {
+        pipeline = pipeline.png({ quality: 70, compressionLevel: 9 });
+      } else if (metadata.format === "webp") {
+        pipeline = pipeline.webp({ quality: 70 });
+      } else {
+        // Default to webp if format is unusual but still an image
+        pipeline = pipeline.webp({ quality: 70 });
+      }
+
+      const processedBuffer = await pipeline.toBuffer();
+      
+      // Only use processed buffer if it's actually smaller (sometimes compression adds overhead to tiny files)
+      if (processedBuffer.length < buffer.length || buffer.length > 51200) {
+        buffer = processedBuffer as any;
+        finalSize = processedBuffer.length;
+      }
+    } catch (error) {
+      console.error("Error processing image with sharp:", error);
+      // Fallback to original buffer if processing fails
+    }
+  }
 
   await fs.writeFile(filePath, buffer);
 
@@ -988,6 +1032,6 @@ export async function uploadFile(formData: FormData) {
     name: file.name,
     url: `/api/files/${fileName}`,
     fileType: file.type,
-    fileSize: file.size,
+    fileSize: finalSize,
   };
 }
