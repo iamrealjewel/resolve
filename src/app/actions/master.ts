@@ -5,6 +5,20 @@ import { revalidatePath } from "next/cache";
 import { checkAuth } from "@/lib/auth-utils";
 import { Role } from "@/lib/rbac";
 import bcrypt from "bcryptjs";
+import fs from "fs/promises";
+import path from "path";
+
+async function deleteOldImage(oldImageUrl: string | null | undefined, newImageUrl: string | null | undefined) {
+  if (oldImageUrl && oldImageUrl !== newImageUrl && oldImageUrl.startsWith("/api/files/")) {
+    const fileName = oldImageUrl.replace("/api/files/", "");
+    const filePath = path.join(process.cwd(), "uploads_secure", fileName);
+    try {
+      await fs.unlink(filePath);
+    } catch (error) {
+      console.error(`Failed to delete old image: ${filePath}`, error);
+    }
+  }
+}
 
 // --- COMPANY ---
 export async function createCompany(data: { name: string; logo?: string }) {
@@ -382,10 +396,19 @@ export async function updateUser(id: string, data: {
     };
   }
 
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+    select: { image: true }
+  });
+
   const user = await prisma.user.update({
     where: { id },
     data: updateData
   });
+
+  if (userData.image !== undefined) {
+    await deleteOldImage(existingUser?.image, userData.image);
+  }
   revalidatePath("/users");
   return user;
 }
@@ -419,10 +442,19 @@ export async function updateProfile(data: { name?: string; phone?: string; image
   const session = await checkAuth();
   const userId = (session.user as any).id;
   
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { image: true }
+  });
+
   const user = await prisma.user.update({
     where: { id: userId },
     data
   });
+  
+  if (data.image !== undefined) {
+    await deleteOldImage(existingUser?.image, data.image);
+  }
   
   revalidatePath("/profile");
   return user;
