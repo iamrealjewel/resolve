@@ -150,12 +150,133 @@ function SuperiorPicker({ value, onValueChange, users }: { value: string | null,
   );
 }
 
-export function UserProvisioningDialog({ companies, departments, locations, designations, users }: { 
+function CategoryPicker({ value, onValueChange, categories }: { value: string[], onValueChange: (v: string[]) => void, categories: any[] }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const categoryTree = useMemo(() => {
+    const map = new Map();
+    categories.forEach(c => map.set(c.id, { ...c, children: [] }));
+    const roots: any[] = [];
+    map.forEach(c => {
+      if (c.parentId) {
+        const parent = map.get(c.parentId);
+        if (parent) parent.children.push(c);
+      } else {
+        roots.push(c);
+      }
+    });
+    return roots;
+  }, [categories]);
+
+  const toggleCategory = (id: string) => {
+    if (value.includes(id)) {
+      onValueChange(value.filter(v => v !== id));
+    } else {
+      onValueChange([...value, id]);
+    }
+  };
+
+  const getPath = (id: string) => {
+    const path: string[] = [];
+    let current = categories.find(c => c.id === id);
+    while (current) {
+      path.unshift(current.name);
+      current = categories.find(c => c.id === current.parentId);
+    }
+    return path.join(" > ");
+  };
+
+  const TreeItem = ({ category, depth = 0 }: { category: any, depth?: number }) => {
+    const isSelected = value.includes(category.id);
+    const hasChildren = category.children && category.children.length > 0;
+
+    return (
+      <div className="flex flex-col">
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start h-10 rounded-none px-3 gap-2 transition-colors border-b border-muted/20",
+            isSelected && "bg-primary/5 text-primary font-bold"
+          )}
+          onClick={() => toggleCategory(category.id)}
+        >
+          <div className="flex items-center gap-2" style={{ paddingLeft: `${depth * 16}px` }}>
+            <div className={cn(
+              "size-4 rounded-sm border flex items-center justify-center transition-all",
+              isSelected ? "bg-primary border-primary text-white" : "border-muted-foreground/30"
+            )}>
+              {isSelected && <Check className="size-3" />}
+            </div>
+            <span className="text-[11px] uppercase tracking-wider">{category.name}</span>
+          </div>
+        </Button>
+        {category.children.map((child: any) => (
+          <TreeItem key={child.id} category={child} depth={depth + 1} />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger className="w-full min-h-[36px] h-auto justify-between bg-transparent rounded-sm border text-sm font-medium px-3 py-2 hover:bg-muted/50 transition-all flex items-center text-left">
+        <div className="flex flex-wrap gap-1">
+          {value.length > 0 ? (
+            value.map(id => (
+              <div key={id} className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase border border-primary/20">
+                {categories.find(c => c.id === id)?.name || id}
+              </div>
+            ))
+          ) : (
+            <span className="text-muted-foreground font-normal">All Categories (Unrestricted)</span>
+          )}
+        </div>
+        <ChevronDown className="size-4 opacity-50 ml-2 shrink-0" />
+      </PopoverTrigger>
+      <PopoverContent className="w-[400px] p-0 rounded-none border shadow-xl" align="start">
+        <div className="flex flex-col">
+          <div className="p-3 border-b bg-muted/30">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search categories..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-10 pl-10 bg-background border-muted-foreground/20 rounded-none text-xs font-medium"
+              />
+            </div>
+          </div>
+          <div className="max-h-[400px] overflow-y-auto">
+            {categoryTree.map(root => (
+              <TreeItem key={root.id} category={root} />
+            ))}
+          </div>
+          {value.length > 0 && (
+            <div className="p-3 border-t bg-muted/30">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full h-8 text-[10px] font-bold uppercase tracking-wider"
+                onClick={() => onValueChange([])}
+              >
+                Clear Restrictions (Allow All)
+              </Button>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function UserProvisioningDialog({ companies, departments, locations, designations, users, categories }: { 
   companies: any[], 
   departments: any[], 
   locations: any[],
   designations: any[],
-  users: any[]
+  users: any[],
+  categories: any[]
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -169,7 +290,8 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
     locationId: "",
     designationId: "",
     superiorId: "",
-    phone: ""
+    phone: "",
+    allowedCategoryIds: [] as string[]
   });
 
   const [searchStates, setSearchStates] = useState({
@@ -209,6 +331,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
         designationId: form.designationId || null,
         superiorId: form.superiorId || null,
         phone: form.phone || null,
+        allowedCategoryIds: form.allowedCategoryIds,
       });
       toast.success("Identity provisioned successfully");
       setIsOpen(false);
@@ -385,6 +508,22 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
               </div>
             </div>
           </div>
+          {/* ACCESS PARAMETERS */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b pb-2">
+              <Shield className="size-4 text-[#0176D3]" />
+              <span className="text-sm font-semibold">Access Parameters</span>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Allowed Incident Categories</Label>
+              <CategoryPicker 
+                value={form.allowedCategoryIds} 
+                onValueChange={(v) => setForm({ ...form, allowedCategoryIds: v })}
+                categories={categories}
+              />
+              <p className="text-[10px] text-muted-foreground italic">If no categories are selected, the user will have access to all categories.</p>
+            </div>
+          </div>
         </div>
         <div className="p-6 border-t bg-muted/10">
           <Button 
@@ -401,13 +540,14 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
   );
 }
 
-export function EditUserDialog({ user, companies, departments, locations, designations, users }: { 
+export function EditUserDialog({ user, companies, departments, locations, designations, users, categories }: { 
   user: any, 
   companies: any[], 
   departments: any[], 
   locations: any[],
   designations: any[],
-  users: any[]
+  users: any[],
+  categories: any[]
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -421,7 +561,8 @@ export function EditUserDialog({ user, companies, departments, locations, design
     locationId: user.locationId || "",
     designationId: user.designationId || "",
     superiorId: user.superiorId || "",
-    phone: user.phone || ""
+    phone: user.phone || "",
+    allowedCategoryIds: (user.allowedCategories?.map((c: any) => c.id) || []) as string[]
   });
 
   const [searchStates, setSearchStates] = useState({
@@ -461,6 +602,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
         designationId: form.designationId || null,
         superiorId: form.superiorId || null,
         phone: form.phone || null,
+        allowedCategoryIds: form.allowedCategoryIds,
       });
       toast.success("User profile updated");
       setIsOpen(false);
@@ -626,6 +768,22 @@ export function EditUserDialog({ user, companies, departments, locations, design
                   users={users}
                 />
               </div>
+            </div>
+          </div>
+          {/* ACCESS PARAMETERS */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b pb-2">
+              <Shield className="size-4 text-[#0176D3]" />
+              <span className="text-sm font-semibold">Access Parameters</span>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Allowed Incident Categories</Label>
+              <CategoryPicker 
+                value={form.allowedCategoryIds} 
+                onValueChange={(v) => setForm({ ...form, allowedCategoryIds: v })}
+                categories={categories}
+              />
+              <p className="text-[10px] text-muted-foreground italic">If no categories are selected, the user will have access to all categories.</p>
             </div>
           </div>
         </div>

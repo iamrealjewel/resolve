@@ -40,6 +40,7 @@ interface UsersTableProps {
   departments: any[];
   locations: any[];
   designations: any[];
+  categories: any[];
 }
 
 const ROLE_MAP: Record<string, string> = {
@@ -63,7 +64,8 @@ export function UsersTable({
   companies, 
   departments, 
   locations, 
-  designations 
+  designations,
+  categories
 }: UsersTableProps) {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({
@@ -284,6 +286,7 @@ export function UsersTable({
                         locations={locations} 
                         designations={designations}
                         users={users}
+                        categories={categories}
                       />
                       <DeleteUserButton id={user.id} />
                     </div>

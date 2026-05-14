@@ -67,6 +67,7 @@ export default async function UsersPage() {
             locations={locations} 
             designations={designations}
             users={users}
+            categories={categories}
           />
         </div>
       </div>
@@ -77,6 +78,7 @@ export default async function UsersPage() {
         departments={departments} 
         locations={locations} 
         designations={designations} 
+        categories={categories}
       />
     </div>
   );
