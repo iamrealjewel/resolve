@@ -563,8 +563,12 @@ export async function updateIncident(id: string, data: any) {
   if (data.priority && data.priority !== incident.priority) {
     logEntries.push({ userId: user.id, action: "DETAIL_UPDATE", content: `Priority changed from ${incident.priority} to ${data.priority}` });
   }
-  if (data.reference !== undefined && data.reference !== incident.reference) {
-    logEntries.push({ userId: user.id, action: "DETAIL_UPDATE", content: `Reference updated from "${incident.reference || "None"}" to "${data.reference || "None"}"` });
+  if (data.reference !== undefined) {
+    const oldRef = incident.reference || "";
+    const newRef = data.reference || "";
+    if (oldRef !== newRef) {
+      logEntries.push({ userId: user.id, action: "DETAIL_UPDATE", content: `Reference updated from "${oldRef || "None"}" to "${newRef || "None"}"` });
+    }
   }
   if (data.categoryId && data.categoryId !== incident.categoryId) {
     const oldCat = incident.category?.name || "Unknown";
