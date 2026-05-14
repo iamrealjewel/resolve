@@ -610,6 +610,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
             </div>
           </div>
         </div>
+      </div>
         <div className="p-6 border-t bg-muted/10">
           <Button 
             onClick={handleProvision} 
@@ -879,6 +880,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
             </div>
           </div>
         </div>
+      </div>
         <div className="p-6 border-t bg-muted/10">
           <Button 
             onClick={handleEdit} 
