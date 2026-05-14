@@ -70,5 +70,8 @@
   },
   "prisma": {
     "seed": "node prisma/seed.ts"
+  },
+  "optionalDependencies": {
+    "@img/sharp-linux-x64": "^0.34.5"
   }
 }
