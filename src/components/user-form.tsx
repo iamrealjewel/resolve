@@ -359,7 +359,8 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
       setForm({
         name: "", email: "", password: "", role: "USER",
         companyId: "", departmentId: "", locationId: "",
-        designationId: "", superiorId: "", phone: ""
+        designationId: "", superiorId: "", phone: "",
+        allowedCategoryIds: []
       });
     } catch (error) {
       toast.error("Provisioning failed");
