@@ -87,8 +87,8 @@ export function ClientLayout({
 
 function Footer() {
   return (
-    <footer className="w-full bg-white dark:bg-[#1A1A1A] border-t py-4 px-6 mt-auto">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <footer className="w-full bg-white dark:bg-[#1A1A1A] border-t h-14 flex items-center px-6 shrink-0 mt-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
         <div className="flex items-center gap-4">
           <span className="text-xs font-medium text-muted-foreground">
             © {new Date().getFullYear()} QTrack Incident Management
