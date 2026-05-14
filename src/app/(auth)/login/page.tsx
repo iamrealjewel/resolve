@@ -54,7 +54,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} className="rounded" />
+          <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} style={{ width: 40, height: 40 }} className="rounded object-contain" />
           <h1 className="text-2xl font-bold tracking-tight text-white">Resolve</h1>
         </div>
 

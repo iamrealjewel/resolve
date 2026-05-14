@@ -17,7 +17,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="w-full relative z-10 flex h-20 items-center justify-between px-6 border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} className="rounded-xl" />
+          <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} style={{ width: 40, height: 40 }} className="rounded-xl object-contain" />
           <span className="text-xl font-bold tracking-tight text-slate-900">Resolve</span>
         </div>
         <nav className="flex items-center gap-4">
@@ -69,7 +69,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="flex flex-col items-center md:items-start gap-4">
             <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} className="rounded-xl" />
+              <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} style={{ width: 40, height: 40 }} className="rounded-xl object-contain" />
               <span className="text-xl font-bold tracking-tight text-slate-900">Resolve</span>
             </div>
             <p className="text-sm text-slate-500 text-center md:text-left max-w-[300px]">
