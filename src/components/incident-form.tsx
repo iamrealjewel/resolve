@@ -46,6 +46,7 @@ import { RelativeTime } from "./relative-time";
 import { UserTagInput } from "./user-tag-input";
 import { Editor } from "./ui/editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const STATUS_COLOR_MAP: Record<string, string> = {
   NEW: "bg-blue-700 text-white",
