@@ -107,12 +107,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-
+        {/* Collapsed-only: layout + theme pinned to bottom of content */}
+        {state === "collapsed" && (
+          <div className="mt-auto flex flex-col items-center gap-1 pb-2 border-b">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLayout}
+              title="Switch to Top Navigation"
+              className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <LayoutIcon className="size-4" />
+            </Button>
+            <ThemeToggle />
+          </div>
+        )}
       </SidebarContent>
 
       <SidebarFooter className={cn(
-        "border-t h-14 flex shrink-0 transition-all duration-300",
-        state === "expanded" ? "flex-row items-center justify-between px-4" : "flex-col items-center justify-center gap-3 px-0"
+        "border-t h-14 flex shrink-0 items-center transition-all duration-300",
+        state === "expanded" ? "flex-row justify-between px-4" : "justify-center px-0"
       )}>
         {state === "expanded" ? (
           <>
@@ -131,21 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-3 w-full">
-             <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleLayout}
-              title="Switch to Top Navigation"
-              className="size-9 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            >
-              <LayoutIcon className="size-5" />
-            </Button>
-            <ThemeToggle />
-            <div className="pt-2 border-t w-full flex justify-center">
-              <UserNav />
-            </div>
-          </div>
+          <UserNav />
         )}
       </SidebarFooter>
     </Sidebar>
