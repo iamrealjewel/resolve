@@ -13,6 +13,7 @@ import { Search, Shield, Building2, MapPin, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DeleteUserButton } from "@/components/user-crud";
 import { UserProvisioningDialog, EditUserDialog } from "@/components/user-form";
+import { BulkUserUploadDialog } from "@/components/bulk-user-upload-dialog";
 import { checkAuth } from "@/lib/auth-utils";
 import { UsersTable } from "./users-table";
 import { Card } from "@/components/ui/card";
@@ -50,13 +51,22 @@ export default async function UsersPage() {
             Manage system access, roles, and hierarchical reporting lines.
           </p>
         </div>
-        <UserProvisioningDialog 
-          companies={companies} 
-          departments={departments} 
-          locations={locations} 
-          designations={designations}
-          users={users}
-        />
+        <div className="flex items-center gap-2">
+          <BulkUserUploadDialog 
+            companies={companies} 
+            departments={departments} 
+            locations={locations} 
+            designations={designations}
+            users={users}
+          />
+          <UserProvisioningDialog 
+            companies={companies} 
+            departments={departments} 
+            locations={locations} 
+            designations={designations}
+            users={users}
+          />
+        </div>
       </div>
 
       <UsersTable 

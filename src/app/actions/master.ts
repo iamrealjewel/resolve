@@ -247,6 +247,34 @@ export async function provisionUser(data: {
   return user;
 }
 
+export async function bulkCreateUsers(users: any[]) {
+  await checkAuth("SUPER_ADMIN");
+  
+  // Pre-hash passwords in parallel outside the transaction to prevent timeout
+  // bcrypt.hash is CPU intensive and would otherwise block the transaction
+  const usersWithHashes = await Promise.all(
+    users.map(async (userData) => {
+      const { password, ...rest } = userData;
+      const hashedPassword = await bcrypt.hash(password || "password123", 10);
+      return { ...rest, password: hashedPassword };
+    })
+  );
+
+  const results = await prisma.$transaction(async (tx) => {
+    const createdUsers = [];
+    for (const data of usersWithHashes) {
+      const user = await tx.user.create({ data });
+      createdUsers.push(user);
+    }
+    return createdUsers;
+  }, {
+    timeout: 30000 // Increase timeout to 30 seconds for large batches
+  });
+
+  revalidatePath("/users");
+  return results;
+}
+
 export async function updateUser(id: string, data: {
   name?: string;
   role?: any;

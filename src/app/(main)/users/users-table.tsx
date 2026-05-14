@@ -50,6 +50,14 @@ const ROLE_MAP: Record<string, string> = {
   USER: "Standard User",
 };
 
+const ROLE_COLORS: Record<string, string> = {
+  SUPER_ADMIN: "bg-rose-100 text-rose-700 border-rose-200",
+  DEPARTMENT_HEAD: "bg-blue-100 text-blue-700 border-blue-200",
+  LINE_MANAGER: "bg-purple-100 text-purple-700 border-purple-200",
+  RESOLVER: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  USER: "bg-slate-100 text-slate-700 border-slate-200",
+};
+
 export function UsersTable({ 
   users, 
   companies, 
@@ -65,6 +73,8 @@ export function UsersTable({
     locationId: "all",
     designationId: "all",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = 
@@ -79,6 +89,18 @@ export function UsersTable({
 
     return matchesSearch && matchesRole && matchesCompany && matchesDepartment && matchesLocation && matchesDesignation;
   });
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (a.role === "SUPER_ADMIN" && b.role !== "SUPER_ADMIN") return -1;
+    if (a.role !== "SUPER_ADMIN" && b.role === "SUPER_ADMIN") return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
+  const paginatedUsers = sortedUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const clearFilters = () => {
     setFilters({
@@ -210,92 +232,136 @@ export function UsersTable({
         </div>
       </div>
 
-      <div className="border-2 shadow-none overflow-hidden bg-white dark:bg-[#1A1A1A]">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/30 border-b">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] pl-8 h-12">Personnel Details</TableHead>
-                <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-12">Role & Position</TableHead>
-                <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-12">Organization</TableHead>
-                <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-12">Workstation</TableHead>
-                <TableHead className="w-[140px] h-12"></TableHead>
+    <div className="border shadow-none overflow-hidden bg-white dark:bg-[#1A1A1A] rounded-md">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-muted/50 border-b">
+            <TableRow>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Name</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Email</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Role</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Company</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Department</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Designation</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Location</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Phone</TableHead>
+              <TableHead className="font-bold text-foreground uppercase tracking-wider text-[10px] h-10 px-4">Superior</TableHead>
+              <TableHead className="w-[100px] h-10 px-4"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground font-medium text-xs bg-muted/5">
+                  No users found matching the filters.
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-40 text-center text-muted-foreground font-black uppercase tracking-[0.2em] text-xs bg-muted/5">
-                    No identity records match the active filters.
+            ) : (
+              paginatedUsers.map((user) => (
+                <TableRow key={user.id} className="hover:bg-muted/5 border-b transition-colors">
+                  <TableCell className="px-4 py-3 font-semibold text-sm whitespace-nowrap">{user.name}</TableCell>
+                  <TableCell className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{user.email}</TableCell>
+                  <TableCell className="px-4 py-3">
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase border px-2 py-1 rounded-sm tracking-wider",
+                      ROLE_COLORS[user.role] || ROLE_COLORS.USER
+                    )}>
+                      {ROLE_MAP[user.role] || user.role}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap">{user.company?.name || "-"}</TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap">{user.department?.name || "-"}</TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap">{user.designation?.title || "-"}</TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap">{user.location?.name || "-"}</TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap font-medium">{user.phone || "-"}</TableCell>
+                  <TableCell className="px-4 py-3 text-xs whitespace-nowrap">{user.superior?.name || "-"}</TableCell>
+                  <TableCell className="px-4 py-3">
+                    <div className="flex items-center gap-1 justify-end">
+                      <EditUserDialog 
+                        user={user} 
+                        companies={companies} 
+                        departments={departments} 
+                        locations={locations} 
+                        designations={designations}
+                        users={users}
+                      />
+                      <DeleteUserButton id={user.id} />
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-muted/5 border-b border-muted/10 transition-all group">
-                    <TableCell className="pl-8 py-5">
-                      <div className="flex items-center gap-5">
-                        <Avatar className="size-12 rounded border-2 border-muted-foreground/10 shadow-sm transition-transform group-hover:scale-105">
-                          <AvatarFallback className="rounded font-bold text-sm bg-[#0176D3] text-white uppercase">{user.name.substring(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm text-foreground group-hover:text-[#0176D3] transition-colors tracking-tight leading-tight">{user.name}</span>
-                          <div className="flex flex-col mt-2 gap-1.5">
-                            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-2">
-                              <Building2 className="size-3 text-[#0176D3]/50" /> {user.department?.name || "No Department"}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-2">
-                              <Phone className="size-3 text-[#0176D3]/50" /> {user.phone || "No Contact"}
-                            </span>
-                            {user.superior && (
-                              <div className="flex items-center gap-2 mt-1">
-                                <Shield className="size-3 text-[#0176D3]" />
-                                <span className="text-[10px] text-[#0176D3] font-bold tracking-tight">Reporting to: {user.superior.name}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[11px] font-bold tracking-wider text-foreground leading-none">{ROLE_MAP[user.role] || user.role}</span>
-                        <div className="h-px w-8 bg-[#0176D3]/20" />
-                        <span className="text-[10px] font-bold text-muted-foreground leading-none">{user.designation?.title || "Personnel"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[11px] font-bold text-foreground tracking-tight">{user.company?.name || "Global Entity"}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[200px]">{user.email}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="size-3.5 text-[#0176D3]/40" />
-                          <span className="text-[11px] font-bold text-foreground leading-none">{user.location?.name || "Remote"}</span>
-                        </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 justify-end pr-8">
-                        <EditUserDialog 
-                          user={user} 
-                          companies={companies} 
-                          departments={departments} 
-                          locations={locations} 
-                          designations={designations}
-                          users={users}
-                        />
-                        <div className="w-px h-6 bg-muted-foreground/10 mx-1" />
-                        <DeleteUserButton id={user.id} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
+      
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-muted/20 border-t gap-4">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase text-muted-foreground whitespace-nowrap">Show</span>
+              <Select 
+                value={String(itemsPerPage)} 
+                onValueChange={(v) => {
+                  setItemsPerPage(Number(v));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px] text-xs font-bold bg-background">
+                  <SelectValue placeholder={String(itemsPerPage)} />
+                </SelectTrigger>
+                <SelectContent className="min-w-[70px]">
+                  {[10, 15, 25, 50, 100].map((size) => (
+                    <SelectItem key={size} value={String(size)} className="text-xs font-bold">
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">
+              Showing <span className="text-foreground">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-foreground">{Math.min(currentPage * itemsPerPage, sortedUsers.length)}</span> of <span className="text-foreground">{sortedUsers.length}</span> users
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="h-8 w-8 p-0"
+            >
+              {"<"}
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className={cn(
+                    "h-8 w-8 p-0 text-xs",
+                    currentPage === page ? "bg-[#0176D3]" : ""
+                  )}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="h-8 w-8 p-0"
+            >
+              {">"}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   );
 }
