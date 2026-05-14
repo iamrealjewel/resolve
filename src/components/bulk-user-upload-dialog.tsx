@@ -170,10 +170,7 @@ export function BulkUserUploadDialog({
       else if (superior) rowData.superiorId = superior.id;
 
       // 4. Category Restriction Mapping
-      const restrict = row["Restrict Categories?"];
       const allowedNames = row["Allowed Categories (Comma Separated)"];
-      
-      rowData.restrictCategories = restrict === "Yes";
       
       if (allowedNames) {
         const names = String(allowedNames).split(",").map(n => n.trim());

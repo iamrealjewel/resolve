@@ -219,11 +219,11 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
   const categoryTree = React.useMemo(() => {
     const sessionUser = initialData.sessionUser;
-    const isRestricted = sessionUser?.restrictCategories;
     const allowedIds = sessionUser?.allowedCategories?.map((c: any) => c.id) || [];
 
     const isAllowed = (catId: string) => {
-      if (!isRestricted || user?.role === "SUPER_ADMIN") return true;
+      // If Super Admin OR no specific categories are listed, everything is allowed
+      if (user?.role === "SUPER_ADMIN" || allowedIds.length === 0) return true;
       
       let currentId: string | null = catId;
       while (currentId) {

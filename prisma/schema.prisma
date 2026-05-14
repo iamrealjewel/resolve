@@ -65,7 +65,6 @@ model User {
   superior          User?              @relation("ReportingLine", fields: [superiorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subordinates      User[]             @relation("ReportingLine")
   
-  restrictCategories Boolean            @default(false)
   allowedCategories  IncidentCategory[] @relation("UserAllowedCategories")
   
   createdAt         DateTime           @default(now())

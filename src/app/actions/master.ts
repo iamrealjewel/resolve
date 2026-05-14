@@ -231,7 +231,6 @@ export async function provisionUser(data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
-  restrictCategories?: boolean;
   allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
@@ -311,7 +310,6 @@ export async function updateUser(id: string, data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
-  restrictCategories?: boolean;
   allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
