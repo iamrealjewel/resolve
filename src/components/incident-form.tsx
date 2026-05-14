@@ -1056,9 +1056,12 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                           {filteredLogs.filter((l: any) => l.type === "COMMENT" || l.content?.includes("<p>")).map((log: any) => (
                             <div key={log.id} className="bg-white dark:bg-[#1A1A1A] border rounded-none p-4 space-y-3 relative group shadow-sm">
                               <div className="flex items-start gap-3">
-                                <div className="size-8 rounded-none bg-[#0176D3] flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0">
-                                  {log.user.name?.charAt(0)}
-                                </div>
+                                <Avatar className="size-8 rounded-full border shadow-sm">
+                                  <AvatarImage src={log.user.image || "/avatars/default.png"} className="object-cover" />
+                                  <AvatarFallback className="bg-[#0176D3] text-white font-bold text-[11px]">
+                                    {log.user.name?.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold text-[#0176D3]">{log.user.name}</span>

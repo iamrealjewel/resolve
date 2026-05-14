@@ -261,7 +261,20 @@ export function UsersTable({
             ) : (
               paginatedUsers.map((user) => (
                 <TableRow key={user.id} className="hover:bg-muted/5 border-b transition-colors">
-                  <TableCell className="px-4 py-3 font-semibold text-sm whitespace-nowrap">{user.name}</TableCell>
+                  <TableCell className="px-4 py-3 font-semibold text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="size-10 border rounded-full shrink-0">
+                        <AvatarImage src={user.image || "/avatars/default.png"} className="object-cover" />
+                        <AvatarFallback className="bg-[#0176D3]/10 text-[#0176D3] text-xs font-bold">
+                          {user.name.split(" ").map((n: any) => n[0]).join("").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-foreground">{user.name}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{user.role}</span>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{user.email}</TableCell>
                   <TableCell className="px-4 py-3">
                     <span className={cn(

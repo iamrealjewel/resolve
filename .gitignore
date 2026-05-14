@@ -42,3 +42,7 @@ next-env.d.ts
 
 # prisma generated
 /src/generated/
+
+# uploads
+/uploads_secure/
+/public/uploads/

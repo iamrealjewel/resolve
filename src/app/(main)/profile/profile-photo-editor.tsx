@@ -8,11 +8,13 @@ import { uploadFile } from "@/app/actions/incidents";
 import { updateProfile } from "@/app/actions/master";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export function ProfilePhotoEditor({ initialImage, initials }: { initialImage: string | null, initials: string }) {
   const [image, setImage] = useState(initialImage);
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const { update } = useSession();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -28,6 +30,10 @@ export function ProfilePhotoEditor({ initialImage, initials }: { initialImage: s
       if (result?.url) {
         await updateProfile({ image: result.url });
         setImage(result.url);
+        
+        // Update client-side session
+        await update({ image: result.url });
+        
         toast.success("Profile photo updated");
         router.refresh();
       }
@@ -40,9 +46,9 @@ export function ProfilePhotoEditor({ initialImage, initials }: { initialImage: s
 
   return (
     <div className="relative group">
-      <Avatar className="size-28 rounded-none border-4 border-white shadow-md">
+      <Avatar className="size-28 rounded-full border-4 border-white shadow-md overflow-hidden">
         <AvatarImage src={image || "/avatars/default.png"} className="object-cover" />
-        <AvatarFallback className="text-3xl font-black rounded-none bg-[#0176D3] text-white">
+        <AvatarFallback className="text-3xl font-black rounded-full bg-[#0176D3] text-white">
           {uploading ? <Loader2 className="size-8 animate-spin" /> : initials}
         </AvatarFallback>
       </Avatar>

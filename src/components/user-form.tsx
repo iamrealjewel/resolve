@@ -182,9 +182,11 @@ function SuperiorPicker({ value, onValueChange, users }: { value: string | null,
                   setOpen(false);
                 }}
               >
-                <Avatar className="size-8 rounded-none border">
-                  <AvatarImage src={u.avatar} />
-                  <AvatarFallback className="rounded-none text-[10px] font-black">{u.name.substring(0,2).toUpperCase()}</AvatarFallback>
+                <Avatar className="size-8 rounded-full border">
+                  <AvatarImage src={u.image || u.avatar || "/avatars/default.png"} className="object-cover" />
+                  <AvatarFallback className="rounded-full text-[10px] font-black bg-[#0176D3]/10 text-[#0176D3]">
+                    {u.name.split(" ").map((n: any) => n[0]).join("").toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start overflow-hidden">
                   <span className="text-xs font-bold text-foreground truncate w-full text-left">{u.name}</span>

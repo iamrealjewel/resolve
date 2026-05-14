@@ -27,21 +27,29 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-none p-0 border border-transparent hover:border-border transition-none">
-          <Avatar className="h-full w-full rounded-none">
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 border border-transparent hover:border-border transition-all">
+          <Avatar className="h-full w-full rounded-full border">
             <AvatarImage src={(user as any)?.image || "/avatars/default.png"} className="object-cover" />
-            <AvatarFallback className="rounded-none">{initials}</AvatarFallback>
+            <AvatarFallback className="rounded-full bg-[#0176D3]/10 text-[#0176D3] text-xs font-bold">{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64 rounded-none shadow-xl border p-0" align="end" sideOffset={8}>
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-4 bg-muted/30 border-b">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-bold leading-none text-foreground">{user?.name || "User"}</p>
-              <p className="text-[10px] font-medium leading-none text-muted-foreground uppercase tracking-wider mt-1">
-                {user?.email || "user@example.com"}
-              </p>
+            <div className="flex items-center gap-4">
+              <Avatar className="size-10 border rounded-full">
+                <AvatarImage src={(user as any)?.image || "/avatars/default.png"} className="object-cover" />
+                <AvatarFallback className="bg-[#0176D3]/10 text-[#0176D3] text-xs font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-bold leading-none text-foreground">{user?.name || "User"}</p>
+                <p className="text-[10px] font-medium leading-none text-muted-foreground uppercase tracking-wider">
+                  {user?.email || "user@example.com"}
+                </p>
+              </div>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

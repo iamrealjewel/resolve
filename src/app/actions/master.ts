@@ -329,6 +329,7 @@ export async function bulkUpsertUsers(users: any[]) {
 
 export async function updateUser(id: string, data: {
   name?: string;
+  email?: string;
   role?: any;
   companyId?: string;
   password?: string;
