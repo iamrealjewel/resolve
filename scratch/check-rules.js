@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require("../src/generated/client");
 const { PrismaMariaDb } = require("@prisma/adapter-mariadb");
 const dotenv = require("dotenv");
 dotenv.config();

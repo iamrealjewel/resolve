@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from "../generated/client";
 
 export function getIncidentAccessFilter(user: { id: string; role: string; departmentId?: string | null }) {
   if (user.role === Role.SUPER_ADMIN) {
