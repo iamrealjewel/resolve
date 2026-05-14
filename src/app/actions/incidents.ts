@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import fs from "fs/promises";
 import path from "path";
-import sharp from "sharp";
+import { Jimp } from "jimp";
 
 async function findRoutingRule(categoryId: string) {
   let currentId = categoryId;
@@ -992,41 +992,29 @@ export async function uploadFile(formData: FormData) {
   // Resize images to limit storage (target ~50KB)
   if (file.type.startsWith("image/") && !file.type.includes("svg")) {
     try {
-      const image = sharp(buffer);
-      const metadata = await image.metadata();
-      
-      // If image is larger than target, or very large resolution, resize it
-      let pipeline = image;
+      const image = await Jimp.read(buffer as any);
       
       // Resize to a maximum of 1200px width/height to keep file size down
-      if ((metadata.width || 0) > 1200 || (metadata.height || 0) > 1200) {
-        pipeline = pipeline.resize(1200, 1200, {
-          fit: "inside",
-          withoutEnlargement: true
-        });
+      if (image.width > 1200 || image.height > 1200) {
+        image.scaleToFit({ w: 1200, h: 1200 });
       }
 
-      // Compress based on format
-      if (metadata.format === "jpeg" || metadata.format === "jpg") {
-        pipeline = pipeline.jpeg({ quality: 70, mozjpeg: true });
-      } else if (metadata.format === "png") {
-        pipeline = pipeline.png({ quality: 70, compressionLevel: 9 });
-      } else if (metadata.format === "webp") {
-        pipeline = pipeline.webp({ quality: 70 });
-      } else {
-        // Default to webp if format is unusual but still an image
-        pipeline = pipeline.webp({ quality: 70 });
+      // Apply compression & Get buffer
+      // Determine output format based on input or default to JPEG
+      let mimeType: any = file.type;
+      if (!["image/jpeg", "image/png", "image/bmp"].includes(mimeType)) {
+        mimeType = "image/jpeg";
       }
 
-      const processedBuffer = await pipeline.toBuffer();
+      const processedBuffer = await image.getBuffer(mimeType, { quality: 70 });
       
-      // Only use processed buffer if it's actually smaller (sometimes compression adds overhead to tiny files)
+      // Only use processed buffer if it's actually smaller or if it exceeds 50KB
       if (processedBuffer.length < buffer.length || buffer.length > 51200) {
-        buffer = processedBuffer as any;
+        buffer = Buffer.from(processedBuffer);
         finalSize = processedBuffer.length;
       }
     } catch (error) {
-      console.error("Error processing image with sharp:", error);
+      console.error("Error processing image with jimp:", error);
       // Fallback to original buffer if processing fails
     }
   }
