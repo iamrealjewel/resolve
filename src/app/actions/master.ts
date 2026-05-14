@@ -231,6 +231,7 @@ export async function provisionUser(data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
+  image?: string | null;
   allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
@@ -242,6 +243,7 @@ export async function provisionUser(data: {
     data: {
       ...userData,
       password: hashedPassword,
+      image: data.image || null,
       allowedCategories: allowedCategoryIds ? {
         connect: allowedCategoryIds.map(id => ({ id }))
       } : undefined
@@ -310,6 +312,7 @@ export async function updateUser(id: string, data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
+  image?: string | null;
   allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
@@ -324,6 +327,10 @@ export async function updateUser(id: string, data: {
     updateData.allowedCategories = {
       set: allowedCategoryIds.map(id => ({ id }))
     };
+  }
+
+  if (data.image !== undefined) {
+    updateData.image = data.image;
   }
 
   const user = await prisma.user.update({
@@ -357,6 +364,19 @@ export async function changeOwnPassword(currentPass: string, newPass: string) {
   });
   
   return { success: true };
+}
+
+export async function updateProfile(data: { name?: string; phone?: string; image?: string | null }) {
+  const session = await checkAuth();
+  const userId = (session.user as any).id;
+  
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data
+  });
+  
+  revalidatePath("/profile");
+  return user;
 }
 
 // --- ROUTING RULE ---

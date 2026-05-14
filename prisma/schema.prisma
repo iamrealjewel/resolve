@@ -62,6 +62,7 @@ model User {
   locationId        String?
   phone             String?
   superiorId        String?
+  image             String?
   superior          User?              @relation("ReportingLine", fields: [superiorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subordinates      User[]             @relation("ReportingLine")
   

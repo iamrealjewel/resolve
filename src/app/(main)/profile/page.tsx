@@ -22,6 +22,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+import { ProfilePhotoEditor } from "./profile-photo-editor";
+
 export default async function ProfilePage() {
   const session = await checkAuth();
   const userId = (session.user as any).id;
@@ -57,11 +59,7 @@ export default async function ProfilePage() {
         {/* PROFILE OVERVIEW CARD */}
         <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
           <div className="bg-slate-100/80 p-10 flex items-center gap-8 border-b">
-            <Avatar className="size-28 rounded-none border-4 border-white shadow-md">
-              <AvatarFallback className="text-3xl font-black rounded-none bg-[#0176D3] text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <ProfilePhotoEditor initialImage={user.image} initials={initials} />
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <h2 className="text-3xl font-black text-slate-900 tracking-tight">{user.name}</h2>

@@ -52,6 +52,61 @@ const ROLE_MAP: Record<string, string> = {
   USER: "Standard User",
 };
 
+function ProfilePhotoUpload({ 
+  value, 
+  onChange, 
+  isSubmitting 
+}: { 
+  value: string | null, 
+  onChange: (v: string | null) => void,
+  isSubmitting?: boolean
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const { uploadFile } = await import("@/app/actions/incidents");
+      const result = await uploadFile(formData);
+      
+      if (result?.url) {
+        onChange(result.url);
+      }
+    } catch (error) {
+      toast.error("Photo upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-4 bg-muted/5 border-b mb-6">
+      <div className="relative group">
+        <Avatar className="size-24 border-2 border-white shadow-md rounded-full">
+          <AvatarImage src={value || "/avatars/default.png"} className="object-cover" />
+          <AvatarFallback className="text-2xl font-bold bg-[#0176D3]/10 text-[#0176D3]">
+            {uploading ? <Loader2 className="size-8 animate-spin" /> : <UserCircle2 className="size-12" />}
+          </AvatarFallback>
+        </Avatar>
+        <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+          <Edit2 className="size-5" />
+          <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={uploading || isSubmitting} />
+        </label>
+      </div>
+      <div className="text-center">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Profile Photo</p>
+        <p className="text-[10px] text-muted-foreground/60 mt-1">Optimal size: 256x256px</p>
+      </div>
+    </div>
+  );
+}
+
 function getTreeList(depts: any[], parentId: string | null = null, depth = 0): any[] {
   return depts
     .filter(d => d.parentId === parentId)
@@ -312,6 +367,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
     designationId: "",
     superiorId: "",
     phone: "",
+    image: null as string | null,
     allowedCategoryIds: [] as string[]
   });
 
@@ -360,6 +416,7 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
         name: "", email: "", password: "", role: "USER",
         companyId: "", departmentId: "", locationId: "",
         designationId: "", superiorId: "", phone: "",
+        image: null,
         allowedCategoryIds: []
       });
     } catch (error) {
@@ -388,8 +445,14 @@ export function UserProvisioningDialog({ companies, departments, locations, desi
             <DialogDescription className="text-xs text-muted-foreground">Provision organizational credentials</DialogDescription>
           </div>
         </DialogHeader>
-        <div className="grid gap-6 p-6 overflow-y-auto max-h-[70vh]">
-          <div className="space-y-4">
+        <div className="overflow-y-auto max-h-[70vh]">
+          <ProfilePhotoUpload 
+            value={form.image} 
+            onChange={(v) => setForm({ ...form, image: v })} 
+            isSubmitting={isSubmitting}
+          />
+          <div className="grid gap-6 p-6 pt-0">
+            <div className="space-y-4">
             <div className="flex items-center gap-2 border-b pb-2">
               <User className="size-4 text-[#0176D3]" />
               <span className="text-sm font-semibold">Identity</span>
@@ -584,6 +647,7 @@ export function EditUserDialog({ user, companies, departments, locations, design
     designationId: user.designationId || "",
     superiorId: user.superiorId || "",
     phone: user.phone || "",
+    image: user.image || null,
     allowedCategoryIds: (user.allowedCategories?.map((c: any) => c.id) || []) as string[]
   });
 
@@ -652,7 +716,13 @@ export function EditUserDialog({ user, companies, departments, locations, design
             <DialogDescription className="text-xs text-muted-foreground">Update identity and assignment</DialogDescription>
           </div>
         </DialogHeader>
-        <div className="grid gap-6 p-6 overflow-y-auto max-h-[70vh]">
+        <div className="overflow-y-auto max-h-[70vh]">
+          <ProfilePhotoUpload 
+            value={form.image} 
+            onChange={(v) => setForm({ ...form, image: v })} 
+            isSubmitting={isSubmitting}
+          />
+          <div className="grid gap-6 p-6 pt-0">
           {/* PERSONAL INFORMATION */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b pb-2">

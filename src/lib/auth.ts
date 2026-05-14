@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
           companyId: user.companyId,
           departmentId: user.departmentId,
           locationId: user.locationId,
+          image: user.image,
         };
       },
     }),
@@ -55,6 +56,7 @@ export const authOptions: NextAuthOptions = {
         token.companyId = (user as any).companyId;
         token.departmentId = (user as any).departmentId;
         token.locationId = (user as any).locationId;
+        token.image = (user as any).image;
       }
       return token;
     },
@@ -65,6 +67,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).companyId = token.companyId;
         (session.user as any).departmentId = token.departmentId;
         (session.user as any).locationId = token.locationId;
+        (session.user as any).image = token.image;
       }
       return session;
     },

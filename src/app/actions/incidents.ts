@@ -979,14 +979,14 @@ export async function uploadFile(formData: FormData) {
   const buffer = Buffer.from(bytes);
 
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  const uploadDir = path.join(process.cwd(), "uploads_secure");
   const filePath = path.join(uploadDir, fileName);
 
   await fs.writeFile(filePath, buffer);
 
   return {
     name: file.name,
-    url: `/uploads/${fileName}`,
+    url: `/api/files/${fileName}`,
     fileType: file.type,
     fileSize: file.size,
   };
