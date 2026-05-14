@@ -974,6 +974,7 @@ export async function getResolverDeptUsers(incidentId: string) {
 
 export async function uploadFile(formData: FormData) {
   const file = formData.get("file") as File;
+  const folder = formData.get("folder") as string || ""; // Optional subfolder
   if (!file) return null;
 
   const bytes = await file.arrayBuffer();
@@ -981,7 +982,11 @@ export async function uploadFile(formData: FormData) {
   let finalSize = file.size;
 
   const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-  const uploadDir = path.join(process.cwd(), "uploads_secure");
+  const uploadDir = path.join(process.cwd(), "uploads_secure", folder);
+  
+  // Ensure subfolder exists
+  await fs.mkdir(uploadDir, { recursive: true });
+  
   const filePath = path.join(uploadDir, fileName);
 
   // Resize images to limit storage (target ~50KB)
@@ -1030,7 +1035,7 @@ export async function uploadFile(formData: FormData) {
 
   return {
     name: file.name,
-    url: `/api/files/${fileName}`,
+    url: `/api/files/${folder ? folder + "/" : ""}${fileName}`,
     fileType: file.type,
     fileSize: finalSize,
   };

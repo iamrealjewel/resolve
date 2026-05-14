@@ -24,6 +24,7 @@ export function ProfilePhotoEditor({ initialImage, initials }: { initialImage: s
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("folder", "avatars");
       
       const result = await uploadFile(formData);
       
