@@ -20,7 +20,6 @@ export default async function CreateIncidentPage() {
         companyId: true, 
         locationId: true, 
         departmentId: true,
-        restrictCategories: true,
         allowedCategories: { select: { id: true } }
       }
     })
