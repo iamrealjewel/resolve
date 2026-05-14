@@ -88,24 +88,13 @@ export function ClientLayout({
 function Footer() {
   return (
     <footer className="w-full bg-white dark:bg-[#1A1A1A] border-t h-14 flex items-center px-6 shrink-0 mt-auto">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-medium text-muted-foreground">
-            © {new Date().getFullYear()} QTrack Incident Management
-          </span>
-          <Separator orientation="vertical" className="h-3 hidden md:block" />
-          <span className="text-xs font-semibold text-[#0176D3]">
-            v2.4.0-Operational
-          </span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="#" className="text-xs font-medium text-muted-foreground hover:text-[#0176D3] transition-colors">
-            Help Center
-          </Link>
-          <Link href="#" className="text-xs font-medium text-muted-foreground hover:text-[#0176D3] transition-colors">
-            Terms of Service
-          </Link>
-        </div>
+      <div className="flex items-center justify-between w-full">
+        <span className="text-xs font-medium text-muted-foreground">
+          © {new Date().getFullYear()} QTrack Incident Management
+        </span>
+        <span className="text-xs font-medium text-muted-foreground">
+          Developed and Maintained by MMI IT Team
+        </span>
       </div>
     </footer>
   );
