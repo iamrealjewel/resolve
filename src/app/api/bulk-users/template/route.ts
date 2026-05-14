@@ -5,12 +5,13 @@ import { Role } from "@/generated/client";
 
 export async function GET() {
   try {
-    const [companies, departments, designations, locations, users] = await Promise.all([
+    const [companies, departments, designations, locations, users, categories] = await Promise.all([
       prisma.company.findMany({ select: { name: true } }),
       prisma.department.findMany({ select: { name: true } }),
       prisma.designation.findMany({ select: { title: true } }),
       prisma.location.findMany({ select: { name: true } }),
       prisma.user.findMany({ select: { email: true } }),
+      prisma.incidentCategory.findMany({ select: { name: true } }),
     ]);
 
     const workbook = new ExcelJS.Workbook();
@@ -30,6 +31,8 @@ export async function GET() {
     listSheet.getColumn('D').values = ['Designations', ...designations.map(d => d.title)];
     listSheet.getColumn('E').values = ['Locations', ...locations.map(l => l.name)];
     listSheet.getColumn('F').values = ['Users', ...users.map(u => u.email)];
+    listSheet.getColumn('G').values = ['Categories', ...categories.map(c => c.name)];
+    listSheet.getColumn('H').values = ['Restriction', 'Yes', 'No'];
 
     // Define main sheet columns
     mainSheet.columns = [
@@ -42,6 +45,8 @@ export async function GET() {
       { header: 'Location', key: 'location', width: 25 },
       { header: 'Phone', key: 'phone', width: 20 },
       { header: 'Superior Email', key: 'superior', width: 30 },
+      { header: 'Restrict Categories?', key: 'restrictCategories', width: 20 },
+      { header: 'Allowed Categories (Comma Separated)', key: 'allowedCategories', width: 40 },
       { header: 'Password (Optional)', key: 'password', width: 25 },
     ];
 
@@ -119,6 +124,15 @@ export async function GET() {
           error: 'Please select a valid user email.'
         };
       }
+
+      // Restrict Categories
+      mainSheet.getCell(`J${i}`).dataValidation = {
+        type: 'list',
+        allowBlank: true,
+        formulae: [`DataLists!$H$2:$H$3`],
+        showErrorMessage: true,
+        error: 'Please select Yes or No.'
+      };
     }
 
     const buffer = await workbook.xlsx.writeBuffer();

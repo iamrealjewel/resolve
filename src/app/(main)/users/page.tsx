@@ -19,7 +19,7 @@ import { UsersTable } from "./users-table";
 import { Card } from "@/components/ui/card";
 
 async function getUsersData() {
-  const [users, companies, departments, locations, designations] = await Promise.all([
+  const [users, companies, departments, locations, designations, categories] = await Promise.all([
     prisma.user.findMany({
       include: { 
         company: true, 
@@ -34,13 +34,14 @@ async function getUsersData() {
     prisma.department.findMany(),
     prisma.location.findMany(),
     prisma.designation.findMany(),
+    prisma.incidentCategory.findMany(),
   ]);
-  return { users, companies, departments, locations, designations };
+  return { users, companies, departments, locations, designations, categories };
 }
 
 export default async function UsersPage() {
   await checkAuth("SUPER_ADMIN");
-  const { users, companies, departments, locations, designations } = await getUsersData();
+  const { users, companies, departments, locations, designations, categories } = await getUsersData();
 
   return (
     <div className="space-y-6 pb-10 px-6">
@@ -58,6 +59,7 @@ export default async function UsersPage() {
             locations={locations} 
             designations={designations}
             users={users}
+            categories={categories}
           />
           <UserProvisioningDialog 
             companies={companies} 

@@ -218,19 +218,41 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
   }, [isSuperAdmin, session?.user, resolverUsers]);
 
   const categoryTree = React.useMemo(() => {
+    const sessionUser = initialData.sessionUser;
+    const isRestricted = sessionUser?.restrictCategories;
+    const allowedIds = sessionUser?.allowedCategories?.map((c: any) => c.id) || [];
+
+    const isAllowed = (catId: string) => {
+      if (!isRestricted || user?.role === "SUPER_ADMIN") return true;
+      
+      let currentId: string | null = catId;
+      while (currentId) {
+        if (allowedIds.includes(currentId)) return true;
+        const currentCat = initialData.categories.find(c => c.id === currentId);
+        currentId = currentCat?.parentId || null;
+      }
+      return false;
+    };
+
     const map = new Map();
-    initialData.categories.forEach(c => map.set(c.id, { ...c, children: [] }));
+    initialData.categories.forEach(c => {
+      if (isAllowed(c.id)) {
+        map.set(c.id, { ...c, children: [] });
+      }
+    });
+
     const roots: any[] = [];
     map.forEach(c => {
       if (c.parentId) {
         const parent = map.get(c.parentId);
         if (parent) parent.children.push(c);
+        else roots.push(c); // If parent is not allowed but child is (shouldn't happen with our logic but for safety)
       } else {
         roots.push(c);
       }
     });
     return roots;
-  }, [initialData.categories]);
+  }, [initialData.categories, initialData.sessionUser, user?.role]);
 
   const filteredCategoryTree = React.useMemo(() => {
     if (!catSearch) return categoryTree;

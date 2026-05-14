@@ -231,9 +231,11 @@ export async function provisionUser(data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
+  restrictCategories?: boolean;
+  allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
-  const { password, ...userData } = data;
+  const { password, allowedCategoryIds, ...userData } = data;
   
   const hashedPassword = await bcrypt.hash(password || "password123", 10);
 
@@ -241,34 +243,58 @@ export async function provisionUser(data: {
     data: {
       ...userData,
       password: hashedPassword,
+      allowedCategories: allowedCategoryIds ? {
+        connect: allowedCategoryIds.map(id => ({ id }))
+      } : undefined
     }
   });
   revalidatePath("/users");
   return user;
 }
 
-export async function bulkCreateUsers(users: any[]) {
+export async function bulkUpsertUsers(users: any[]) {
   await checkAuth("SUPER_ADMIN");
   
   // Pre-hash passwords in parallel outside the transaction to prevent timeout
-  // bcrypt.hash is CPU intensive and would otherwise block the transaction
   const usersWithHashes = await Promise.all(
     users.map(async (userData) => {
-      const { password, ...rest } = userData;
-      const hashedPassword = await bcrypt.hash(password || "password123", 10);
-      return { ...rest, password: hashedPassword };
+      const { password, allowedCategoryIds, ...rest } = userData;
+      let hashedPassword;
+      if (password) {
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
+      return { ...rest, password: hashedPassword, allowedCategoryIds };
     })
   );
 
   const results = await prisma.$transaction(async (tx) => {
-    const createdUsers = [];
-    for (const data of usersWithHashes) {
-      const user = await tx.user.create({ data });
-      createdUsers.push(user);
+    const output = [];
+    for (const { email, allowedCategoryIds, ...data } of usersWithHashes) {
+      const updateData: any = { ...data };
+      if (!data.password) delete updateData.password;
+      
+      const user = await tx.user.upsert({
+        where: { email },
+        update: {
+          ...updateData,
+          allowedCategories: allowedCategoryIds ? {
+            set: allowedCategoryIds.map((id: string) => ({ id }))
+          } : undefined
+        },
+        create: {
+          ...data,
+          email,
+          password: data.password || await bcrypt.hash("password123", 10),
+          allowedCategories: allowedCategoryIds ? {
+            connect: allowedCategoryIds.map((id: string) => ({ id }))
+          } : undefined
+        }
+      });
+      output.push(user);
     }
-    return createdUsers;
+    return output;
   }, {
-    timeout: 30000 // Increase timeout to 30 seconds for large batches
+    timeout: 60000 
   });
 
   revalidatePath("/users");
@@ -285,13 +311,21 @@ export async function updateUser(id: string, data: {
   designationId?: string | null;
   superiorId?: string | null;
   phone?: string | null;
+  restrictCategories?: boolean;
+  allowedCategoryIds?: string[];
 }) {
   await checkAuth("SUPER_ADMIN");
-  const { password, ...userData } = data;
+  const { password, allowedCategoryIds, ...userData } = data;
   
   const updateData: any = { ...userData };
   if (password) {
     updateData.password = await bcrypt.hash(password, 10);
+  }
+
+  if (allowedCategoryIds) {
+    updateData.allowedCategories = {
+      set: allowedCategoryIds.map(id => ({ id }))
+    };
   }
 
   const user = await prisma.user.update({

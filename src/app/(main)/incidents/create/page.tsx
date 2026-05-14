@@ -15,7 +15,14 @@ export default async function CreateIncidentPage() {
     getFormData(),
     prisma.user.findUnique({
       where: { id: (session.user as any).id },
-      select: { id: true, companyId: true, locationId: true, departmentId: true }
+      select: { 
+        id: true, 
+        companyId: true, 
+        locationId: true, 
+        departmentId: true,
+        restrictCategories: true,
+        allowedCategories: { select: { id: true } }
+      }
     })
   ]);
 

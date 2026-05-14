@@ -32,7 +32,7 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { bulkCreateUsers } from "@/app/actions/master";
+import { bulkUpsertUsers } from "@/app/actions/master";
 import { cn } from "@/lib/utils";
 
 interface BulkUserUploadDialogProps {
@@ -41,6 +41,7 @@ interface BulkUserUploadDialogProps {
   locations: any[];
   designations: any[];
   users: any[];
+  categories: any[];
 }
 
 interface ParsedRow {
@@ -55,7 +56,8 @@ export function BulkUserUploadDialog({
   departments,
   locations,
   designations,
-  users
+  users,
+  categories
 }: BulkUserUploadDialogProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isParsing, setIsParsing] = React.useState(false);
@@ -133,9 +135,13 @@ export function BulkUserUploadDialog({
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           errors.push("Invalid email format");
         }
-        if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-          errors.push("User with this email already exists");
+        
+        const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (existingUser) {
+          rowData.id = existingUser.id;
+          rowData.isUpdate = true;
         }
+
         if (emailsInExcel.has(email.toLowerCase())) {
           errors.push("Duplicate email in Excel");
         }
@@ -163,7 +169,27 @@ export function BulkUserUploadDialog({
       if (superiorEmail && !superior) errors.push(`Superior "${superiorEmail}" not found`);
       else if (superior) rowData.superiorId = superior.id;
 
-      // 4. Role Validation
+      // 4. Category Restriction Mapping
+      const restrict = row["Restrict Categories?"];
+      const allowedNames = row["Allowed Categories (Comma Separated)"];
+      
+      rowData.restrictCategories = restrict === "Yes";
+      
+      if (allowedNames) {
+        const names = String(allowedNames).split(",").map(n => n.trim());
+        const foundCategoryIds = [];
+        for (const name of names) {
+          const cat = categories.find(c => c.name === name);
+          if (cat) {
+            foundCategoryIds.push(cat.id);
+          } else {
+            errors.push(`Category "${name}" not found`);
+          }
+        }
+        rowData.allowedCategoryIds = foundCategoryIds;
+      }
+
+      // 5. Role Validation
       const validRoles = ["SUPER_ADMIN", "DEPARTMENT_HEAD", "LINE_MANAGER", "RESOLVER", "USER"];
       if (roleName && !validRoles.includes(roleName)) {
         errors.push(`Invalid role "${roleName}"`);
@@ -174,7 +200,8 @@ export function BulkUserUploadDialog({
       rowData.name = name;
       rowData.email = email;
       rowData.phone = phone ? String(phone) : null;
-      rowData.password = password || "password123";
+      if (password) rowData.password = password;
+      else if (!rowData.isUpdate) rowData.password = "password123";
 
       const parsedRow: ParsedRow = {
         index: index + 2, // Excel row index
@@ -199,8 +226,10 @@ export function BulkUserUploadDialog({
     setIsSubmitting(true);
     try {
       const payload = validRows.map(r => r.data);
-      await bulkCreateUsers(payload);
-      toast.success(`Successfully created ${validRows.length} users`);
+      await bulkUpsertUsers(payload);
+      const updates = validRows.filter(r => r.data.isUpdate).length;
+      const creations = validRows.length - updates;
+      toast.success(`Successfully processed ${validRows.length} users (${creations} created, ${updates} updated)`);
       setIsOpen(false);
       resetState();
     } catch (error: any) {
@@ -321,7 +350,13 @@ export function BulkUserUploadDialog({
                       <TableBody>
                         {validRows.map((row) => (
                           <TableRow key={row.index}>
-                            <TableCell className="font-medium text-muted-foreground">#{row.index}</TableCell>
+                            <TableCell className="font-medium text-muted-foreground">
+                              {row.data.isUpdate ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">UPD</Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">NEW</Badge>
+                              )}
+                            </TableCell>
                             <TableCell className="font-semibold whitespace-nowrap">{row.data.name}</TableCell>
                             <TableCell className="whitespace-nowrap">{row.data.email}</TableCell>
                             <TableCell>
