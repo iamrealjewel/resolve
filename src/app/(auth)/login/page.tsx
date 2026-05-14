@@ -4,12 +4,12 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import Image from "next/image";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -54,9 +54,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="h-10 w-10 rounded bg-primary flex items-center justify-center">
-            <ShieldCheck className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <Image src="/logo.png" alt="Resolve Logo" width={40} height={40} className="rounded" />
           <h1 className="text-2xl font-bold tracking-tight text-white">Resolve</h1>
         </div>
 
