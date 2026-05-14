@@ -241,9 +241,17 @@ export async function provisionUser(data: {
 
   const user = await prisma.user.create({
     data: {
-      ...userData,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
       password: hashedPassword,
+      phone: userData.phone || null,
       image: data.image || null,
+      company: { connect: { id: userData.companyId } },
+      department: userData.departmentId ? { connect: { id: userData.departmentId } } : undefined,
+      location: userData.locationId ? { connect: { id: userData.locationId } } : undefined,
+      designation: userData.designationId ? { connect: { id: userData.designationId } } : undefined,
+      superior: userData.superiorId ? { connect: { id: userData.superiorId } } : undefined,
       allowedCategories: allowedCategoryIds ? {
         connect: allowedCategoryIds.map(id => ({ id }))
       } : undefined
@@ -277,15 +285,32 @@ export async function bulkUpsertUsers(users: any[]) {
       const user = await tx.user.upsert({
         where: { email },
         update: {
-          ...updateData,
+          name: data.name,
+          role: data.role,
+          phone: data.phone,
+          image: data.image,
+          password: data.password || undefined,
+          company: data.companyId ? { connect: { id: data.companyId } } : undefined,
+          department: data.departmentId ? { connect: { id: data.departmentId } } : (data.departmentId === null ? { disconnect: true } : undefined),
+          location: data.locationId ? { connect: { id: data.locationId } } : (data.locationId === null ? { disconnect: true } : undefined),
+          designation: data.designationId ? { connect: { id: data.designationId } } : (data.designationId === null ? { disconnect: true } : undefined),
+          superior: data.superiorId ? { connect: { id: data.superiorId } } : (data.superiorId === null ? { disconnect: true } : undefined),
           allowedCategories: allowedCategoryIds ? {
             set: allowedCategoryIds.map((id: string) => ({ id }))
           } : undefined
         },
         create: {
-          ...data,
           email,
+          name: data.name,
+          role: data.role,
           password: data.password || await bcrypt.hash("password123", 10),
+          phone: data.phone || null,
+          image: data.image || null,
+          company: { connect: { id: data.companyId } },
+          department: data.departmentId ? { connect: { id: data.departmentId } } : undefined,
+          location: data.locationId ? { connect: { id: data.locationId } } : undefined,
+          designation: data.designationId ? { connect: { id: data.designationId } } : undefined,
+          superior: data.superiorId ? { connect: { id: data.superiorId } } : undefined,
           allowedCategories: allowedCategoryIds ? {
             connect: allowedCategoryIds.map((id: string) => ({ id }))
           } : undefined
@@ -318,19 +343,42 @@ export async function updateUser(id: string, data: {
   await checkAuth("SUPER_ADMIN");
   const { password, allowedCategoryIds, ...userData } = data;
   
-  const updateData: any = { ...userData };
+  const updateData: any = {
+    name: userData.name,
+    email: userData.email,
+    role: userData.role,
+    phone: userData.phone,
+    image: userData.image,
+  };
+
   if (password) {
     updateData.password = await bcrypt.hash(password, 10);
+  }
+
+  if (userData.companyId) {
+    updateData.company = { connect: { id: userData.companyId } };
+  }
+
+  if (userData.departmentId !== undefined) {
+    updateData.department = userData.departmentId ? { connect: { id: userData.departmentId } } : { disconnect: true };
+  }
+
+  if (userData.locationId !== undefined) {
+    updateData.location = userData.locationId ? { connect: { id: userData.locationId } } : { disconnect: true };
+  }
+
+  if (userData.designationId !== undefined) {
+    updateData.designation = userData.designationId ? { connect: { id: userData.designationId } } : { disconnect: true };
+  }
+
+  if (userData.superiorId !== undefined) {
+    updateData.superior = userData.superiorId ? { connect: { id: userData.superiorId } } : { disconnect: true };
   }
 
   if (allowedCategoryIds) {
     updateData.allowedCategories = {
       set: allowedCategoryIds.map(id => ({ id }))
     };
-  }
-
-  if (data.image !== undefined) {
-    updateData.image = data.image;
   }
 
   const user = await prisma.user.update({
