@@ -111,8 +111,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter className={cn(
-        "border-t p-2 transition-all duration-300 py-4",
-        state === "expanded" ? "flex flex-row items-center justify-between px-4" : "flex flex-col items-center gap-3 px-0"
+        "border-t h-14 flex shrink-0 transition-all duration-300",
+        state === "expanded" ? "flex-row items-center justify-between px-4" : "flex-col items-center justify-center gap-3 px-0"
       )}>
         {state === "expanded" ? (
           <>
