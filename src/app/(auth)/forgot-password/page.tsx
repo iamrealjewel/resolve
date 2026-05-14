@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA] p-4">
         <div className="mb-8 animate-in fade-in zoom-in duration-700">
-          <img src="/Resolve-Logo.png" alt="Resolve Logo" className="h-12 w-auto" />
+          <img src="/logo.png" alt="Resolve Logo" className="h-12 w-auto" />
         </div>
         <Card className="w-full max-w-[400px] border-none shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white rounded-xl text-center overflow-hidden">
           <div className="h-1.5 bg-[#0176D3]" />
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA] p-4 relative overflow-hidden">
       <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
-        <img src="/Resolve-Logo.png" alt="Resolve Logo" className="h-14 w-auto" />
+        <img src="/logo.png" alt="Resolve Logo" className="h-14 w-auto" />
       </div>
       
       <Card className="w-full max-w-[400px] border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white rounded-xl overflow-hidden relative z-10">
