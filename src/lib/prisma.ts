@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 const url = new URL(process.env.DATABASE_URL!);
