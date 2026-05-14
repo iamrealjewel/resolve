@@ -491,10 +491,11 @@ export async function updateIncident(id: string, data: any) {
   const isDeptHeadOfReporter = incident.departmentId === user.departmentId && user.role === "DEPARTMENT_HEAD";
   const isAssignee = incident.assigneeId === user.id;
 
-  // Also check if user is a resolver for this incident
+  // Resolvers can only edit if they are the assignee
   const isResolverForCategory = user.role === "RESOLVER" && (
-    incident.departmentId === user.departmentId ||
-    incident.category.rules?.some((r: any) => r.departmentId === user.departmentId)
+    (incident.departmentId === user.departmentId ||
+    incident.category.rules?.some((r: any) => r.departmentId === user.departmentId)) &&
+    incident.assigneeId === user.id
   );
 
   const isRestrictedRaiser = isReporter && !isSuperAdmin;
@@ -617,6 +618,38 @@ export async function updateIncident(id: string, data: any) {
 export async function addComment(id: string, content: string, attachments?: any[]) {
   const session = await checkAuth();
   const user = session.user as any;
+
+  const incident = await prisma.incident.findUnique({
+    where: { id },
+    include: { reporter: true }
+  });
+
+  if (!incident) throw new Error("Incident not found");
+
+  // Authorization Check for commenting
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isReporter = incident.reporterId === user.id;
+  const isAssignee = incident.assigneeId === user.id;
+  const isApprover = incident.raiserApproverId === user.id || incident.resolverApproverId === user.id;
+  const isTagged = await prisma.incident.count({
+    where: { id, accessList: { some: { id: user.id } } }
+  }) > 0;
+  
+  // Line Manager / Dept Head of reporter
+  const isPrivilegedManager = (user.role === "DEPARTMENT_HEAD" || user.role === "LINE_MANAGER") && (
+    incident.departmentId === user.departmentId ||
+    incident.reporter.superiorId === user.id
+  );
+
+  // Resolvers can ONLY comment if assigned
+  const isUnauthorizedResolver = user.role === "RESOLVER" && !isAssignee && !isTagged;
+
+  if (!isSuperAdmin && !isReporter && !isAssignee && !isApprover && !isTagged && !isPrivilegedManager) {
+    if (isUnauthorizedResolver) {
+      throw new Error("Unauthorized: Resolvers must be assigned to an incident to post comments.");
+    }
+    throw new Error("Unauthorized: You do not have permission to comment on this incident.");
+  }
 
   await prisma.incidentLog.create({
     data: {

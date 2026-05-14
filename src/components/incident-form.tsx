@@ -150,12 +150,18 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
   const isReporter = initialData.incident?.reporterId === (session?.user as any)?.id;
   const isAssignee = initialData.incident?.assigneeId === (session?.user as any)?.id;
+  const isTagged = initialData.incident?.accessList?.some((u: any) => u.id === (session?.user as any)?.id);
   const isResolverForCategory = !!session?.user && resolverUsers.some(u => u.id === (session.user as any).id);
   const isRestrictedRaiser = (user?.role === "USER" || user?.role === "LINE_MANAGER" || user?.role === "DEPARTMENT_HEAD") && !isSuperAdmin && !isResolver;
 
   const isActionLocked = isPendingOperational && !isSuperAdmin && !isApprover;
-  const canModify = isCreate || ((isSuperAdmin || isResolver) && !isActionLocked);
+  
+  // Resolvers can only modify if they are assigned
+  const canModify = isCreate || ((isSuperAdmin || (isResolver && isAssignee)) && !isActionLocked);
   const effectiveIsView = isView || !canModify;
+
+  const canComment = isSuperAdmin || isAssignee || isReporter || isApprover || isTagged ||
+    ((user?.role === "LINE_MANAGER" || user?.role === "DEPARTMENT_HEAD") && incident?.departmentId === user?.departmentId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -690,9 +696,18 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
                   <Button variant="ghost" size="sm" onClick={() => router.back()} className="h-8 font-medium text-[10px] uppercase tracking-widest text-[#0176D3] hover:bg-white/50">
                     <ChevronLeft className="size-4 mr-1" /> Back
                   </Button>
-                  {isView && (isSuperAdmin || ((isAssignee || isResolverForCategory) && !isRestrictedRaiser && !isPendingOperational)) && (
-                    <Button onClick={() => router.push(`/incidents/${initialData.incident.id}/edit`)} size="sm" className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-medium text-[10px] uppercase tracking-widest px-4 rounded-sm shadow-sm">
-                      <Edit className="size-3.5 mr-1.5" /> Edit
+                  {isView && (isSuperAdmin || ((isAssignee || (isResolverForCategory && !isAssignee)) && !isRestrictedRaiser && !isPendingOperational)) && (
+                    <Button 
+                      onClick={() => {
+                        if (isAssignee || isSuperAdmin) router.push(`/incidents/${initialData.incident.id}/edit`);
+                        else handleAssign();
+                      }} 
+                      disabled={isAssigning}
+                      size="sm" 
+                      className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-medium text-[10px] uppercase tracking-widest px-4 rounded-sm shadow-sm"
+                    >
+                      {isAssigning ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : <Edit className="size-3.5 mr-1.5" />}
+                      {isAssignee || isSuperAdmin ? "Edit" : "Assign to Me"}
                     </Button>
                   )}
                 </>
@@ -991,39 +1006,48 @@ export function IncidentForm({ mode, initialData }: IncidentFormProps) {
 
                     <TabsContent value="comments" className="flex-1 overflow-y-auto p-4 space-y-6 m-0 pb-32">
                       {/* COMMENT BOX */}
-                      <div className="bg-white dark:bg-[#1A1A1A] p-5 border rounded-none shadow-sm space-y-4">
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-[#0176D3] uppercase tracking-widest">
-                          <MessageSquarePlus className="size-3.5" />
-                          Post an update
-                        </div>
-                        <div className="border bg-white dark:bg-black">
-                          <Editor content={comment} onChange={setComment} placeholder="Write a comment or update..." />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-col gap-2 flex-1">
-                            {commentAttachments.length > 0 && (
-                              <div className="flex flex-wrap gap-2 pb-2">
-                                {commentAttachments.map((file, idx) => (
-                                  <div key={idx} className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-[#0176D3]">
-                                    <FileIcon className="size-3" />
-                                    <span className="truncate max-w-[100px]">{file.name}</span>
-                                    <button type="button" onClick={() => setCommentAttachments(commentAttachments.filter((_, i) => i !== idx))} className="hover:text-red-500">
-                                      <X className="size-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <div className="relative">
-                              <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, true)} />
-                              <Button type="button" variant="ghost" size="sm" className="h-8 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-[#0176D3] p-0"><Paperclip className="size-3.5 mr-1.5" /> Attach Files</Button>
-                            </div>
+                      {canComment ? (
+                        <div className="bg-white dark:bg-[#1A1A1A] p-5 border rounded-none shadow-sm space-y-4">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-[#0176D3] uppercase tracking-widest">
+                            <MessageSquarePlus className="size-3.5" />
+                            Post an update
                           </div>
-                          <Button onClick={handleAddComment} disabled={isAddingComment || (!comment.trim() || comment === "<p></p>") && commentAttachments.length === 0} size="sm" className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-xs px-6 uppercase tracking-widest self-end">
-                            Post
-                          </Button>
+                          <div className="border bg-white dark:bg-black">
+                            <Editor content={comment} onChange={setComment} placeholder="Write a comment or update..." />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-2 flex-1">
+                              {commentAttachments.length > 0 && (
+                                <div className="flex flex-wrap gap-2 pb-2">
+                                  {commentAttachments.map((file, idx) => (
+                                    <div key={idx} className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-[#0176D3]">
+                                      <FileIcon className="size-3" />
+                                      <span className="truncate max-w-[100px]">{file.name}</span>
+                                      <button type="button" onClick={() => setCommentAttachments(commentAttachments.filter((_, i) => i !== idx))} className="hover:text-red-500">
+                                        <X className="size-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="relative">
+                                <input type="file" multiple className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, true)} />
+                                <Button type="button" variant="ghost" size="sm" className="h-8 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-[#0176D3] p-0"><Paperclip className="size-3.5 mr-1.5" /> Attach Files</Button>
+                              </div>
+                            </div>
+                            <Button onClick={handleAddComment} disabled={isAddingComment || (!comment.trim() || comment === "<p></p>") && commentAttachments.length === 0} size="sm" className="h-8 bg-[#0176D3] hover:bg-[#014486] text-white font-bold text-xs px-6 uppercase tracking-widest self-end">
+                              Post
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="bg-amber-50 border border-amber-200 p-4 rounded-none flex items-center gap-3">
+                          <AlertCircle className="size-4 text-amber-600 shrink-0" />
+                          <p className="text-xs font-semibold text-amber-700">
+                            You must be assigned to this incident to post updates.
+                          </p>
+                        </div>
+                      )}
 
                       {/* COMMENTS FEED */}
                       <div className="space-y-4">
