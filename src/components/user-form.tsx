@@ -154,7 +154,7 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const categoryTree = useMemo(() => {
+  const filteredCategoryTree = useMemo(() => {
     const map = new Map();
     categories.forEach(c => map.set(c.id, { ...c, children: [] }));
     const roots: any[] = [];
@@ -166,8 +166,28 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
         roots.push(c);
       }
     });
-    return roots;
-  }, [categories]);
+
+    if (!search) return roots;
+
+    const filter = (list: any[]): any[] => {
+      const results: any[] = [];
+      for (const cat of list) {
+        const matches = cat.name.toLowerCase().includes(search.toLowerCase());
+        const filteredChildren = cat.children ? filter(cat.children) : [];
+
+        if (matches || filteredChildren.length > 0) {
+          results.push({
+            ...cat,
+            children: filteredChildren,
+            _isMatch: matches
+          });
+        }
+      }
+      return results;
+    };
+
+    return filter(roots);
+  }, [categories, search]);
 
   const toggleCategory = (id: string) => {
     if (value.includes(id)) {
@@ -175,16 +195,6 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
     } else {
       onValueChange([...value, id]);
     }
-  };
-
-  const getPath = (id: string) => {
-    const path: string[] = [];
-    let current = categories.find(c => c.id === id);
-    while (current) {
-      path.unshift(current.name);
-      current = categories.find(c => c.id === current.parentId);
-    }
-    return path.join(" > ");
   };
 
   const TreeItem = ({ category, depth = 0 }: { category: any, depth?: number }) => {
@@ -197,7 +207,8 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
           variant="ghost"
           className={cn(
             "w-full justify-start h-10 rounded-none px-3 gap-2 transition-colors border-b border-muted/20",
-            isSelected && "bg-primary/5 text-primary font-bold"
+            isSelected && "bg-primary/5 text-primary font-bold",
+            category._isMatch && search && "bg-amber-50 dark:bg-amber-900/10"
           )}
           onClick={() => toggleCategory(category.id)}
         >
@@ -208,7 +219,12 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
             )}>
               {isSelected && <Check className="size-3" />}
             </div>
-            <span className="text-[11px] uppercase tracking-wider">{category.name}</span>
+            <span className={cn(
+              "text-[11px] uppercase tracking-wider",
+              category._isMatch && search && "text-amber-700 dark:text-amber-400"
+            )}>
+              {category.name}
+            </span>
           </div>
         </Button>
         {category.children.map((child: any) => (
@@ -248,9 +264,14 @@ function CategoryPicker({ value, onValueChange, categories }: { value: string[],
             </div>
           </div>
           <div className="max-h-[400px] overflow-y-auto">
-            {categoryTree.map(root => (
+            {filteredCategoryTree.map(root => (
               <TreeItem key={root.id} category={root} />
             ))}
+            {filteredCategoryTree.length === 0 && (
+              <div className="p-8 text-center text-xs text-muted-foreground font-medium uppercase tracking-widest">
+                No matching categories found.
+              </div>
+            )}
           </div>
           {value.length > 0 && (
             <div className="p-3 border-t bg-muted/30">
