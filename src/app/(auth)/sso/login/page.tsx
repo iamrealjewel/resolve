@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Loader2, ShieldAlert, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function SSOLoginPage() {
+function SSOLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -139,5 +139,65 @@ export default function SSOLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Sleek Loading Fallback while React Suspense resolves useSearchParams on static building/client loading
+function SSOLoginFallback() {
+  return (
+    <div className="min-h-screen w-full flex bg-slate-950 selection:bg-primary/20 items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(99,102,241,0.18),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(244,63,94,0.1),transparent_50%)]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md bg-slate-900/75 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] space-y-8 flex flex-col items-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20 shadow-inner">
+            <Image 
+              src="/logo.png" 
+              alt="Resolve Logo" 
+              width={48} 
+              height={48} 
+              style={{ width: 48, height: 48 }} 
+              className="rounded-lg object-contain animate-pulse" 
+            />
+          </div>
+          <div className="text-center space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+              Resolve
+            </h1>
+            <p className="text-xs font-bold text-slate-400 tracking-widest uppercase">
+              Incident Command Centre
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center text-center space-y-5 py-6">
+          <div className="relative p-4 bg-primary/10 rounded-full border border-primary/30">
+            <Loader2 className="size-8 text-primary animate-spin" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-white">Initializing Secure Tunnel</h2>
+            <p className="text-sm text-slate-400 max-w-[280px]">
+              Preparing single sign-on handshake. Please hold...
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-slate-800 w-full text-center flex flex-col items-center space-y-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+          <span>Enterprise Secure SSO Route</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SSOLoginPage() {
+  return (
+    <Suspense fallback={<SSOLoginFallback />}>
+      <SSOLoginContent />
+    </Suspense>
   );
 }
